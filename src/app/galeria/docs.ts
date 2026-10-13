@@ -1,3 +1,8 @@
+import { BAR_LIST_DOC } from '../charts/bar-list/bar-list.doc';
+import { KPI_CARD_DOC } from '../charts/kpi-card/kpi-card.doc';
+import { LINE_CHART_DOC } from '../charts/line-chart/line-chart.doc';
+import { MAPA_UF_DOC } from '../charts/mapa-uf/mapa-uf.doc';
+import { SPARKLINE_DOC } from '../charts/sparkline/sparkline.doc';
 import { BADGE_DOC } from '../ui/badge/badge.doc';
 import { BUTTON_DOC } from '../ui/button/button.doc';
 import { CARD_DOC } from '../ui/card/card.doc';
@@ -16,6 +21,11 @@ export const DOCS: readonly ComponentDoc[] = [
   SKELETON_DOC,
   EMPTY_STATE_DOC,
   ERROR_STATE_DOC,
+  KPI_CARD_DOC,
+  SPARKLINE_DOC,
+  LINE_CHART_DOC,
+  BAR_LIST_DOC,
+  MAPA_UF_DOC,
 ];
 
 export const CATEGORIAS: readonly CategoriaDoc[] = ['Primitivos', 'Gráficos', 'Dados'];

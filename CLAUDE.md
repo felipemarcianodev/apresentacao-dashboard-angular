@@ -51,6 +51,7 @@ docs/                          -> documentação; plano-reconstrucao.md é local
 .claude/agents/seguranca-angular.md    -> auditor de segurança Angular (angular.dev/best-practices/security)
 public/
   favicon.ico
+  geo/br-uf.json               -> malha das 27 UFs (API de malhas do IBGE, coordenadas com 2 casas), usada pelo MapaUf
   theme-init.js                -> aplica .dark antes do Angular subir (evita piscar); arquivo estático por causa da CSP
 src/
   index.html                   -> documento base (lang pt-BR), carrega theme-init.js
@@ -60,8 +61,11 @@ src/
                                   warn, violet); valores escuros em .dark; foco visível e reduced-motion
   app/
     app.ts                     -> componente raiz (mi-root), só monta o shell
-    app.config.ts              -> providers: zoneless, router com withComponentInputBinding, erros globais
+    app.config.ts              -> providers: zoneless, router com withComponentInputBinding, HttpClient com fetch
     app.routes.ts              -> rotas lazy /ibge, /bcb, /ipea, /ui; data.titulo vira o título da topbar
+    core/formato/formato.ts    -> formatar(valor, formato) pt-BR (numero, decimal, percentual em pontos, moeda,
+                                  compacto) e formatarVariacao com sinal; SEM_DADO para nulo
+    core/brasil/ufs.ts         -> UFS: 27 UFs com código IBGE, sigla, nome e região; ufPorCodigo, ufPorSigla
     core/theme/theme-preference.ts -> ThemePreference: signal tema (light, dark, system), classe .dark, localStorage
     layout/shell/              -> Shell: sidebar (drawer no mobile), topbar com título da rota, router-outlet
       navegacao.ts             -> NAVEGACAO: grupos Painéis e Kit com rota, rótulo e ícone Font Awesome
@@ -75,6 +79,16 @@ src/
       skeleton/                -> Skeleton (mi-skeleton): bloco ou linhas de texto; tamanho por classe de quem usa
       empty-state/             -> EmptyState (mi-empty-state): ícone, título, descrição e ação projetada
       error-state/             -> ErrorState (mi-error-state): role alert e output tentarDeNovo
+    charts/                    -> gráficos do kit (SVG próprio ou HTML), cada um com spec e doc
+      escala.ts                -> funções puras: escalaLinear, passoAgradavel, eixoAgradavel, indicesDeRotulo
+      largura-do-host.ts       -> larguraDoHost(): signal com a largura do elemento (ResizeObserver)
+      sparkline/               -> Sparkline (mi-sparkline): tendência sem eixos, cor por currentColor
+      kpi-card/                -> KpiCard (mi-kpi-card): valor, variação com sentidoBom, sparkline, referência
+      line-chart/              -> LineChart (mi-line-chart): séries, eixo redondo, tooltip, setas, tabela sr-only
+      bar-list/                -> BarList (mi-bar-list): ranking horizontal em HTML, ordenar e limite
+      mapa-uf/                 -> MapaUf (mi-mapa-uf): coroplético por quantil, seleção por clique ou Enter
+        projecao.ts            -> projetarMalha (equiretangular), limitesPorQuantil, classeDoValor
+        malha-de-teste.ts      -> malha mínima para specs
     galeria/                   -> documentação do kit em /ui (lazy, galeria.routes.ts)
       component-doc.model.ts   -> ComponentDoc, PropriedadeDoc, ExemploDoc
       docs.ts                  -> DOCS: registro de todas as documentações; buscarDoc(slug)

@@ -1,0 +1,16 @@
+<ol class="grid gap-2.5">
+  @for (linha of linhas(); track linha.rotulo) {
+    <li class="grid grid-cols-[minmax(0,8rem)_1fr_auto] items-center gap-3 text-sm">
+      <span class="truncate" [class.font-semibold]="linha.destaque" [title]="linha.rotulo">{{ linha.rotulo }}</span>
+      <span class="h-2.5 overflow-hidden rounded-full bg-sunken" aria-hidden="true">
+        <span
+          class="block h-full rounded-full transition-[width] duration-500"
+          [class.bg-accent]="linha.destaque"
+          [class.bg-primary-300]="!linha.destaque"
+          [style.width.%]="linha.percentual"
+        ></span>
+      </span>
+      <span class="text-right font-medium tabular-nums" [class.font-semibold]="linha.destaque">{{ linha.texto }}</span>
+    </li>
+  }
+</ol>

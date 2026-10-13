@@ -1,0 +1,119 @@
+@if (series().length > 1) {
+  <ul class="mb-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
+    @for (tracado of tracados(); track tracado.nome) {
+      <li class="inline-flex items-center gap-1.5">
+        <span class="h-0.5 w-4 rounded-full bg-current" [class]="tracado.cor"></span>
+        {{ tracado.nome }}
+      </li>
+    }
+  </ul>
+}
+
+<svg
+  [attr.width]="largura()"
+  [attr.height]="altura()"
+  class="block touch-pan-y overflow-visible focus-visible:outline-offset-4"
+  role="img"
+  tabindex="0"
+  [attr.aria-label]="rotulo() + '. Use as setas para ler cada ponto.'"
+  (pointermove)="acompanharPonteiro($event)"
+  (pointerleave)="limparDestaque()"
+  (focus)="focarUltimoPonto()"
+  (blur)="limparDestaque()"
+  (keydown)="navegarComTeclado($event)"
+>
+  <g class="text-grid" aria-hidden="true">
+    @for (marca of marcasY(); track marca.texto) {
+      <line [attr.x1]="area().x0" [attr.x2]="area().x1" [attr.y1]="marca.y" [attr.y2]="marca.y" stroke="currentColor" />
+    }
+  </g>
+  <g class="fill-muted text-[11px] tabular-nums" aria-hidden="true">
+    @for (marca of marcasY(); track marca.texto) {
+      <text [attr.x]="area().x0 - 8" [attr.y]="marca.y" text-anchor="end" dominant-baseline="middle">
+        {{ marca.texto }}
+      </text>
+    }
+    @for (rotuloX of rotulosX(); track $index) {
+      <text [attr.x]="rotuloX.x" [attr.y]="area().y1 + 18" [attr.text-anchor]="rotuloX.ancora">
+        {{ rotuloX.texto }}
+      </text>
+    }
+  </g>
+
+  @for (tracado of tracados(); track tracado.nome) {
+    <g [class]="tracado.cor" aria-hidden="true">
+      @if (tracado.preenchimento) {
+        <path [attr.d]="tracado.preenchimento" fill="currentColor" class="opacity-10" />
+      }
+      <path
+        [attr.d]="tracado.linha"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linejoin="round"
+        stroke-linecap="round"
+      />
+    </g>
+  }
+
+  @if (destaque(); as d) {
+    <g aria-hidden="true">
+      <line
+        [attr.x1]="d.x"
+        [attr.x2]="d.x"
+        [attr.y1]="area().y0"
+        [attr.y2]="area().y1"
+        class="text-muted"
+        stroke="currentColor"
+        stroke-dasharray="3 3"
+      />
+      @for (item of d.itens; track item.nome) {
+        @if (item.y !== null) {
+          <circle [attr.cx]="d.x" [attr.cy]="item.y" r="4" [class]="item.cor" fill="currentColor" class="stroke-surface" stroke-width="2" />
+        }
+      }
+    </g>
+  }
+</svg>
+
+@if (destaque(); as d) {
+  <div
+    class="pointer-events-none absolute top-0 z-10 rounded-lg border border-line bg-surface px-3 py-2 text-xs shadow-lg"
+    [style.left.px]="d.esquerda"
+    [style.width.px]="d.larguraTooltip"
+    aria-live="polite"
+  >
+    <p class="mb-1 font-semibold">{{ d.rotulo }}</p>
+    @for (item of d.itens; track item.nome) {
+      <p class="flex items-center justify-between gap-2">
+        <span class="inline-flex min-w-0 items-center gap-1.5 text-muted">
+          <span class="size-2 shrink-0 rounded-full bg-current" [class]="item.cor"></span>
+          <span class="truncate">{{ item.nome }}</span>
+        </span>
+        <span class="font-semibold tabular-nums">{{ item.texto }}</span>
+      </p>
+    }
+  </div>
+}
+
+<table class="sr-only">
+  <caption>{{ rotulo() }}</caption>
+  <thead>
+    <tr>
+      <th scope="col">Período</th>
+      @for (serie of series(); track serie.nome) {
+        <th scope="col">{{ serie.nome }}</th>
+      }
+    </tr>
+  </thead>
+  <tbody>
+    @for (linha of tabela(); track linha.rotulo) {
+      <tr>
+        <th scope="row">{{ linha.rotulo }}</th>
+        @for (valor of linha.valores; track $index) {
+          <td>{{ valor }}</td>
+        }
+      </tr>
+    }
+  </tbody>
+</table>
