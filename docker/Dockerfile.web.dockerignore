@@ -1,0 +1,10 @@
+# Sem isto, o COPY traria node_modules e builds do host para dentro da imagem.
+**/node_modules
+**/dist
+**/.angular
+**/.git
+**/test-results
+**/playwright-report
+e2e
+docs
+.claude

@@ -35,7 +35,8 @@ Regra: **nenhum número inventado.** Toda tela mostra a fonte e a data de refer�
 | Ambiente | Endereço |
 |---|---|
 | Local | `http://localhost:4200` (`npm start`) |
-| Produção | a definir (sugestão: `mirante.felipemarcianodev.com`, mesma VPS do portfólio) |
+| Container local | `http://localhost:8092` (`docker compose -f docker/docker-compose.yml up -d --build`) |
+| Produção | `https://mirante.felipemarcianodev.com` (VPS do portfólio, atrás do nginx de borda do Planuz) |
 
 ## Mapa de arquivos
 
@@ -44,7 +45,22 @@ CLAUDE.md                      -> este arquivo (regras e mapa)
 README.md                      -> apresentação pública do projeto
 .gitignore                     -> padrão do Angular CLI + plano faseado local de docs/
 .postcssrc.json                -> liga o Tailwind v4 (@tailwindcss/postcss) ao build do Angular
-angular.json                   -> projeto "mirante", prefixo mi; estilos globais: Inter, Font Awesome e src/styles.css
+angular.json                   -> projeto "mirante", prefixo mi; estilos globais: Inter, Font Awesome (só o core e
+                                  o solid) e src/styles.css; produção sem CSS crítico inline (exigência da CSP)
+VERSION                        -> versão semântica do Mirante
+azure-pipelines.yml            -> release/*: npm audit, unitários, build, imagem, E2E contra o container, envio
+                                  da imagem por scp e troca do container na VPS (variable group mirante-producao)
+docker/
+  Dockerfile.web               -> build no node:22-alpine, entrega no nginx:1.27-alpine, healthcheck em /health
+  Dockerfile.web.dockerignore  -> evita levar node_modules, dist e e2e do host para a imagem
+  nginx/nginx.conf             -> SPA com try_files, gzip (inclusive atrás da borda, HTTP/1.0), cache imutável
+                                  para arquivos com hash e no-cache para o resto
+  nginx/seguranca.conf         -> CSP estrita (sem unsafe-inline, Trusted Types, connect-src só nas 3 APIs) e
+                                  headers; incluído em cada location
+  docker-compose.yml           -> serviço web (mirante-web), 127.0.0.1:8092, 64 MB, só leitura, sem capacidades extras
+  docker-compose.prod.yml      -> pluga o web na rede externa edge da VPS
+  borda/site-mirante.conf      -> cópia de referência do server block do nginx de borda (vale o do repo planuz)
+  setup-letsencrypt-mirante.sh -> emissão inicial do certificado na VPS (volumes do planuz-certbot)
 package.json                   -> scripts start, build:deploy, test:ci, e2e
 playwright.config.ts           -> E2E: projetos desktop (1366 px) e celular (360 px), pt-BR, fuso de São Paulo,
                                   sobe ng serve na porta 4300
@@ -58,11 +74,13 @@ e2e/                           -> testes de ponta a ponta (Playwright)
   galeria.spec.ts              -> todas as páginas de componente, slug inválido, botão de copiar
   acessibilidade.spec.ts       -> axe WCAG 2.2 AA nos dois temas e alvo de toque de 40 px
   responsivo.spec.ts           -> nenhuma rota rola para o lado nem vaza conteúdo da tela
+  producao.spec.ts             -> só com E2E_BASE_URL: CSP, headers e cache do nginx da imagem
 docs/                          -> documentação; plano-reconstrucao.md é local e não vai para o git
 .claude/skills/executar-plano-faseado/ -> executa o plano fase a fase com os portões
 .claude/agents/seguranca-angular.md    -> auditor de segurança Angular (angular.dev/best-practices/security)
 public/
   favicon.ico
+  robots.txt
   geo/br-uf.json               -> malha das 27 UFs (API de malhas do IBGE, coordenadas com 2 casas), usada pelo MapaUf
   theme-init.js                -> aplica .dark antes do Angular subir (evita piscar); arquivo estático por causa da CSP
 src/
@@ -80,7 +98,8 @@ src/
     core/brasil/ufs.ts         -> UFS: 27 UFs com código IBGE, sigla, nome e região; ufPorCodigo, ufPorSigla
     core/dados/valor-de.ts     -> valorDe(resource): valor ou undefined, sem lançar no estado de erro
     core/theme/theme-preference.ts -> ThemePreference: signal tema (light, dark, system), classe .dark, localStorage
-    layout/shell/              -> Shell: sidebar (drawer no mobile), topbar com título da rota, router-outlet
+    layout/shell/              -> Shell: sidebar (drawer no mobile), topbar com título da rota, router-outlet;
+                                  a gaveta fecha a cada navegação, menos a inicial (aparelho lento)
       navegacao.ts             -> NAVEGACAO: grupos Painéis e Kit com rota, rótulo e ícone Font Awesome
     layout/theme-toggle/       -> ThemeToggle: radiogroup claro, escuro e sistema
     dashboards/bcb/            -> painel do Banco Central em /bcb
@@ -202,6 +221,8 @@ Font Awesome Free (`@fortawesome/fontawesome-free`), empacotado no bundle (sem C
 - Link externo com `rel="noopener noreferrer"`.
 - Nada em `localStorage` além da preferência de tema.
 - Sem script de terceiro (analytics, pixel). Hosts externos permitidos: só as três APIs de dados.
+- A CSP fica em dois lugares, iguais: `docker/nginx/seguranca.conf` (imagem) e o server block do nginx de borda (repo planuz, cópia em `docker/borda/`). Host novo de API entra nos dois e no `APIS` de `e2e/apis.ts`.
+- Nada de script ou estilo inline no `index.html`: a CSP não tem `unsafe-inline` e usa Trusted Types.
 - Sem `console.*` com objeto de resposta em código de produção.
 - Antes de release, rodar o agente `seguranca-angular`.
 
@@ -224,6 +245,7 @@ npm run build:deploy   # build de produção (portão de toda fase)
 npm run test:ci        # testes unitários em ChromeHeadless, sem watch (portão de toda fase)
 npm run e2e            # Playwright, desktop e celular (portão das telas tocadas; suíte inteira antes de release)
 GRAVAR=1 npx playwright test gravar-apis --project=desktop   # regrava as respostas das APIs
+E2E_BASE_URL=http://localhost:8092 npx playwright test       # E2E contra a imagem de produção (CSP real)
 ```
 
 Armadilhas de layout que o E2E pega: `sr-only` direto em `<table>` não funciona (a tabela ignora a largura de 1 px e alarga a página; envolver numa `div.sr-only`), e `grid` sem `grid-cols-1` deixa um `<pre>` largo esticar a coluna. Área com `overflow-x-auto` precisa de `tabindex="0"` para rolar pelo teclado.

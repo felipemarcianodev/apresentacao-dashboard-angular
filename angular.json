@@ -26,7 +26,8 @@
             ],
             "styles": [
               "node_modules/@fontsource-variable/inter/index.css",
-              "node_modules/@fortawesome/fontawesome-free/css/all.min.css",
+              "node_modules/@fortawesome/fontawesome-free/css/fontawesome.min.css",
+              "node_modules/@fortawesome/fontawesome-free/css/solid.min.css",
               "src/styles.css"
             ]
           },
@@ -44,7 +45,12 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "optimization": {
+                "scripts": true,
+                "styles": { "minify": true, "inlineCritical": false },
+                "fonts": true
+              }
             },
             "development": {
               "optimization": false,
@@ -81,7 +87,8 @@
             ],
             "styles": [
               "node_modules/@fontsource-variable/inter/index.css",
-              "node_modules/@fortawesome/fontawesome-free/css/all.min.css",
+              "node_modules/@fortawesome/fontawesome-free/css/fontawesome.min.css",
+              "node_modules/@fortawesome/fontawesome-free/css/solid.min.css",
               "src/styles.css"
             ]
           }

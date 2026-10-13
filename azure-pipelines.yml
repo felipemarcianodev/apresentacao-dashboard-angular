@@ -1,0 +1,156 @@
+# Pipeline do Mirante (SPA estática), no molde dos demais projetos do portfólio.
+#
+# Disparo: push em release/* (ou manual). O repositório é o do GitHub (público), ligado ao
+# Azure DevOps por service connection do GitHub.
+#
+# Fluxo:
+#   1. Portões no agente: npm audit (só produção), testes unitários, build de produção.
+#   2. Build da imagem no agente e E2E (Playwright) contra o próprio container, com a CSP e os
+#      headers do nginx de produção.
+#   3. docker save | scp | docker load na VPS (compilar na VPS esgota a memória e derruba os
+#      outros apps do servidor) e troca simples do container.
+#
+# Variable group "mirante-producao": SERVER_IP, SERVER_USER, SSH_PUBLICKEY,
+# SSH_KNOWN_HOSTS (linha completa da host key da VPS, ex.: saída de ssh-keyscan -t ed25519 <ip>,
+# conferida uma vez à mão), DEPLOY_PATH (/opt/mirante) e BIND_ADDR_INTERNAL (127.0.0.1).
+# Secure file: id_ed25519_kinghost (o mesmo dos outros projetos).
+#
+# O domínio chega ao container pelo nginx de borda (repositório planuz,
+# docker/nginx/conf.d/site-mirante.conf), na rede docker externa "edge".
+
+name: $(SourceBranchName)-$(Date:yyyyMMdd)$(Rev:.r)
+
+trigger:
+  branches:
+    include:
+      - release/*
+
+pr: none
+
+parameters:
+  - name: rodarE2e
+    displayName: "Rodar o E2E (Playwright) contra a imagem antes do deploy"
+    type: boolean
+    default: true
+  - name: deploy
+    displayName: "Deploy via SSH no servidor de produção"
+    type: boolean
+    default: true
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  - group: mirante-producao
+
+steps:
+  - task: UseNode@1
+    displayName: "Instalar Node.js 22"
+    inputs:
+      version: 22.x
+
+  - script: |
+      set -e
+      npm ci --ignore-scripts
+      npm audit --omit=dev --audit-level=high
+    displayName: "Dependências e npm audit (produção)"
+
+  - script: |
+      set -e
+      npm run test:ci
+      npm run build:deploy
+    displayName: "Testes unitários e build de produção"
+
+  - script: |
+      set -e
+      docker build --progress=plain -f docker/Dockerfile.web -t mirante-web:latest .
+    displayName: "Build da imagem"
+
+  - script: |
+      set -e
+      docker run -d --name mirante-e2e -p 8092:80 mirante-web:latest
+      npx playwright install --with-deps chromium
+      for i in $(seq 1 20); do curl -fsS http://localhost:8092/health && break; sleep 1; done
+      E2E_BASE_URL=http://localhost:8092 CI=1 npx playwright test
+    displayName: "E2E contra o container (CSP e headers de produção)"
+    condition: and(succeeded(), eq('${{ parameters.rodarE2e }}', 'true'))
+
+  - task: InstallSSHKey@0
+    displayName: "[Deploy] Instalar chave SSH"
+    condition: and(succeeded(), eq('${{ parameters.deploy }}', 'true'))
+    inputs:
+      # Host key fixa do variable group: um ssh-keyscan em runtime aceitaria qualquer servidor.
+      knownHostsEntry: $(SSH_KNOWN_HOSTS)
+      sshPublicKey: $(SSH_PUBLICKEY)
+      sshKeySecureFile: id_ed25519_kinghost
+
+  - script: |
+      set -e
+      SSH_OPTS="-o ServerAliveInterval=30 -o ServerAliveCountMax=20 -o TCPKeepAlive=yes -o ConnectTimeout=20"
+      ssh $SSH_OPTS $(SERVER_USER)@$(SERVER_IP) "DEPLOY_PATH='$(DEPLOY_PATH)' bash -s" << 'REMOTE_EOF'
+      set -e
+      if [ ! -d "${DEPLOY_PATH}/.git" ]; then
+        echo "=== Clone inicial em ${DEPLOY_PATH} ==="
+        sudo mkdir -p "${DEPLOY_PATH}"
+        sudo chown "$(whoami)":"$(whoami)" "${DEPLOY_PATH}"
+        git clone https://github.com/felipemarcianodev/apresentacao-dashboard-angular.git "${DEPLOY_PATH}"
+      fi
+      docker network ls --format '{{.Name}}' | grep -q '^edge$' || docker network create edge
+      REMOTE_EOF
+      printf 'BIND_ADDR_INTERNAL=%s\n' "$(BIND_ADDR_INTERNAL)" > /tmp/mirante.env
+      scp $SSH_OPTS /tmp/mirante.env $(SERVER_USER)@$(SERVER_IP):$(DEPLOY_PATH)/docker/.env
+      rm -f /tmp/mirante.env
+    displayName: "[Deploy] Bootstrap do servidor (clone, rede edge e .env)"
+    condition: and(succeeded(), eq('${{ parameters.deploy }}', 'true'))
+
+  - script: |
+      set -e
+      docker save mirante-web:latest | gzip -1 > /tmp/mirante-images.tar.gz
+      ls -lh /tmp/mirante-images.tar.gz
+      scp -o ServerAliveInterval=30 -o ServerAliveCountMax=20 -o TCPKeepAlive=yes -o ConnectTimeout=20 \
+        /tmp/mirante-images.tar.gz $(SERVER_USER)@$(SERVER_IP):/tmp/mirante-images.tar.gz
+      rm -f /tmp/mirante-images.tar.gz
+    displayName: "[Deploy] Envio da imagem para a VPS"
+    condition: and(succeeded(), eq('${{ parameters.deploy }}', 'true'))
+
+  - script: |
+      set -e
+      # O SHA do commit construído (só hexadecimal) e não o nome do branch: nome de ref pode
+      # conter aspas e ponto e vírgula e viraria comando na VPS. Também garante que o compose
+      # da VPS é o do mesmo commit da imagem.
+      SHA="$(Build.SourceVersion)"
+      if ! echo "$SHA" | grep -Eq '^[0-9a-f]{40}$'; then
+        echo "##[error] Build.SourceVersion inesperado."
+        exit 1
+      fi
+      ssh -o ServerAliveInterval=30 -o ServerAliveCountMax=20 -o TCPKeepAlive=yes -o ConnectTimeout=20 \
+        $(SERVER_USER)@$(SERVER_IP) "DEPLOY_PATH='$(DEPLOY_PATH)' SHA='$SHA' bash -s" << 'REMOTE_EOF'
+      set -e
+      cd "${DEPLOY_PATH}"
+      git fetch origin "${SHA}"
+      git reset --hard "${SHA}"
+      git log -1 --oneline
+      cd docker
+      COMPOSE="docker compose -f docker-compose.yml -f docker-compose.prod.yml"
+      # A versão no ar vira :anterior (rollback manual: docker tag mirante-web:anterior mirante-web:latest).
+      if docker image inspect mirante-web:latest > /dev/null 2>&1; then
+        docker tag mirante-web:latest mirante-web:anterior
+      fi
+      nice -n 10 ionice -c3 sh -c 'gunzip -c /tmp/mirante-images.tar.gz | docker load'
+      rm -f /tmp/mirante-images.tar.gz
+      $COMPOSE up -d --no-deps --no-build web
+      for i in $(seq 1 30); do
+        if curl -fsS http://127.0.0.1:8092/health > /dev/null; then
+          echo "mirante-web saudável."
+          # Só imagens do Mirante: a VPS é compartilhada com outros apps.
+          docker image prune -f --filter "label=app=mirante" > /dev/null
+          exit 0
+        fi
+        sleep 2
+      done
+      echo "##[error] mirante-web não respondeu em /health."
+      docker logs --tail 50 mirante-web
+      exit 1
+      REMOTE_EOF
+    displayName: "[Deploy] Carregar a imagem e trocar o container"
+    condition: and(succeeded(), eq('${{ parameters.deploy }}', 'true'))

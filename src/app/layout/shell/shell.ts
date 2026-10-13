@@ -34,8 +34,12 @@ export class Shell {
         filter((evento) => evento instanceof NavigationEnd),
         takeUntilDestroyed(),
       )
-      .subscribe(() => {
-        this.menuAberto.set(false);
+      .subscribe((evento) => {
+        // A navegação inicial (id 1) pode terminar depois de a pessoa abrir o menu num aparelho
+        // lento; só uma navegação feita depois fecha a gaveta.
+        if (evento.id > 1) {
+          this.menuAberto.set(false);
+        }
         this.titulo.set(this.tituloDaRotaAtual());
       });
   }
