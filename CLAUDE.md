@@ -43,7 +43,7 @@ Regra: **nenhum número inventado.** Toda tela mostra a fonte e a data de refer�
 ```
 CLAUDE.md                      -> este arquivo (regras e mapa)
 README.md                      -> apresentação pública do projeto
-.gitignore                     -> padrão do Angular CLI + plano faseado local de docs/
+.gitignore                     -> padrão do Angular CLI + planos faseados locais de docs/ (plano-*.md)
 .github/dependabot.yml         -> atualizações semanais do npm (Angular, testes e Tailwind em grupos; versão maior do
                                   Angular e do TypeScript fica para o ng update) e das
                                   imagens base do docker/ (só digest novo; troca de versão do nginx e maior do
@@ -51,7 +51,7 @@ README.md                      -> apresentação pública do projeto
 .postcssrc.json                -> liga o Tailwind v4 (@tailwindcss/postcss) ao build do Angular
 angular.json                   -> projeto "mirante", prefixo mi; estilos globais: Inter, Font Awesome (só o core e
                                   o solid) e src/styles.css; produção sem CSS crítico inline (exigência da CSP)
-VERSION                        -> versão semântica do Mirante
+VERSION                        -> versão semântica do Mirante; o build a embute no rodapé da barra lateral
 azure-pipelines.yml            -> release/*: npm audit, unitários, build, imagem, E2E contra o container, envio
                                   da imagem por scp e troca do container na VPS (variable group mirante-producao)
 docker/
@@ -91,6 +91,7 @@ public/
   geo/br-uf.json               -> malha das 27 UFs (API de malhas do IBGE, coordenadas com 2 casas), usada pelo MapaUf
   theme-init.js                -> aplica .dark antes do Angular subir (evita piscar); arquivo estático por causa da CSP
 src/
+  arquivos-de-texto.d.ts       -> tipo dos arquivos importados como texto (VERSION)
   index.html                   -> documento base (lang pt-BR), carrega theme-init.js
   main.ts                      -> bootstrap da aplicação
   styles.css                   -> @import tailwindcss + @theme: escala primary do blog, tokens de superfície
@@ -100,14 +101,17 @@ src/
     app.ts                     -> componente raiz (mi-root), só monta o shell
     app.config.ts              -> providers: zoneless, router com withComponentInputBinding, HttpClient com fetch
     app.routes.ts              -> rotas lazy /ibge (IbgePainel), /bcb (BcbPainel), /ipea (IpeaPainel), /ui; data.titulo vira o título da topbar
+    core/versao/versao.ts      -> VERSAO: lida do arquivo VERSION da raiz como texto (import com loader text)
     core/formato/formato.ts    -> formatar(valor, formato) pt-BR (numero, decimal, percentual em pontos, moeda,
                                   moeda-compacta, dolar, compacto) e formatarVariacao com sinal; SEM_DADO para nulo
     core/brasil/ufs.ts         -> UFS: 27 UFs com código IBGE, sigla, nome e região; ufPorCodigo, ufPorSigla
     core/dados/valor-de.ts     -> valorDe(resource): valor ou undefined, sem lançar no estado de erro
     core/theme/theme-preference.ts -> ThemePreference: signal tema (light, dark, system), classe .dark, localStorage
     layout/shell/              -> Shell: sidebar (drawer no mobile), topbar com título da rota, router-outlet;
-                                  a gaveta fecha a cada navegação, menos a inicial (aparelho lento)
+                                  a gaveta fecha a cada navegação, menos a inicial (aparelho lento); rodapé fixo
+                                  com o link do código e a versão (ligada à tag do GitHub)
       navegacao.ts             -> NAVEGACAO: grupos Painéis e Kit com rota, rótulo e ícone Font Awesome
+      outros-projetos.ts       -> OUTROS_PROJETOS: Planuz, portfólio e blog, em "Conheça também" (abre em nova aba)
     layout/theme-toggle/       -> ThemeToggle: radiogroup claro, escuro e sistema
     dashboards/bcb/            -> painel do Banco Central em /bcb
       sgs.ts                   -> API do SGS: urlSerie por janela de datas (diária exige, até 10 anos), lerSerie

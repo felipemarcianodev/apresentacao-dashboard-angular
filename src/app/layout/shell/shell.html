@@ -47,19 +47,54 @@
         }
       </ul>
     }
+
+    <p id="titulo-outros-projetos" class="mb-2 px-3 text-xs font-semibold tracking-wider text-muted uppercase">
+      Conheça também
+    </p>
+    <ul class="grid gap-0.5" aria-labelledby="titulo-outros-projetos">
+      @for (projeto of outrosProjetos; track projeto.url) {
+        <li>
+          <a
+            [href]="projeto.url"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex min-h-10 items-center gap-3 rounded-lg px-3 py-1.5 text-sm transition-colors hover:bg-sunken"
+          >
+            <i class="fa-solid w-4 text-center text-muted" [class]="projeto.icone" aria-hidden="true"></i>
+            <span class="flex min-w-0 flex-col">
+              <span class="font-medium">{{ projeto.rotulo }}</span>
+              <span class="truncate text-xs text-muted">{{ projeto.descricao }}</span>
+            </span>
+            <i class="fa-solid fa-arrow-up-right-from-square ml-auto text-xs text-muted" aria-hidden="true"></i>
+            <span class="sr-only">(abre em nova aba)</span>
+          </a>
+        </li>
+      }
+    </ul>
   </nav>
 
-  <div class="border-t border-line px-5 py-4 text-xs text-muted">
+  <footer class="border-t border-line px-5 py-3 text-xs text-muted">
     <p>Dados abertos, sem login.</p>
-    <a
-      href="https://github.com/felipemarcianodev/apresentacao-dashboard-angular"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="mt-1 inline-flex items-center gap-1.5 font-medium text-fg hover:text-accent"
-    >
-      <i class="fa-solid fa-code" aria-hidden="true"></i> Código no GitHub
-    </a>
-  </div>
+    <div class="mt-1 flex items-center justify-between gap-2">
+      <a
+        href="https://github.com/felipemarcianodev/apresentacao-dashboard-angular"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex min-h-10 items-center gap-1.5 font-medium text-fg hover:text-accent"
+      >
+        <i class="fa-solid fa-code" aria-hidden="true"></i> Código no GitHub
+        <span class="sr-only">(abre em nova aba)</span>
+      </a>
+      <a
+        [href]="urlDaVersao"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex min-h-10 items-center font-mono tabular-nums hover:text-accent"
+        [attr.aria-label]="'Versão ' + versao + ' no GitHub (abre em nova aba)'"
+        >v{{ versao }}</a
+      >
+    </div>
+  </footer>
 </aside>
 
 <div class="lg:pl-64">

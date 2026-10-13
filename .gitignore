@@ -43,7 +43,7 @@ __screenshots__/
 Thumbs.db
 
 # Plano faseado local, fora do versionamento
-docs/plano-reconstrucao.md
+docs/plano-*.md
 
 # Configuração local do Claude Code
 .claude/settings.local.json
