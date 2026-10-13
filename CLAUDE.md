@@ -43,7 +43,7 @@ Regra: **nenhum número inventado.** Toda tela mostra a fonte e a data de refer�
 ```
 CLAUDE.md                      -> este arquivo (regras e mapa)
 README.md                      -> apresentação pública do projeto
-.gitignore                     -> padrão do Angular CLI + plano faseado local de docs/
+.gitignore                     -> padrão do Angular CLI + planos faseados locais de docs/ (plano-*.md)
 .github/dependabot.yml         -> atualizações semanais do npm (Angular, testes e Tailwind em grupos; versão maior do
                                   Angular e do TypeScript fica para o ng update) e das
                                   imagens base do docker/ (só digest novo; troca de versão do nginx e maior do
