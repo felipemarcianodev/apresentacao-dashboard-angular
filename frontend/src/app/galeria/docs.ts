@@ -9,6 +9,7 @@ import { BUTTON_DOC } from '../ui/button/button.doc';
 import { CARD_DOC } from '../ui/card/card.doc';
 import { EMPTY_STATE_DOC } from '../ui/empty-state/empty-state.doc';
 import { ERROR_STATE_DOC } from '../ui/error-state/error-state.doc';
+import { MENU_HAMBURGUER_DOC } from '../ui/menu-hamburguer/menu-hamburguer.doc';
 import { SEGMENTED_DOC } from '../ui/segmented/segmented.doc';
 import { SKELETON_DOC } from '../ui/skeleton/skeleton.doc';
 import { CategoriaDoc, ComponentDoc } from './component-doc.model';
@@ -22,6 +23,7 @@ export const DOCS: readonly ComponentDoc[] = [
   SKELETON_DOC,
   EMPTY_STATE_DOC,
   ERROR_STATE_DOC,
+  MENU_HAMBURGUER_DOC,
   KPI_CARD_DOC,
   SPARKLINE_DOC,
   LINE_CHART_DOC,

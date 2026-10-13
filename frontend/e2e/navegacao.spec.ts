@@ -1,3 +1,4 @@
+import AxeBuilder from '@axe-core/playwright';
 import { esperarDados, expect, test } from './apis';
 
 test.describe('navegação e tema', () => {
@@ -19,7 +20,7 @@ test.describe('navegação e tema', () => {
     const menu = page.getByRole('complementary', { name: 'Navegação principal' });
     for (const destino of destinos) {
       if (isMobile) {
-        await page.getByRole('button', { name: 'Abrir menu' }).click();
+        await page.getByRole('button', { name: 'Menu de navegação' }).click();
       }
       await menu.getByRole('link', { name: destino.link, exact: true }).click();
       await expect(page).toHaveURL(destino.url);
@@ -70,7 +71,7 @@ test.describe('menu no celular', () => {
 
   test('abre como gaveta e fecha pelo fundo', async ({ page }) => {
     await page.goto('/ibge');
-    const abrir = page.getByRole('button', { name: 'Abrir menu' });
+    const abrir = page.getByRole('button', { name: 'Menu de navegação' });
     const menu = page.getByRole('complementary', { name: 'Navegação principal' });
     await expect(menu).not.toBeInViewport();
     await abrir.click();
@@ -79,5 +80,41 @@ test.describe('menu no celular', () => {
     await page.getByRole('button', { name: 'Fechar menu' }).click({ position: { x: 340, y: 400 } });
     await expect(abrir).toHaveAttribute('aria-expanded', 'false');
     await expect(menu).not.toBeInViewport();
+  });
+});
+
+test.describe('menu no desktop', () => {
+  test.skip(({ isMobile }) => !!isMobile, 'só no desktop');
+
+  test('a barra lateral cabe na altura de um notebook sem rolar', async ({ page }) => {
+    await page.setViewportSize({ width: 1366, height: 768 });
+    await page.goto('/ibge');
+    const rola = await page
+      .getByRole('complementary', { name: 'Navegação principal' })
+      .locator('nav')
+      .evaluate((nav) => nav.scrollHeight > nav.clientHeight);
+    expect(rola).toBe(false);
+  });
+
+  test('o menu recolhe a barra em ícones, com nome e dica em cada link, e expande de volta', async ({ page }) => {
+    await page.goto('/ibge');
+    await esperarDados(page);
+    const menuBotao = page.getByRole('button', { name: 'Menu de navegação' });
+    const barra = page.getByRole('complementary', { name: 'Navegação principal' });
+    await expect(menuBotao).toHaveAttribute('aria-expanded', 'true');
+    const larguraAberta = (await barra.boundingBox())!.width;
+
+    await menuBotao.click();
+    await expect(menuBotao).toHaveAttribute('aria-expanded', 'false');
+    await expect.poll(async () => (await barra.boundingBox())!.width).toBeLessThan(larguraAberta / 2);
+    const bcb = barra.getByRole('link', { name: 'Banco Central', exact: true });
+    await expect(bcb).toHaveAttribute('title', 'Banco Central');
+    const resultado = await new AxeBuilder({ page }).include('aside').withTags(['wcag2a', 'wcag2aa', 'wcag22aa']).analyze();
+    expect(resultado.violations.map((v) => v.id)).toEqual([]);
+    await bcb.click();
+    await expect(page).toHaveURL(/\/bcb$/);
+
+    await menuBotao.click();
+    await expect.poll(async () => (await barra.boundingBox())!.width).toBe(larguraAberta);
   });
 });

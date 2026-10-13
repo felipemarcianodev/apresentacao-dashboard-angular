@@ -4,7 +4,7 @@ test.describe('galeria /ui', () => {
   test('cada componente do índice abre a própria página sem erro', async ({ page }) => {
     await page.goto('/ui');
     const links = page.locator('main a[href^="/ui/"]');
-    await expect(links).toHaveCount(13);
+    await expect(links).toHaveCount(14);
     const caminhos = await links.evaluateAll((as) => as.map((a) => a.getAttribute('href')!));
     for (const caminho of caminhos) {
       await page.goto(caminho);

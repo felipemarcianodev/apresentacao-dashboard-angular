@@ -6,8 +6,18 @@ import { Shell } from './shell';
 @Component({ template: '' })
 class PaginaVazia {}
 
+/** Simula a largura da tela: o menu se comporta diferente no celular e no desktop. */
+function simularTela(larga: boolean): void {
+  spyOn(window, 'matchMedia').and.returnValue({
+    matches: larga,
+    addEventListener: () => undefined,
+    removeEventListener: () => undefined,
+  } as unknown as MediaQueryList);
+}
+
 describe('Shell', () => {
   beforeEach(() => {
+    simularTela(false);
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
@@ -77,5 +87,31 @@ describe('Shell', () => {
     const versao = html.querySelector<HTMLAnchorElement>('aside footer a[aria-label^="Versão"]')!;
     expect(versao.textContent!.trim()).toMatch(/^v\d+\.\d+\.\d+$/);
     expect(versao.href).toContain(`/tree/${versao.textContent!.trim()}`);
+  });
+
+  it('no desktop, o menu recolhe a barra para os ícones e expande de volta', async () => {
+    (window.matchMedia as jasmine.Spy).and.returnValue({
+      matches: true,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+    } as unknown as MediaQueryList);
+    const { fixture, html, botaoMenu, router } = montar();
+    await router.navigateByUrl('/ibge');
+    await fixture.whenStable();
+    const barra = html.querySelector('aside')!;
+    expect(botaoMenu().getAttribute('aria-expanded')).toBe('true');
+    expect(barra.classList).toContain('w-64');
+
+    botaoMenu().click();
+    await fixture.whenStable();
+    expect(botaoMenu().getAttribute('aria-expanded')).toBe('false');
+    expect(barra.classList).toContain('w-16');
+    const link = html.querySelector<HTMLAnchorElement>('nav a[href="/ibge"]')!;
+    expect(link.title).toBe('IBGE');
+    expect(link.querySelector('span')!.classList).toContain('sr-only');
+
+    botaoMenu().click();
+    await fixture.whenStable();
+    expect(barra.classList).toContain('w-64');
   });
 });
