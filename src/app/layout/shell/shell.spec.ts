@@ -55,4 +55,27 @@ describe('Shell', () => {
     await fixture.whenStable();
     expect(botaoMenu().getAttribute('aria-expanded')).toBe('false');
   });
+
+  it('lista os outros projetos com link externo seguro', async () => {
+    const { fixture, html } = montar();
+    await fixture.whenStable();
+    const links = [...html.querySelectorAll<HTMLAnchorElement>('[aria-labelledby="titulo-outros-projetos"] a')];
+    expect(links.map((link) => link.href)).toEqual([
+      'https://planuz.com/',
+      'https://felipemarcianodev.com/',
+      'https://blog.felipemarcianodev.com/',
+    ]);
+    for (const link of links) {
+      expect(link.target).toBe('_blank');
+      expect(link.rel).toBe('noopener noreferrer');
+    }
+  });
+
+  it('mostra a versão no rodapé da barra lateral, ligada à tag do GitHub', async () => {
+    const { fixture, html } = montar();
+    await fixture.whenStable();
+    const versao = html.querySelector<HTMLAnchorElement>('aside footer a[aria-label^="Versão"]')!;
+    expect(versao.textContent!.trim()).toMatch(/^v\d+\.\d+\.\d+$/);
+    expect(versao.href).toContain(`/tree/${versao.textContent!.trim()}`);
+  });
 });

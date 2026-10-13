@@ -9,8 +9,10 @@ import {
   RouterOutlet,
 } from '@angular/router';
 import { filter } from 'rxjs';
+import { VERSAO } from '../../core/versao/versao';
 import { ThemeToggle } from '../theme-toggle/theme-toggle';
 import { NAVEGACAO } from './navegacao';
+import { OUTROS_PROJETOS } from './outros-projetos';
 
 /** Estrutura da aplicação: barra lateral com os painéis e o kit, barra superior e área de conteúdo. */
 @Component({
@@ -25,6 +27,9 @@ export class Shell {
   private readonly rota = inject(ActivatedRoute);
 
   protected readonly navegacao = NAVEGACAO;
+  protected readonly outrosProjetos = OUTROS_PROJETOS;
+  protected readonly versao = VERSAO;
+  protected readonly urlDaVersao = `https://github.com/felipemarcianodev/apresentacao-dashboard-angular/tree/v${VERSAO}`;
   protected readonly menuAberto = signal(false);
   protected readonly titulo = signal('');
 
