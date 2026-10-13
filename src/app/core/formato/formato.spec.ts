@@ -19,6 +19,10 @@ describe('formatar', () => {
     expect(formatar(213421037, 'compacto')).toBe('213,4 mi');
   });
 
+  it('formata dólar sem centavos', () => {
+    expect(formatar(10638.47, 'dolar')).toBe('US$ 10.638');
+  });
+
   it('abrevia valores em real', () => {
     expect(formatar(10943345439000, 'moeda-compacta')).toBe('R$ 10,94 tri');
   });

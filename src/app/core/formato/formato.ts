@@ -1,4 +1,11 @@
-export type FormatoNumero = 'numero' | 'decimal' | 'percentual' | 'moeda' | 'moeda-compacta' | 'compacto';
+export type FormatoNumero =
+  | 'numero'
+  | 'decimal'
+  | 'percentual'
+  | 'moeda'
+  | 'moeda-compacta'
+  | 'dolar'
+  | 'compacto';
 
 const FORMATADORES: Record<FormatoNumero, Intl.NumberFormat> = {
   numero: new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 }),
@@ -15,6 +22,7 @@ const FORMATADORES: Record<FormatoNumero, Intl.NumberFormat> = {
     notation: 'compact',
     maximumFractionDigits: 2,
   }),
+  dolar: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }),
   compacto: new Intl.NumberFormat('pt-BR', { notation: 'compact', maximumFractionDigits: 1 }),
 };
 
