@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Mirante.Dados;
 using StackExchange.Redis;
 
@@ -17,6 +18,8 @@ public static class InfraestruturaExtensions
         var conexoes = configuration.GetSection(Conexoes.Secao).Get<Conexoes>() ?? new Conexoes();
 
         services.AddDbContext<MiranteDb>(options => options.UseNpgsql(conexoes.Postgres));
+        services.AddScoped<Reservas>();
+        services.AddHostedService<AplicadorDeMigrations>();
 
         // Uma conexão para a aplicação inteira, como o StackExchange.Redis recomenda. Sem
         // AbortOnConnectFail, o Redis fora do ar não impede a API de subir: o cache é acessório.
@@ -26,6 +29,11 @@ public static class InfraestruturaExtensions
             opcoes.AbortOnConnectFail = false;
             return ConnectionMultiplexer.Connect(opcoes);
         });
+
+        // Segunda camada do HybridCache, na mesma conexão.
+        services.AddStackExchangeRedisCache(_ => { });
+        services.AddOptions<RedisCacheOptions>()
+            .Configure<IConnectionMultiplexer>((opcoes, redis) => opcoes.ConnectionMultiplexerFactory = () => Task.FromResult(redis));
 
         return services;
     }

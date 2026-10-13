@@ -57,17 +57,22 @@ azure-pipelines.yml            -> release/*: npm audit, unitários, build, image
                                   da imagem por scp e troca do container na VPS (variable group mirante-producao)
 backend/                       -> API .NET 10 (solução Mirante.slnx)
   global.json                  -> SDK 10 e executor de testes Microsoft Testing Platform
+  dotnet-tools.json            -> dotnet-ef local (dotnet tool restore)
   Directory.Build.props        -> net10.0, nullable, avisos como erro, analisadores
   Directory.Packages.props     -> versões de pacote centralizadas
-  src/Mirante.Api/             -> minimal API: Program, Configuracao/ (Conexoes validadas na subida, Postgres
-                                  e Redis), Saude/ (/health vivo, /health/ready com Postgres e Redis, sem detalhe
+  src/Mirante.Api/             -> minimal API: Program, Configuracao/ (Conexoes validadas na subida, Postgres,
+                                  Redis como segunda camada do HybridCache, AplicadorDeMigrations na subida), Saude/ (/health vivo, /health/ready com Postgres e Redis, sem detalhe
                                   de erro no corpo), Fontes/ (FontesEndpoints: /api/ibge, /api/bcb e /api/ipea com
-                                  os mesmos caminhos das fontes; 404 fora da lista, 400 malformada, 502 fonte fora)
+                                  os mesmos caminhos das fontes; 404 fora da lista, 400 malformada, 502 fonte fora;
+                                  X-Mirante-Origem cache, fonte ou reserva) e ConsultasComCache (memória, Redis,
+                                  fonte e, com a fonte fora, a reserva; validade por fonte em OpcoesDoCache)
   src/Mirante.Fontes/          -> ListaPermitida (o que os painéis consultam, espelho de indicadores.ts e series.ts:
                                   série nova entra nos dois), ConsultaIbge, ConsultaBcb e ConsultaIpea (validação e
                                   forma canônica), ClienteDasFontes (JSON como veio, recusa HTML), FontesExtensions
                                   (cliente por fonte com resiliência; Ipeadata com prazo maior)
-  src/Mirante.Dados/           -> MiranteDb (EF Core 10, Npgsql): reserva das séries
+  src/Mirante.Dados/           -> MiranteDb (EF Core 10, Npgsql), Reserva e Reservas (última resposta boa por
+                                  consulta, coluna json para guardar o texto como veio, gravação com ON CONFLICT
+                                  que nunca troca nova por antiga), Migrations/ (geradas pelo dotnet ef)
   tests/Mirante.Testes.Unidade/    -> xUnit v3, sem rede nem banco
   tests/Mirante.Testes.Integracao/ -> API real (WebApplicationFactory) com Postgres e Redis em Testcontainers;
                                   FontesSimuladas responde no lugar das três fontes (teste nunca bate na rede)
@@ -276,6 +281,7 @@ GRAVAR=1 npx playwright test gravar-apis --project=desktop   # regrava as respos
 E2E_BASE_URL=http://localhost:8092 npx playwright test       # E2E contra a imagem de produção (CSP real)
 dotnet build backend/Mirante.slnx                            # backend, 0 avisos (avisos são erro)
 dotnet test --solution backend/Mirante.slnx                  # unidade e integração (Docker de pé)
+cd backend && dotnet tool restore && dotnet ef migrations add Nome --project src/Mirante.Dados --output-dir Migrations
 ```
 
 Armadilhas de layout que o E2E pega: `sr-only` direto em `<table>` não funciona (a tabela ignora a largura de 1 px e alarga a página; envolver numa `div.sr-only`), e `grid` sem `grid-cols-1` deixa um `<pre>` largo esticar a coluna. Área com `overflow-x-auto` precisa de `tabindex="0"` para rolar pelo teclado.

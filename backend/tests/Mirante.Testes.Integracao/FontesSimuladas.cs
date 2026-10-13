@@ -17,6 +17,9 @@ public sealed class FontesSimuladas
 
     public void Responder(Func<Fonte, HttpResponseMessage> resposta) => responder = resposta;
 
+    /// <summary>Quanto a fonte demora para responder (para simular chamadas simultâneas).</summary>
+    public TimeSpan Atraso { get; set; }
+
     public static HttpResponseMessage Json(string corpo, HttpStatusCode status = HttpStatusCode.OK) =>
         new(status) { Content = new StringContent(corpo, Encoding.UTF8, "application/json") };
 
@@ -24,10 +27,14 @@ public sealed class FontesSimuladas
 
     private sealed class ManipuladorSimulado(Fonte fonte, FontesSimuladas simulador) : HttpMessageHandler
     {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             simulador.chamadas.Enqueue((fonte, request.RequestUri!));
-            return Task.FromResult(simulador.responder(fonte));
+            if (simulador.Atraso > TimeSpan.Zero)
+            {
+                await Task.Delay(simulador.Atraso, cancellationToken);
+            }
+            return simulador.responder(fonte);
         }
     }
 }
