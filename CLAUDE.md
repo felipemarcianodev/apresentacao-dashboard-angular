@@ -62,15 +62,22 @@ src/
   app/
     app.ts                     -> componente raiz (mi-root), só monta o shell
     app.config.ts              -> providers: zoneless, router com withComponentInputBinding, HttpClient com fetch
-    app.routes.ts              -> rotas lazy /ibge, /bcb, /ipea, /ui; data.titulo vira o título da topbar
+    app.routes.ts              -> rotas lazy /ibge (IbgePainel), /bcb, /ipea, /ui; data.titulo vira o título da topbar
     core/formato/formato.ts    -> formatar(valor, formato) pt-BR (numero, decimal, percentual em pontos, moeda,
-                                  compacto) e formatarVariacao com sinal; SEM_DADO para nulo
+                                  moeda-compacta, compacto) e formatarVariacao com sinal; SEM_DADO para nulo
     core/brasil/ufs.ts         -> UFS: 27 UFs com código IBGE, sigla, nome e região; ufPorCodigo, ufPorSigla
     core/theme/theme-preference.ts -> ThemePreference: signal tema (light, dark, system), classe .dark, localStorage
     layout/shell/              -> Shell: sidebar (drawer no mobile), topbar com título da rota, router-outlet
       navegacao.ts             -> NAVEGACAO: grupos Painéis e Kit com rota, rótulo e ícone Font Awesome
     layout/theme-toggle/       -> ThemeToggle: radiogroup claro, escuro e sistema
-    dashboards/em-breve/       -> EmBreve: página provisória de painel ainda não construído
+    dashboards/em-breve/       -> EmBreve: página provisória dos painéis ainda não construídos (BCB, Ipeadata)
+    dashboards/ibge/           -> painel do IBGE em /ibge (?uf=RJ filtra pela UF)
+      agregados.ts             -> API de agregados v3: urlAgregado, lerValor (símbolos do IBGE viram null),
+                                  lerAgregado (variável -> localidade -> pontos), rotuloPeriodo, ultimoValido
+      indicadores.ts           -> INDICADORES_UF (população 6579, desocupação 4099, PIB 5938) e IPCA (1737, só
+                                  Brasil); resumir (valor, variação, série) e valoresPorUf
+      ibge-painel.ts           -> IbgePainel: httpResource por agregado (valorDe protege o estado de erro),
+                                  KPIs, linhas de desocupação e IPCA, mapa com ranking e tabela das 27 UFs
     ui/                        -> primitivos do kit, um por pasta (componente, template, spec, doc)
       button/                  -> Button: seletor button[miButton], a[miButton]; variante, tamanho, icone, carregando
       badge/                   -> Badge (mi-badge): tom semântico e ícone
@@ -152,6 +159,14 @@ Font Awesome Free (`@fortawesome/fontawesome-free`), empacotado no bundle (sem C
 - Números com `tabular-nums` e formatação pt-BR (`Intl.NumberFormat('pt-BR')`).
 - `prefers-reduced-motion` respeitado em toda animação.
 - Copy sem travessão como separador estilístico (usar vírgula, ponto, dois-pontos ou reescrever).
+
+## Dados das APIs públicas
+
+- Consumo por `httpResource` com `parse` que já devolve o modelo tipado; o mapeamento fica em funções puras testadas.
+- **Nunca ler `.value()` de um resource sem `hasValue()`**: em estado de erro ele lança exceção e derruba a tela. Use um helper como `valorDe()` do painel do IBGE.
+- Símbolos de dado ausente das fontes ("-", "...", "X") viram `null` e aparecem como "sem dado", nunca como zero.
+- Cada card com dado preenche `fonte` com o órgão e a tabela de origem; o período de referência aparece junto do número.
+- Testes nunca batem na rede: `HttpTestingController` com respostas mínimas.
 
 ## Segurança
 

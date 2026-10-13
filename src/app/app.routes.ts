@@ -5,11 +5,8 @@ export const routes: Routes = [
   {
     path: 'ibge',
     title: 'IBGE · Mirante',
-    data: {
-      titulo: 'IBGE',
-      descricao: 'População, PIB, desocupação e inflação oficial, com recorte por UF.',
-    },
-    loadComponent: () => import('./dashboards/em-breve/em-breve').then((m) => m.EmBreve),
+    data: { titulo: 'IBGE' },
+    loadComponent: () => import('./dashboards/ibge/ibge-painel').then((m) => m.IbgePainel),
   },
   {
     path: 'bcb',

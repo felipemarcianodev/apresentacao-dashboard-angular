@@ -48,7 +48,7 @@ export const KPI_CARD_DOC: ComponentDoc = {
   entradas: [
     { nome: 'rotulo', tipo: 'string', obrigatoria: true, descricao: 'Nome do indicador.' },
     { nome: 'valor', tipo: 'number | null', obrigatoria: true, descricao: 'Valor atual. null exibe "sem dado".' },
-    { nome: 'formato', tipo: 'FormatoNumero', padrao: "'numero'", descricao: "numero, decimal, percentual (em pontos: 4.6 vira 4,6%), moeda ou compacto." },
+    { nome: 'formato', tipo: 'FormatoNumero', padrao: "'numero'", descricao: "numero, decimal, percentual (em pontos: 4.6 vira 4,6%), moeda, moeda-compacta (R$ 10,94 tri) ou compacto." },
     { nome: 'unidade', tipo: 'string', padrao: "''", descricao: 'Sufixo discreto após o valor (hab., t, km²).' },
     { nome: 'variacao', tipo: 'number | null', padrao: 'null', descricao: 'Variação a exibir com sinal.' },
     { nome: 'formatoVariacao', tipo: "FormatoNumero | 'pontos'", padrao: "'percentual'", descricao: 'Use pontos para diferença entre taxas (p.p.).' },

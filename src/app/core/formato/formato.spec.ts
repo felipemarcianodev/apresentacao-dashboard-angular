@@ -19,6 +19,10 @@ describe('formatar', () => {
     expect(formatar(213421037, 'compacto')).toBe('213,4 mi');
   });
 
+  it('abrevia valores em real', () => {
+    expect(formatar(10943345439000, 'moeda-compacta')).toBe('R$ 10,94 tri');
+  });
+
   it('devolve "sem dado" para nulo, indefinido e NaN', () => {
     expect(formatar(null)).toBe(SEM_DADO);
     expect(formatar(undefined)).toBe(SEM_DADO);

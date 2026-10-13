@@ -1,40 +1,44 @@
 <p class="text-xs font-semibold tracking-wide text-muted uppercase">{{ rotulo() }}</p>
 
-<div class="flex flex-wrap items-end justify-between gap-x-3 gap-y-2">
-  <p class="text-2xl font-bold tracking-tight whitespace-nowrap tabular-nums">
-    {{ valorFormatado() }}
-    @if (unidade()) {
-      <span class="text-sm font-medium text-muted">{{ unidade() }}</span>
-    }
-  </p>
-  @if (serie().length > 1) {
-    <mi-sparkline
-      class="w-24 shrink-0"
-      [class.text-up]="tendencia()?.avaliacao === 'boa'"
-      [class.text-down]="tendencia()?.avaliacao === 'ruim'"
-      [class.text-accent]="!tendencia() || tendencia()?.avaliacao === 'neutra'"
-      [valores]="serie()"
-      [altura]="32"
-    />
+<p class="text-2xl font-bold tracking-tight whitespace-nowrap tabular-nums">
+  {{ valorFormatado() }}
+  @if (unidade()) {
+    <span class="text-sm font-medium text-muted">{{ unidade() }}</span>
   }
-</div>
+</p>
 
-@if (tendencia(); as t) {
-  <p class="flex flex-wrap items-center gap-x-1.5 text-xs">
-    <span
-      class="inline-flex items-center gap-1 font-semibold tabular-nums"
-      [class.text-up]="t.avaliacao === 'boa'"
-      [class.text-down]="t.avaliacao === 'ruim'"
-      [class.text-muted]="t.avaliacao === 'neutra'"
-    >
-      <i class="fa-solid" [class]="t.icone" aria-hidden="true"></i>
-      <span class="sr-only">{{ t.leitura }}</span>
-      {{ t.texto }}
-    </span>
-    @if (rotuloVariacao()) {
-      <span class="text-muted">{{ rotuloVariacao() }}</span>
+@if (tendencia() || serie().length > 1) {
+  <div class="flex items-end justify-between gap-3">
+    @if (tendencia(); as t) {
+      <p class="flex min-w-0 flex-wrap items-center gap-x-1.5 text-xs">
+        <span
+          class="inline-flex items-center gap-1 font-semibold tabular-nums"
+          [class.text-up]="t.avaliacao === 'boa'"
+          [class.text-down]="t.avaliacao === 'ruim'"
+          [class.text-muted]="t.avaliacao === 'neutra'"
+        >
+          <i class="fa-solid" [class]="t.icone" aria-hidden="true"></i>
+          <span class="sr-only">{{ t.leitura }}</span>
+          {{ t.texto }}
+        </span>
+        @if (rotuloVariacao()) {
+          <span class="text-muted">{{ rotuloVariacao() }}</span>
+        }
+      </p>
+    } @else {
+      <span></span>
     }
-  </p>
+    @if (serie().length > 1) {
+      <mi-sparkline
+        class="w-20 shrink-0"
+        [class.text-up]="tendencia()?.avaliacao === 'boa'"
+        [class.text-down]="tendencia()?.avaliacao === 'ruim'"
+        [class.text-accent]="!tendencia() || tendencia()?.avaliacao === 'neutra'"
+        [valores]="serie()"
+        [altura]="28"
+      />
+    }
+  </div>
 }
 
 @if (referencia()) {
