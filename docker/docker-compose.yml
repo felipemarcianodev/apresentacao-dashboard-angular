@@ -1,4 +1,5 @@
-# Mirante: um único container (SPA estática). Em produção, somar docker-compose.prod.yml.
+# Mirante: site (web), API .NET (api), reserva (postgres) e cache (redis). Em produção, somar
+# docker-compose.prod.yml. O deploy atual troca só o web; a API entra em produção numa fase própria.
 name: mirante
 
 services:
@@ -24,3 +25,73 @@ services:
     cap_add: [CHOWN, SETGID, SETUID, NET_BIND_SERVICE]
     security_opt:
       - no-new-privileges:true
+
+  api:
+    image: mirante-api:latest
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    container_name: mirante-api
+    ports:
+      # Só para desenvolvimento local; em produção o acesso é pela rede interna, via web.
+      - "127.0.0.1:8093:8080"
+    environment:
+      ConnectionStrings__Postgres: "Host=postgres;Database=mirante;Username=mirante;Password=${MIRANTE_DB_SENHA:-mirante-local}"
+      ConnectionStrings__Redis: "redis:6379"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    mem_limit: 128m
+    cpus: 0.5
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+
+  postgres:
+    image: postgres:17-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24
+    container_name: mirante-postgres
+    environment:
+      POSTGRES_DB: mirante
+      POSTGRES_USER: mirante
+      # Senha local de desenvolvimento; em produção vem do variable group (MIRANTE_DB_SENHA).
+      POSTGRES_PASSWORD: "${MIRANTE_DB_SENHA:-mirante-local}"
+    volumes:
+      - postgres-dados:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mirante -d mirante"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    mem_limit: 192m
+    cpus: 0.5
+    security_opt:
+      - no-new-privileges:true
+
+  redis:
+    image: redis:8-alpine@sha256:3811787313eba226a2ef38658c6ccb91cd5e110edc89c37767de373120a0e5a0
+    container_name: mirante-redis
+    # É cache: sem persistência em disco e com teto de memória, descartando o menos usado.
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "48mb", "--maxmemory-policy", "allkeys-lru"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    mem_limit: 64m
+    cpus: 0.25
+    read_only: true
+    cap_drop: [ALL]
+    cap_add: [SETGID, SETUID]
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  postgres-dados:

@@ -1,0 +1,6 @@
+# A imagem da API só precisa do backend, sem artefatos de build do host.
+*
+!backend
+**/bin
+**/obj
+backend/tests

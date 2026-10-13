@@ -1,0 +1,23 @@
+# Mirante: API .NET 10. Build no SDK, execução no runtime do ASP.NET, sem root.
+# Imagens fixadas por digest; o Dependabot (ecossistema docker) abre PR quando sai um novo.
+FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine@sha256:3cc3bbbbf93d82104892f42aa9106b6be4d120346dea0649643a97c801525256 AS build
+WORKDIR /src
+# Restauração numa camada própria: só refaz quando muda um csproj ou versão de pacote.
+COPY backend/global.json backend/Directory.Build.props backend/Directory.Packages.props backend/Mirante.slnx ./
+COPY backend/src/Mirante.Api/Mirante.Api.csproj src/Mirante.Api/
+COPY backend/src/Mirante.Dados/Mirante.Dados.csproj src/Mirante.Dados/
+RUN dotnet restore src/Mirante.Api/Mirante.Api.csproj
+COPY backend/src/ src/
+RUN dotnet publish src/Mirante.Api/Mirante.Api.csproj -c Release -o /app --no-restore /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine@sha256:f62a272ac1b46e83f56b8ed0416572f31cd1128e2c4a5e63eb34d348e4a36095
+LABEL app=mirante
+WORKDIR /app
+COPY --from=build /app .
+ENV ASPNETCORE_HTTP_PORTS=8080 \
+    DOTNET_gcServer=0 \
+    DOTNET_GCHeapHardLimitPercent=75
+USER $APP_UID
+EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 CMD wget -qO- http://127.0.0.1:8080/health || exit 1
+ENTRYPOINT ["dotnet", "Mirante.Api.dll"]
