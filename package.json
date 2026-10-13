@@ -8,7 +8,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "build:deploy": "ng build --configuration production",
-    "test:ci": "ng test --watch=false --browsers=ChromeHeadless"
+    "test:ci": "ng test --watch=false --browsers=ChromeHeadless",
+    "e2e": "playwright test"
   },
   "prettier": {
     "printWidth": 100,
@@ -39,6 +40,8 @@
     "@angular/build": "^20.3.39",
     "@angular/cli": "^20.3.39",
     "@angular/compiler-cli": "^20.3.0",
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.64.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/jasmine": "~5.1.0",
     "jasmine-core": "~5.9.0",

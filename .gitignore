@@ -47,3 +47,9 @@ docs/plano-reconstrucao.md
 
 # Configuração local do Claude Code
 .claude/settings.local.json
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

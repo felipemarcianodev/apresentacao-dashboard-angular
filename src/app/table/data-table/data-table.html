@@ -38,7 +38,12 @@
   </div>
 } @else {
   <!-- Tabela a partir de 640 px -->
-  <div class="hidden overflow-x-auto rounded-xl border border-line bg-surface sm:block">
+  <div
+    class="hidden overflow-x-auto rounded-xl border border-line bg-surface sm:block"
+    tabindex="0"
+    role="region"
+    [attr.aria-label]="rotulo()"
+  >
     <table class="w-full text-left text-sm">
       <caption class="sr-only">{{ rotulo() }}</caption>
       <thead class="border-b border-line bg-sunken/60 text-xs text-muted">

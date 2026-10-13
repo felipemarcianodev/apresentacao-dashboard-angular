@@ -27,7 +27,7 @@ Regra: **nenhum número inventado.** Toda tela mostra a fonte e a data de refer�
 ### Stack
 
 - **Frontend:** Angular 20 (standalone, zoneless, signals), TypeScript, Tailwind CSS v4 (CSS-first, `@theme`), Font Awesome Free empacotado localmente, fonte Inter auto-hospedada.
-- **Testes:** Karma + Jasmine (ChromeHeadless) para unidade; Playwright para E2E (a partir da fase de qualidade).
+- **Testes:** Karma + Jasmine (ChromeHeadless) para unidade; Playwright + axe-core para E2E, com as APIs gravadas em HAR.
 - **Futuro:** backend .NET 10 + EF Core 10, solução `.slnx`, testes de unidade e de integração (Testcontainers). Quando entrar, os portões da skill `executar-plano-faseado` ganham `dotnet build` e `dotnet test`.
 
 ### Ambientes
@@ -45,7 +45,19 @@ README.md                      -> apresentação pública do projeto
 .gitignore                     -> padrão do Angular CLI + plano faseado local de docs/
 .postcssrc.json                -> liga o Tailwind v4 (@tailwindcss/postcss) ao build do Angular
 angular.json                   -> projeto "mirante", prefixo mi; estilos globais: Inter, Font Awesome e src/styles.css
-package.json                   -> scripts start, build:deploy, test:ci
+package.json                   -> scripts start, build:deploy, test:ci, e2e
+playwright.config.ts           -> E2E: projetos desktop (1366 px) e celular (360 px), pt-BR, fuso de São Paulo,
+                                  sobe ng serve na porta 4300
+e2e/                           -> testes de ponta a ponta (Playwright)
+  apis.ts                      -> test com APIs gravadas (HAR), relógio fixo e falha em erro de console;
+                                  ROTAS e esperarDados
+  dados/apis.har               -> respostas reais das três APIs (só corpo e Content-Type, sem cookies)
+  gravar-apis.spec.ts          -> regrava o HAR (GRAVAR=1); depois, atualizar DATA_DA_GRAVACAO em apis.ts
+  navegacao.spec.ts            -> menu, título, tema (claro, escuro, sistema), atalho de teclado, gaveta no celular
+  paineis.spec.ts              -> IBGE (UF por lista, URL e mapa; tabela; erro e Tentar de novo), BCB, Ipeadata
+  galeria.spec.ts              -> todas as páginas de componente, slug inválido, botão de copiar
+  acessibilidade.spec.ts       -> axe WCAG 2.2 AA nos dois temas e alvo de toque de 40 px
+  responsivo.spec.ts           -> nenhuma rota rola para o lado nem vaza conteúdo da tela
 docs/                          -> documentação; plano-reconstrucao.md é local e não vai para o git
 .claude/skills/executar-plano-faseado/ -> executa o plano fase a fase com os portões
 .claude/agents/seguranca-angular.md    -> auditor de segurança Angular (angular.dev/best-practices/security)
@@ -182,7 +194,7 @@ Font Awesome Free (`@fortawesome/fontawesome-free`), empacotado no bundle (sem C
 - **Nunca ler `.value()` de um resource sem `hasValue()`**: em estado de erro ele lança exceção e derruba a tela. Use `valorDe()` de `core/dados/valor-de.ts`.
 - Símbolos de dado ausente das fontes ("-", "...", "X") viram `null` e aparecem como "sem dado", nunca como zero.
 - Cada card com dado preenche `fonte` com o órgão e a tabela de origem; o período de referência aparece junto do número.
-- Testes nunca batem na rede: `HttpTestingController` com respostas mínimas.
+- Testes nunca batem na rede: unidade com `HttpTestingController` e respostas mínimas; E2E com o HAR gravado (host fora das três APIs é bloqueado).
 
 ## Segurança
 
@@ -210,4 +222,8 @@ Font Awesome Free (`@fortawesome/fontawesome-free`), empacotado no bundle (sem C
 npm start              # servidor local
 npm run build:deploy   # build de produção (portão de toda fase)
 npm run test:ci        # testes unitários em ChromeHeadless, sem watch (portão de toda fase)
+npm run e2e            # Playwright, desktop e celular (portão das telas tocadas; suíte inteira antes de release)
+GRAVAR=1 npx playwright test gravar-apis --project=desktop   # regrava as respostas das APIs
 ```
+
+Armadilhas de layout que o E2E pega: `sr-only` direto em `<table>` não funciona (a tabela ignora a largura de 1 px e alarga a página; envolver numa `div.sr-only`), e `grid` sem `grid-cols-1` deixa um `<pre>` largo esticar a coluna. Área com `overflow-x-auto` precisa de `tabindex="0"` para rolar pelo teclado.
