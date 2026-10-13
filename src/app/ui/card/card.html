@@ -1,0 +1,22 @@
+@if (titulo()) {
+  <header class="flex flex-wrap items-start justify-between gap-3 px-5 pt-4">
+    <div class="min-w-0">
+      <h3 class="text-sm font-semibold">{{ titulo() }}</h3>
+      @if (descricao()) {
+        <p class="mt-0.5 text-xs text-muted">{{ descricao() }}</p>
+      }
+    </div>
+    <ng-content select="[acoes]" />
+  </header>
+}
+
+<div class="min-w-0 flex-1 px-5 py-4">
+  <ng-content />
+</div>
+
+@if (fonte()) {
+  <footer class="border-t border-line px-5 py-2.5 text-xs text-muted">
+    <i class="fa-solid fa-database mr-1" aria-hidden="true"></i>
+    Fonte: {{ fonte() }}
+  </footer>
+}
