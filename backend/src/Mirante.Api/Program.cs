@@ -1,4 +1,6 @@
 using Mirante.Api.Configuracao;
+using Mirante.Api.Fontes;
+using Mirante.Fontes;
 using Mirante.Api.Saude;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,12 +14,15 @@ if (!builder.Environment.IsDevelopment())
 builder.Services.AddProblemDetails();
 builder.Services.AddInfraestrutura(builder.Configuration);
 builder.Services.AddSaude();
+builder.Services.AddFontes(builder.Configuration);
+builder.Services.AddSingleton(TimeProvider.System);
 
 var app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.MapSaude();
+app.MapFontes();
 
 app.Run();
 

@@ -6,6 +6,7 @@ WORKDIR /src
 COPY backend/global.json backend/Directory.Build.props backend/Directory.Packages.props backend/Mirante.slnx ./
 COPY backend/src/Mirante.Api/Mirante.Api.csproj src/Mirante.Api/
 COPY backend/src/Mirante.Dados/Mirante.Dados.csproj src/Mirante.Dados/
+COPY backend/src/Mirante.Fontes/Mirante.Fontes.csproj src/Mirante.Fontes/
 RUN dotnet restore src/Mirante.Api/Mirante.Api.csproj
 COPY backend/src/ src/
 RUN dotnet publish src/Mirante.Api/Mirante.Api.csproj -c Release -o /app --no-restore /p:UseAppHost=false

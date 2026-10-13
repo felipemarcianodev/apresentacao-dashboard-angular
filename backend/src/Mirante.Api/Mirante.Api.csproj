@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Mirante.Dados\Mirante.Dados.csproj" />
+    <ProjectReference Include="..\Mirante.Fontes\Mirante.Fontes.csproj" />
   </ItemGroup>
 
 </Project>
