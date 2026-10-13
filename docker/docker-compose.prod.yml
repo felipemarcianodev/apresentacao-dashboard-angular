@@ -1,9 +1,19 @@
-# Produção: pluga o container na rede 'edge', onde o nginx de borda da VPS encaminha o domínio.
+# Produção: pluga o web na rede 'edge', onde o nginx de borda da VPS encaminha o domínio, e
+# exige a senha do Postgres (vem do .env que o pipeline grava a partir do variable group). Sem
+# ela, o compose nem sobe: a senha local de desenvolvimento nunca vale em produção.
 services:
   web:
     networks:
       - default
       - edge
+
+  api:
+    environment:
+      ConnectionStrings__Postgres: "Host=postgres;Database=mirante;Username=mirante;Password=${MIRANTE_DB_SENHA:?defina MIRANTE_DB_SENHA no .env}"
+
+  postgres:
+    environment:
+      POSTGRES_PASSWORD: "${MIRANTE_DB_SENHA:?defina MIRANTE_DB_SENHA no .env}"
 
 networks:
   edge:

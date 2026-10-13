@@ -1,18 +1,20 @@
-# Pipeline do Mirante (SPA estática), no molde dos demais projetos do portfólio.
+# Pipeline do Mirante (site Angular e API .NET), no molde dos demais projetos do portfólio.
 #
 # Disparo: push em release/* (ou manual). O repositório é o do GitHub (público), ligado ao
 # Azure DevOps por service connection do GitHub.
 #
 # Fluxo:
-#   1. Portões no agente: npm audit (só produção), testes unitários, build de produção.
-#   2. Build da imagem no agente e E2E (Playwright) contra o próprio container, com a CSP e os
+#   1. Portões no agente: npm audit (só produção), testes unitários, build de produção; build e
+#      testes do backend (unidade e integração com Postgres e Redis reais, via Testcontainers).
+#   2. Build das imagens no agente e E2E (Playwright) contra o container do site, com a CSP e os
 #      headers do nginx de produção.
 #   3. docker save | scp | docker load na VPS (compilar na VPS esgota a memória e derruba os
-#      outros apps do servidor) e troca simples do container.
+#      outros apps do servidor) e subida da stack (web, api, postgres e redis) esperando o health.
 #
 # Variable group "mirante-producao": SERVER_IP, SERVER_USER, SSH_PUBLICKEY,
 # SSH_KNOWN_HOSTS (linha completa da host key da VPS, ex.: saída de ssh-keyscan -t ed25519 <ip>,
-# conferida uma vez à mão), DEPLOY_PATH (/opt/mirante) e BIND_ADDR_INTERNAL (127.0.0.1).
+# conferida uma vez à mão), DEPLOY_PATH (/opt/mirante), BIND_ADDR_INTERNAL (127.0.0.1) e
+# MIRANTE_DB_SENHA (secreta: senha do Postgres, sem aspas simples nem quebra de linha).
 # Secure file: id_ed25519_kinghost (o mesmo dos outros projetos).
 #
 # O domínio chega ao container pelo nginx de borda (repositório planuz,
@@ -61,13 +63,30 @@ steps:
       npm run build:deploy
     displayName: "Testes unitários e build de produção"
 
-  - script: |
-      set -e
-      docker build --progress=plain -f docker/Dockerfile.web -t mirante-web:latest .
-    displayName: "Build da imagem"
+  - task: UseDotNet@2
+    displayName: "Instalar .NET 10"
+    inputs:
+      packageType: sdk
+      version: 10.0.x
 
   - script: |
       set -e
+      cd backend
+      dotnet build Mirante.slnx -c Release
+      # De dentro de backend/: o global.json liga o Microsoft Testing Platform. A integração
+      # usa o Docker do agente (Testcontainers).
+      dotnet test --solution Mirante.slnx -c Release --no-build
+    displayName: "Backend: build e testes (unidade e integração)"
+
+  - script: |
+      set -e
+      docker build --progress=plain -f docker/Dockerfile.web -t mirante-web:latest .
+      docker build --progress=plain -f docker/Dockerfile.api -t mirante-api:latest .
+    displayName: "Build das imagens (web e api)"
+
+  - script: |
+      set -e
+      # Só o site: o E2E responde o /api com as gravações (HAR), sem depender da API.
       docker run -d --name mirante-e2e -p 8092:80 mirante-web:latest
       npx playwright install --with-deps chromium
       for i in $(seq 1 20); do curl -fsS http://localhost:8092/health && break; sleep 1; done
@@ -97,20 +116,31 @@ steps:
       fi
       docker network ls --format '{{.Name}}' | grep -q '^edge$' || docker network create edge
       REMOTE_EOF
-      printf 'BIND_ADDR_INTERNAL=%s\n' "$(BIND_ADDR_INTERNAL)" > /tmp/mirante.env
+      # A senha vem do variable group como segredo, mapeada em env (nunca aparece no log). Vai
+      # entre aspas simples no .env do compose e dentro da cadeia de conexão do Npgsql: por
+      # isso não pode ter aspas simples nem ponto e vírgula.
+      if [ -z "$MIRANTE_DB_SENHA" ] || printf '%s' "$MIRANTE_DB_SENHA" | grep -q "[';]"; then
+        echo "##[error] MIRANTE_DB_SENHA vazia ou com aspas simples ou ponto e vírgula."
+        exit 1
+      fi
+      umask 077
+      printf "BIND_ADDR_INTERNAL=%s\nMIRANTE_DB_SENHA='%s'\n" "$(BIND_ADDR_INTERNAL)" "$MIRANTE_DB_SENHA" > /tmp/mirante.env
       scp $SSH_OPTS /tmp/mirante.env $(SERVER_USER)@$(SERVER_IP):$(DEPLOY_PATH)/docker/.env
       rm -f /tmp/mirante.env
+      ssh $SSH_OPTS $(SERVER_USER)@$(SERVER_IP) "chmod 600 '$(DEPLOY_PATH)/docker/.env'"
     displayName: "[Deploy] Bootstrap do servidor (clone, rede edge e .env)"
     condition: and(succeeded(), eq('${{ parameters.deploy }}', 'true'))
+    env:
+      MIRANTE_DB_SENHA: $(MIRANTE_DB_SENHA)
 
   - script: |
       set -e
-      docker save mirante-web:latest | gzip -1 > /tmp/mirante-images.tar.gz
+      docker save mirante-web:latest mirante-api:latest | gzip -1 > /tmp/mirante-images.tar.gz
       ls -lh /tmp/mirante-images.tar.gz
       scp -o ServerAliveInterval=30 -o ServerAliveCountMax=20 -o TCPKeepAlive=yes -o ConnectTimeout=20 \
         /tmp/mirante-images.tar.gz $(SERVER_USER)@$(SERVER_IP):/tmp/mirante-images.tar.gz
       rm -f /tmp/mirante-images.tar.gz
-    displayName: "[Deploy] Envio da imagem para a VPS"
+    displayName: "[Deploy] Envio das imagens para a VPS"
     condition: and(succeeded(), eq('${{ parameters.deploy }}', 'true'))
 
   - script: |
@@ -132,25 +162,30 @@ steps:
       git log -1 --oneline
       cd docker
       COMPOSE="docker compose -f docker-compose.yml -f docker-compose.prod.yml"
-      # A versão no ar vira :anterior (rollback manual: docker tag mirante-web:anterior mirante-web:latest).
-      if docker image inspect mirante-web:latest > /dev/null 2>&1; then
-        docker tag mirante-web:latest mirante-web:anterior
-      fi
+      # A versão no ar vira :anterior. Rollback manual:
+      #   docker tag mirante-web:anterior mirante-web:latest && docker tag mirante-api:anterior mirante-api:latest
+      #   e $COMPOSE up -d --no-build
+      for imagem in mirante-web mirante-api; do
+        if docker image inspect "$imagem:latest" > /dev/null 2>&1; then
+          docker tag "$imagem:latest" "$imagem:anterior"
+        fi
+      done
       nice -n 10 ionice -c3 sh -c 'gunzip -c /tmp/mirante-images.tar.gz | docker load'
       rm -f /tmp/mirante-images.tar.gz
-      $COMPOSE up -d --no-deps --no-build web
-      for i in $(seq 1 30); do
-        if curl -fsS http://127.0.0.1:8092/health > /dev/null; then
-          echo "mirante-web saudável."
-          # Só imagens do Mirante: a VPS é compartilhada com outros apps.
-          docker image prune -f --filter "label=app=mirante" > /dev/null
-          exit 0
-        fi
-        sleep 2
-      done
-      echo "##[error] mirante-web não respondeu em /health."
-      docker logs --tail 50 mirante-web
-      exit 1
+      # Postgres e Redis vêm por digest fixo do Docker Hub; o --wait espera o health de todos
+      # (a API aplica as migrations na subida e só fica saudável depois).
+      if ! $COMPOSE up -d --no-build --wait --wait-timeout 240; then
+        echo "##[error] A stack não ficou saudável."
+        $COMPOSE ps
+        docker logs --tail 80 mirante-api || true
+        exit 1
+      fi
+      curl -fsS http://127.0.0.1:8092/health > /dev/null
+      curl -fsS http://127.0.0.1:8093/health/ready
+      echo
+      # Só imagens do Mirante: a VPS é compartilhada com outros apps.
+      docker image prune -f --filter "label=app=mirante" > /dev/null
+      $COMPOSE ps
       REMOTE_EOF
-    displayName: "[Deploy] Carregar a imagem e trocar o container"
+    displayName: "[Deploy] Carregar as imagens e subir a stack"
     condition: and(succeeded(), eq('${{ parameters.deploy }}', 'true'))

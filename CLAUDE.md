@@ -8,7 +8,7 @@ Responda em português brasileiro, salvo quando for pedido outro idioma. Obedeç
 
 ## Sobre o projeto
 
-Mirante é um **kit de dashboard** construído em Angular 20 e Tailwind CSS v4 o mais puro possível, com três painéis sobre dados abertos do Brasil: **IBGE** (primeiro), **Banco Central** (API SGS) e **Ipeadata**. Faz parte do portfólio de Felipe Marciano e é o primeiro projeto dele sem login e sem backend, com dados reais abertos a qualquer visitante.
+Mirante é um **kit de dashboard** construído em Angular 20 e Tailwind CSS v4 o mais puro possível, com três painéis sobre dados abertos do Brasil: **IBGE** (primeiro), **Banco Central** (API SGS) e **Ipeadata**. Faz parte do portfólio de Felipe Marciano e é o primeiro projeto dele sem login, com dados reais abertos a qualquer visitante. Desde a versão 1.1, os painéis consultam uma API .NET própria (cache, reserva e lista permitida) em vez de chamar as fontes direto do navegador.
 
 A **galeria `/ui`** é a documentação do kit, no estilo do angular.dev: cada componente tem descrição, exemplo vivo, tabela de API, trecho de uso e notas de acessibilidade. O repositório é feito para outros desenvolvedores baixarem e reutilizarem os componentes.
 
@@ -28,7 +28,7 @@ Regra: **nenhum número inventado.** Toda tela mostra a fonte e a data de refer�
 
 - **Frontend:** Angular 20 (standalone, zoneless, signals), TypeScript, Tailwind CSS v4 (CSS-first, `@theme`), Font Awesome Free empacotado localmente, fonte Inter auto-hospedada.
 - **Testes:** Karma + Jasmine (ChromeHeadless) para unidade; Playwright + axe-core para E2E, com as APIs gravadas em HAR.
-- **Backend (em construção, plano local `docs/plano-evolucao.md`):** .NET 10, minimal APIs, solução `backend/Mirante.slnx`, EF Core 10 + PostgreSQL (reserva da última resposta boa), Redis (cache), xUnit v3 no Microsoft Testing Platform, Testcontainers nos testes de integração. Os portões da skill `executar-plano-faseado` incluem `dotnet build` e `dotnet test` da solução.
+- **Backend (plano local `docs/plano-evolucao.md`):** .NET 10, minimal APIs, solução `backend/Mirante.slnx`, EF Core 10 + PostgreSQL (reserva da última resposta boa), Redis (cache), xUnit v3 no Microsoft Testing Platform, Testcontainers nos testes de integração. Os portões da skill `executar-plano-faseado` incluem `dotnet build` e `dotnet test` da solução.
 
 ### Ambientes
 
@@ -55,8 +55,10 @@ angular.json                   -> projeto "mirante", prefixo mi; estilos globais
                                   ng serve com proxy.conf.json
 proxy.conf.json                -> npm start encaminha /api para a API local (localhost:5110)
 VERSION                        -> versão semântica do Mirante; o build a embute no rodapé da barra lateral
-azure-pipelines.yml            -> release/*: npm audit, unitários, build, imagem, E2E contra o container, envio
-                                  da imagem por scp e troca do container na VPS (variable group mirante-producao)
+azure-pipelines.yml            -> release/*: npm audit, unitários, build, build e testes do backend (Testcontainers),
+                                  imagens web e api, E2E contra o container do site, envio das imagens por scp e
+                                  subida da stack com --wait (variable group mirante-producao, com MIRANTE_DB_SENHA
+                                  secreta gravada no .env do servidor)
 backend/                       -> API .NET 10 (solução Mirante.slnx)
   global.json                  -> SDK 10 e executor de testes Microsoft Testing Platform
   dotnet-tools.json            -> dotnet-ef local (dotnet tool restore)
@@ -96,8 +98,9 @@ docker/
   docker-compose.yml           -> web (127.0.0.1:8092, 64 MB), api (127.0.0.1:8093, 128 MB), postgres (192 MB,
                                   volume) e redis (64 MB, sem persistência, LRU); redes site (web e api) e interna
                                   (api, postgres e redis, sem internet); log com teto; só leitura e capacidades
-                                  mínimas. O deploy atual troca só o web
-  docker-compose.prod.yml      -> pluga o web na rede externa edge da VPS
+                                  mínimas
+  docker-compose.prod.yml      -> pluga o web na rede externa edge da VPS e exige MIRANTE_DB_SENHA (sem ela, o
+                                  compose não sobe)
   borda/site-mirante.conf      -> cópia de referência do server block do nginx de borda (vale o do repo planuz);
                                   já com connect-src 'self', que a borda só adota depois que a API estiver no ar
   setup-letsencrypt-mirante.sh -> emissão inicial do certificado na VPS (volumes do planuz-certbot)
