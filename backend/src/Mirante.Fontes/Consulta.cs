@@ -3,8 +3,12 @@ namespace Mirante.Fontes;
 /// <summary>Consulta já validada contra a lista permitida.</summary>
 /// <param name="Fonte">De qual fonte é.</param>
 /// <param name="Caminho">Caminho relativo ao endereço base da fonte, montado só com valores validados.</param>
-/// <param name="Chave">Identificação estável da consulta, usada no cache e na reserva.</param>
-public sealed record Consulta(Fonte Fonte, string Caminho, string Chave);
+/// <param name="Chave">Identificação estável da consulta, usada no cache.</param>
+/// <param name="ChaveDaReserva">
+/// Identificação na reserva: sem a data do dia, para a reserva ter uma linha por série e prazo,
+/// sempre a mais recente, em vez de uma linha nova por dia.
+/// </param>
+public sealed record Consulta(Fonte Fonte, string Caminho, string Chave, string ChaveDaReserva);
 
 /// <summary>Por que uma consulta foi recusada, sem chegar à fonte.</summary>
 public enum MotivoDaRecusa

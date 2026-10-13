@@ -25,10 +25,12 @@ public static partial class ConsultaIpea
         }
 
         var caminho = $"ValoresSerie(SERCODIGO='{codigo}')?$select={Selecao}";
-        return Validacao.Aceita(new Consulta(Fonte.Ipea, caminho, $"ipea:{codigo}"));
+        var chave = $"ipea:{codigo}";
+        return Validacao.Aceita(new Consulta(Fonte.Ipea, caminho, chave, chave));
     }
 
     // Código só com maiúsculas, dígitos e sublinhado: nada de aspas, que fechariam o literal do OData.
-    [GeneratedRegex("^ValoresSerie\\(SERCODIGO='(?<codigo>[A-Z0-9_]{1,40})'\\)$", RegexOptions.CultureInvariant)]
+    // \z e não $: o $ aceitaria uma quebra de linha no fim.
+    [GeneratedRegex("^ValoresSerie\\(SERCODIGO='(?<codigo>[A-Z0-9_]{1,40})'\\)\\z", RegexOptions.CultureInvariant)]
     private static partial Regex Recurso();
 }

@@ -11,4 +11,8 @@
     <ProjectReference Include="..\Mirante.Fontes\Mirante.Fontes.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Mirante.Testes.Unidade" />
+  </ItemGroup>
+
 </Project>

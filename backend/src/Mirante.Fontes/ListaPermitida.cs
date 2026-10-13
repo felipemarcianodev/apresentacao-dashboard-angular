@@ -21,8 +21,12 @@ internal static class ListaPermitida
     /// <summary>Séries do SGS: Selic, dólar, euro, crédito, inadimplência e IBC-Br.</summary>
     public static readonly IReadOnlySet<int> Bcb = new HashSet<int> { 432, 1, 21619, 20539, 21082, 24364 };
 
-    /// <summary>O SGS recusa janela maior que 10 anos em série diária.</summary>
-    public const int BcbMaximoDeAnos = 10;
+    /// <summary>
+    /// Prazos do seletor 1A, 2A e 5A do painel. A janela começa no primeiro dia do mês, tantos
+    /// anos antes do fim (inicioDoPeriodo em sgs.ts): qualquer outra janela é recusada, o que
+    /// mantém pequeno o número de consultas diferentes (e de chaves no cache).
+    /// </summary>
+    public static readonly IReadOnlyList<int> BcbPrazosEmAnos = [1, 2, 5];
 
     /// <summary>Séries do Ipeadata: crescimento do PIB, PIB per capita, salário mínimo real e Gini.</summary>
     public static readonly IReadOnlySet<string> Ipea = new HashSet<string>(StringComparer.Ordinal)

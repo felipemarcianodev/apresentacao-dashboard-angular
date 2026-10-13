@@ -65,11 +65,15 @@ backend/                       -> API .NET 10 (solução Mirante.slnx)
                                   de erro no corpo), Fontes/ (FontesEndpoints: /api/ibge, /api/bcb e /api/ipea com
                                   os mesmos caminhos das fontes; 404 fora da lista, 400 malformada, 502 fonte fora;
                                   X-Mirante-Origem cache, fonte ou reserva) e ConsultasComCache (memória, Redis,
-                                  fonte e, com a fonte fora, a reserva; validade por fonte em OpcoesDoCache)
+                                  fonte e, com a fonte fora, a reserva; validade por fonte em OpcoesDoCache),
+                                  Protecao/ (IP real só de proxies nas redes privadas, rate limiter por IP em /api/,
+                                  IPv6 por bloco /64, com 429 e Retry-After, nosniff, sem corpo de requisição)
   src/Mirante.Fontes/          -> ListaPermitida (o que os painéis consultam, espelho de indicadores.ts e series.ts:
-                                  série nova entra nos dois), ConsultaIbge, ConsultaBcb e ConsultaIpea (validação e
-                                  forma canônica), ClienteDasFontes (JSON como veio, recusa HTML), FontesExtensions
-                                  (cliente por fonte com resiliência; Ipeadata com prazo maior)
+                                  série nova entra nos dois), ConsultaIbge, ConsultaBcb (só as janelas 1A, 2A e 5A
+                                  do painel) e ConsultaIpea (validação, forma canônica e chave da reserva sem a data),
+                                  ClienteDasFontes (JSON como veio; recusa HTML, lista vazia e prazo esgotado),
+                                  FontesExtensions (cliente por fonte com resiliência e até 8 chamadas simultâneas;
+                                  Ipeadata com prazo maior)
   src/Mirante.Dados/           -> MiranteDb (EF Core 10, Npgsql), Reserva e Reservas (última resposta boa por
                                   consulta, coluna json para guardar o texto como veio, gravação com ON CONFLICT
                                   que nunca troca nova por antiga), Migrations/ (geradas pelo dotnet ef)
@@ -87,8 +91,9 @@ docker/
   nginx/seguranca.conf         -> CSP estrita (sem unsafe-inline, Trusted Types, connect-src só nas 3 APIs) e
                                   headers; incluído em cada location
   docker-compose.yml           -> web (127.0.0.1:8092, 64 MB), api (127.0.0.1:8093, 128 MB), postgres (192 MB,
-                                  volume) e redis (64 MB, sem persistência, LRU); só leitura e sem capacidades
-                                  extras onde dá. O deploy atual troca só o web
+                                  volume) e redis (64 MB, sem persistência, LRU); redes site (web e api) e interna
+                                  (api, postgres e redis, sem internet); log com teto; só leitura e capacidades
+                                  mínimas. O deploy atual troca só o web
   docker-compose.prod.yml      -> pluga o web na rede externa edge da VPS
   borda/site-mirante.conf      -> cópia de referência do server block do nginx de borda (vale o do repo planuz)
   setup-letsencrypt-mirante.sh -> emissão inicial do certificado na VPS (volumes do planuz-certbot)

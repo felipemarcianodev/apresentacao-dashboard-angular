@@ -5,6 +5,8 @@ namespace Mirante.Fontes;
 /// <summary>
 /// Séries do SGS do Banco Central:
 /// <c>bcdata.sgs.{codigo}/dados?formato=json&amp;dataInicial=dd/MM/aaaa&amp;dataFinal=dd/MM/aaaa</c>.
+/// Só as janelas que o painel pede: fim no dia de hoje e início no primeiro dia do mês, 1, 2 ou
+/// 5 anos antes.
 /// </summary>
 public static class ConsultaBcb
 {
@@ -30,18 +32,28 @@ public static class ConsultaBcb
         {
             return Validacao.Recusada(MotivoDaRecusa.Malformada, "Datas devem estar no formato dd/MM/aaaa.");
         }
-        // Margem de dois dias no fim: o navegador está no fuso de quem acessa, a API em UTC.
-        if (inicio > fim || fim > hoje.AddDays(2) || inicio < fim.AddYears(-ListaPermitida.BcbMaximoDeAnos))
+        // O fim é o "hoje" do navegador, que está no fuso de quem acessa (a API está em UTC):
+        // margem de alguns dias para os dois lados, e nada além disso.
+        if (fim < hoje.AddDays(-3) || fim > hoje.AddDays(2))
+        {
+            return Validacao.Recusada(MotivoDaRecusa.Malformada, "A data final deve ser a de hoje.");
+        }
+        var anos = ListaPermitida.BcbPrazosEmAnos.FirstOrDefault(a => inicio == new DateOnly(fim.Year - a, fim.Month, 1));
+        if (anos == 0)
         {
             return Validacao.Recusada(
                 MotivoDaRecusa.Malformada,
-                $"Janela inválida: início antes do fim, fim até hoje e no máximo {ListaPermitida.BcbMaximoDeAnos} anos.");
+                "A data inicial deve ser o primeiro dia do mês, 1, 2 ou 5 anos antes da final.");
         }
 
         var caminho = string.Create(
             CultureInfo.InvariantCulture,
             $"{Prefixo}{codigo}/dados?formato=json&dataInicial={Escrever(inicio)}&dataFinal={Escrever(fim)}");
-        return Validacao.Aceita(new Consulta(Fonte.Bcb, caminho, $"bcb:{caminho}"));
+        return Validacao.Aceita(new Consulta(
+            Fonte.Bcb,
+            caminho,
+            $"bcb:{caminho}",
+            string.Create(CultureInfo.InvariantCulture, $"bcb:{codigo}:{anos}a")));
     }
 
     private static bool LerData(string? texto, out DateOnly data) =>

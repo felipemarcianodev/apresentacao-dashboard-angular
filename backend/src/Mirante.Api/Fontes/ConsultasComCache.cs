@@ -54,6 +54,7 @@ public sealed partial class ConsultasComCache(
     {
         ArgumentNullException.ThrowIfNull(consulta);
         var chave = opcoes.Value.Prefixo + consulta.Chave;
+        var chaveDaReserva = opcoes.Value.Prefixo + consulta.ChaveDaReserva;
         var validade = opcoes.Value.Validade[consulta.Fonte];
         var veioDaFonte = false;
 
@@ -68,7 +69,7 @@ public sealed partial class ConsultasComCache(
                     // Em segundos: é o que importa para quem lê, e o Postgres guarda até o microssegundo.
                     var agora = relogio.GetUtcNow();
                     var obtidoEm = agora.AddTicks(-(agora.Ticks % TimeSpan.TicksPerSecond));
-                    await GravarReservaAsync(chave, consulta.Fonte, json, obtidoEm, ct);
+                    await GravarReservaAsync(chaveDaReserva, consulta.Fonte, json, obtidoEm, ct);
                     return new EntradaDeCache(json, obtidoEm);
                 },
                 new HybridCacheEntryOptions
@@ -82,7 +83,7 @@ public sealed partial class ConsultasComCache(
         }
         catch (FonteIndisponivelException ex)
         {
-            var reserva = await LerReservaAsync(chave, cancelamento);
+            var reserva = await LerReservaAsync(chaveDaReserva, cancelamento);
             if (reserva is null)
             {
                 throw;
