@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/Mirante.Api/Mirante.Api.csproj" />
     <Project Path="src/Mirante.Dados/Mirante.Dados.csproj" />
+    <Project Path="src/Mirante.Fontes/Mirante.Fontes.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Mirante.Testes.Integracao/Mirante.Testes.Integracao.csproj" />

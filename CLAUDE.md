@@ -61,10 +61,16 @@ backend/                       -> API .NET 10 (solução Mirante.slnx)
   Directory.Packages.props     -> versões de pacote centralizadas
   src/Mirante.Api/             -> minimal API: Program, Configuracao/ (Conexoes validadas na subida, Postgres
                                   e Redis), Saude/ (/health vivo, /health/ready com Postgres e Redis, sem detalhe
-                                  de erro no corpo)
+                                  de erro no corpo), Fontes/ (FontesEndpoints: /api/ibge, /api/bcb e /api/ipea com
+                                  os mesmos caminhos das fontes; 404 fora da lista, 400 malformada, 502 fonte fora)
+  src/Mirante.Fontes/          -> ListaPermitida (o que os painéis consultam, espelho de indicadores.ts e series.ts:
+                                  série nova entra nos dois), ConsultaIbge, ConsultaBcb e ConsultaIpea (validação e
+                                  forma canônica), ClienteDasFontes (JSON como veio, recusa HTML), FontesExtensions
+                                  (cliente por fonte com resiliência; Ipeadata com prazo maior)
   src/Mirante.Dados/           -> MiranteDb (EF Core 10, Npgsql): reserva das séries
   tests/Mirante.Testes.Unidade/    -> xUnit v3, sem rede nem banco
-  tests/Mirante.Testes.Integracao/ -> API real (WebApplicationFactory) com Postgres e Redis em Testcontainers
+  tests/Mirante.Testes.Integracao/ -> API real (WebApplicationFactory) com Postgres e Redis em Testcontainers;
+                                  FontesSimuladas responde no lugar das três fontes (teste nunca bate na rede)
 docker/
   Dockerfile.api               -> build no SDK 10 alpine, execução no aspnet 10 alpine sem root, digests fixos
   Dockerfile.api.dockerignore  -> leva só o backend, sem bin, obj e testes
