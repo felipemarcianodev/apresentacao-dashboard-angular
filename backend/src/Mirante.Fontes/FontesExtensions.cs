@@ -43,6 +43,10 @@ public static class FontesExtensions
                 // O disjuntor precisa observar uma janela de pelo menos o dobro do prazo da tentativa.
                 opcoes.CircuitBreaker.SamplingDuration = prazoPorTentativa * 2;
                 opcoes.Retry.MaxRetryAttempts = 2;
+                // Poucas chamadas simultâneas por fonte: o resto espera numa fila curta, e o que
+                // passar dela é recusado (vira reserva ou 502) em vez de empilhar conexões.
+                opcoes.RateLimiter.DefaultRateLimiterOptions.PermitLimit = 8;
+                opcoes.RateLimiter.DefaultRateLimiterOptions.QueueLimit = 32;
             });
     }
 }

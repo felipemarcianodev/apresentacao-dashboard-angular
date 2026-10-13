@@ -1,8 +1,9 @@
 using System.Text.Json;
+using Polly;
 
 namespace Mirante.Fontes;
 
-/// <summary>A fonte não respondeu, respondeu com erro ou com algo que não é JSON.</summary>
+/// <summary>A fonte não respondeu, respondeu com erro ou com algo que não é o dado esperado.</summary>
 public sealed class FonteIndisponivelException(Fonte fonte, string motivo, Exception? causa = null)
     : Exception($"{fonte}: {motivo}", causa)
 {
@@ -36,6 +37,11 @@ public sealed class ClienteDasFontes(IHttpClientFactory fabrica)
         {
             throw new FonteIndisponivelException(consulta.Fonte, "falha de rede", ex);
         }
+        // Prazo esgotado, disjuntor aberto ou fila cheia na resiliência (Polly).
+        catch (ExecutionRejectedException ex)
+        {
+            throw new FonteIndisponivelException(consulta.Fonte, ex.GetType().Name, ex);
+        }
         catch (TimeoutException ex)
         {
             throw new FonteIndisponivelException(consulta.Fonte, "tempo esgotado", ex);
@@ -45,20 +51,26 @@ public sealed class ClienteDasFontes(IHttpClientFactory fabrica)
             throw new FonteIndisponivelException(consulta.Fonte, "tempo esgotado", ex);
         }
 
-        // Página de manutenção em HTML com status 200 acontece; isso não pode chegar ao painel.
-        if (!EhJson(corpo))
+        // Página de manutenção, ou erro em JSON com status 200: isso não pode ir para o cache
+        // nem substituir a última resposta boa da reserva.
+        if (!TemOFormatoDaFonte(consulta.Fonte, corpo))
         {
-            throw new FonteIndisponivelException(consulta.Fonte, "resposta não é JSON");
+            throw new FonteIndisponivelException(consulta.Fonte, "resposta fora do formato esperado");
         }
         return corpo;
     }
 
-    private static bool EhJson(string corpo)
+    /// <summary>IBGE e SGS devolvem uma lista com dados; o Ipeadata, um objeto com a lista em <c>value</c>.</summary>
+    internal static bool TemOFormatoDaFonte(Fonte fonte, string corpo)
     {
         try
         {
-            using var _ = JsonDocument.Parse(corpo);
-            return true;
+            using var documento = JsonDocument.Parse(corpo);
+            var raiz = documento.RootElement;
+            var lista = fonte == Fonte.Ipea
+                ? raiz.ValueKind == JsonValueKind.Object && raiz.TryGetProperty("value", out var valores) ? valores : default
+                : raiz;
+            return lista.ValueKind == JsonValueKind.Array && lista.GetArrayLength() > 0;
         }
         catch (JsonException)
         {

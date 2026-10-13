@@ -1,4 +1,5 @@
 using System.Globalization;
+using Mirante.Api.Protecao;
 using Mirante.Fontes;
 
 namespace Mirante.Api.Fontes;
@@ -11,7 +12,7 @@ public static class FontesEndpoints
 {
     public static IEndpointRouteBuilder MapFontes(this IEndpointRouteBuilder app)
     {
-        var api = app.MapGroup("/api");
+        var api = app.MapGroup("/api").RequireRateLimiting(ProtecaoExtensions.PoliticaDaApi);
 
         api.MapGet("/ibge/agregados/{agregado:int}/periodos/{periodos}/variaveis/{variaveis}",
             (int agregado, string periodos, string variaveis, string? localidades, ConsultasComCache consultas, HttpContext contexto) =>

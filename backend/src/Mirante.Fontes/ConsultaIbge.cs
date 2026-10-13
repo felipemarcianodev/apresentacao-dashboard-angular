@@ -56,6 +56,7 @@ public static class ConsultaIbge
         var caminho = string.Create(
             CultureInfo.InvariantCulture,
             $"{agregado}/periodos/{ultimos}/variaveis/{string.Join('|', ids)}?localidades={string.Join('|', niveis.Select(n => n + TodasDoNivel))}");
-        return Validacao.Aceita(new Consulta(Fonte.Ibge, caminho, $"ibge:{caminho}"));
+        var chave = $"ibge:{caminho}";
+        return Validacao.Aceita(new Consulta(Fonte.Ibge, caminho, chave, chave));
     }
 }

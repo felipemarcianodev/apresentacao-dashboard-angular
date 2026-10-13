@@ -6,7 +6,17 @@ namespace Mirante.Testes.Integracao;
 
 public sealed class CacheTests(Infraestrutura infra)
 {
-    private const string Selic = "/api/bcb/serie/bcdata.sgs.432/dados?formato=json&dataInicial=01/01/2025&dataFinal=01/02/2025";
+    /// <summary>A janela de 2 anos que o painel pede hoje (fim hoje, início no primeiro dia do mês).</summary>
+    private static readonly string Selic = CaminhoDaSelic(DateOnly.FromDateTime(DateTime.UtcNow));
+
+    private static string CaminhoDaSelic(DateOnly hoje)
+    {
+        var inicio = new DateOnly(hoje.Year - 2, hoje.Month, 1);
+        return string.Create(
+            System.Globalization.CultureInfo.InvariantCulture,
+            $"/api/bcb/serie/bcdata.sgs.432/dados?formato=json&dataInicial={inicio:dd/MM/yyyy}&dataFinal={hoje:dd/MM/yyyy}");
+    }
+
     private const string Json = """[{"data":"02/01/2025","valor":"12.25"}]""";
 
     private static CancellationToken Cancelamento => TestContext.Current.CancellationToken;
@@ -92,6 +102,45 @@ public sealed class CacheTests(Infraestrutura infra)
         Assert.Equal(obtidoEm, Assert.Single(reserva.Headers.GetValues("X-Mirante-Obtido-Em")));
         Assert.Equal("no-store", reserva.Headers.CacheControl?.ToString());
         Assert.Equal(Json, await reserva.Content.ReadAsStringAsync(Cancelamento));
+    }
+
+    [Fact]
+    public async Task Fonte_lenta_alem_do_prazo_tambem_usa_a_reserva()
+    {
+        var prefixo = $"teste-{Guid.NewGuid():N}:";
+        await using (var antes = new ApiDeTeste(infra.Postgres, infra.Redis, FonteNoAr(), prefixo))
+        {
+            await antes.CreateClient().GetAsync(Selic, Cancelamento);
+        }
+
+        var lenta = FonteNoAr();
+        lenta.Atraso = TimeSpan.FromSeconds(5);
+        await using var depois = new ApiDeTeste(infra.Postgres, $"{infra.Redis},defaultDatabase=2", lenta, prefixo)
+        {
+            PrazoDaFonte = TimeSpan.FromMilliseconds(200),
+        };
+        var resposta = await depois.CreateClient().GetAsync(Selic, Cancelamento);
+
+        Assert.Equal(HttpStatusCode.OK, resposta.StatusCode);
+        Assert.Equal("reserva", Origem(resposta));
+    }
+
+    [Fact]
+    public async Task Resposta_vazia_da_fonte_nao_substitui_a_reserva()
+    {
+        var prefixo = $"teste-{Guid.NewGuid():N}:";
+        await using (var antes = new ApiDeTeste(infra.Postgres, infra.Redis, FonteNoAr(), prefixo))
+        {
+            await antes.CreateClient().GetAsync(Selic, Cancelamento);
+        }
+
+        // Status 200 com uma lista vazia: tratado como fonte fora, e a reserva boa é servida.
+        var vazia = Simulador(() => FontesSimuladas.Json("[]"));
+        await using var depois = new ApiDeTeste(infra.Postgres, $"{infra.Redis},defaultDatabase=3", vazia, prefixo);
+        var resposta = await depois.CreateClient().GetAsync(Selic, Cancelamento);
+
+        Assert.Equal("reserva", Origem(resposta));
+        Assert.Equal(Json, await resposta.Content.ReadAsStringAsync(Cancelamento));
     }
 
     [Fact]

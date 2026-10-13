@@ -1,17 +1,18 @@
 using Mirante.Api.Configuracao;
 using Mirante.Api.Fontes;
+using Mirante.Api.Protecao;
 using Mirante.Api.Saude;
 using Mirante.Fontes;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.WebHost.ConfigureKestrel(kestrel => kestrel.AddServerHeader = false);
 if (!builder.Environment.IsDevelopment())
 {
     builder.Logging.ClearProviders().AddJsonConsole();
 }
 
 builder.Services.AddProblemDetails();
+builder.Services.AddProtecao(builder.Configuration);
 builder.Services.AddInfraestrutura(builder.Configuration);
 builder.Services.AddSaude();
 builder.Services.AddFontes(builder.Configuration);
@@ -22,6 +23,7 @@ builder.Services.AddSingleton<ConsultasComCache>();
 
 var app = builder.Build();
 
+app.UseProtecao();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.MapSaude();

@@ -11,7 +11,7 @@ namespace Mirante.Testes.Integracao;
 public sealed class FontesSimuladas
 {
     private readonly ConcurrentQueue<(Fonte Fonte, Uri Endereco)> chamadas = new();
-    private Func<Fonte, HttpResponseMessage> responder = _ => Json("[]");
+    private Func<Fonte, HttpResponseMessage> responder = _ => Json("""[{"simulado":true}]""");
 
     public IReadOnlyList<(Fonte Fonte, Uri Endereco)> Chamadas => [.. chamadas];
 

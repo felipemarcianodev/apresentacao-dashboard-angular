@@ -2,6 +2,20 @@
 # docker-compose.prod.yml. O deploy atual troca só o web; a API entra em produção numa fase própria.
 name: mirante
 
+# Log do Docker com teto: a VPS é compartilhada e o disco não pode encher de log.
+x-log: &log
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+# Redes separadas: o web só alcança a API (rede site); Postgres e Redis ficam na rede interna,
+# que só a API enxerga e que não sai para a internet.
+networks:
+  site:
+  interna:
+    internal: true
+
 services:
   web:
     image: mirante-web:latest
@@ -9,6 +23,8 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.web
     container_name: mirante-web
+    networks: [site]
+    logging: *log
     ports:
       # Só localhost por padrão: sem a borda na frente, o site sairia sem TLS nem HSTS.
       - "${BIND_ADDR_INTERNAL:-127.0.0.1}:8092:80"
@@ -32,6 +48,10 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.api
     container_name: mirante-api
+    # Na rede site (o web chega nela) e na interna (Postgres e Redis). A rede default dá a saída
+    # para a internet que as fontes oficiais exigem.
+    networks: [default, site, interna]
+    logging: *log
     ports:
       # Só para desenvolvimento local; em produção o acesso é pela rede interna, via web.
       - "127.0.0.1:8093:8080"
@@ -56,6 +76,8 @@ services:
   postgres:
     image: postgres:17-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24
     container_name: mirante-postgres
+    networks: [interna]
+    logging: *log
     environment:
       POSTGRES_DB: mirante
       POSTGRES_USER: mirante
@@ -71,12 +93,17 @@ services:
     restart: unless-stopped
     mem_limit: 192m
     cpus: 0.5
+    # O entrypoint do Postgres troca o dono dos dados e desce para o usuário postgres: só isso.
+    cap_drop: [ALL]
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, SETGID, SETUID]
     security_opt:
       - no-new-privileges:true
 
   redis:
     image: redis:8-alpine@sha256:3811787313eba226a2ef38658c6ccb91cd5e110edc89c37767de373120a0e5a0
     container_name: mirante-redis
+    networks: [interna]
+    logging: *log
     # É cache: sem persistência em disco e com teto de memória, descartando o menos usado.
     command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "48mb", "--maxmemory-policy", "allkeys-lru"]
     healthcheck:
