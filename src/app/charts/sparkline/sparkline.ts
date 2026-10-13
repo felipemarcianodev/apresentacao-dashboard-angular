@@ -31,13 +31,13 @@ export class Sparkline {
   readonly valores = input.required<readonly (number | null)[]>();
   readonly altura = input(36, { transform: numberAttribute });
 
-  protected readonly largura = larguraDoHost(120);
+  protected readonly largura = larguraDoHost();
 
   protected readonly desenho = computed(() => {
     const pontos = this.valores()
       .map((valor, indice) => ({ valor, indice }))
       .filter((p): p is { valor: number; indice: number } => p.valor !== null && Number.isFinite(p.valor));
-    if (pontos.length < 2) {
+    if (pontos.length < 2 || this.largura() === 0) {
       return null;
     }
     const folga = 3;

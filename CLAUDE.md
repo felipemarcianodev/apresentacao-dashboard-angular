@@ -20,7 +20,7 @@ Construído em par com o Claude (Claude Code), fase a fase, a partir de um plano
 |---|---|---|
 | IBGE (agregados v3) | `https://servicodados.ibge.gov.br/api/v3/agregados` | População, PIB, desocupação, IPCA, recortes por UF |
 | Banco Central (SGS) | `https://api.bcb.gov.br/dados/serie/bcdata.sgs.{codigo}/dados?formato=json` | Selic, câmbio, crédito |
-| Ipeadata (OData v4) | `http://www.ipeadata.gov.br/api/odata4/` | Séries históricas consolidadas |
+| Ipeadata (OData v4) | `https://www.ipeadata.gov.br/api/odata4/` | Séries históricas consolidadas |
 
 Regra: **nenhum número inventado.** Toda tela mostra a fonte e a data de referência do dado. Dado ilustrativo na galeria é marcado como exemplo.
 
@@ -62,22 +62,29 @@ src/
   app/
     app.ts                     -> componente raiz (mi-root), só monta o shell
     app.config.ts              -> providers: zoneless, router com withComponentInputBinding, HttpClient com fetch
-    app.routes.ts              -> rotas lazy /ibge (IbgePainel), /bcb (BcbPainel), /ipea, /ui; data.titulo vira o título da topbar
+    app.routes.ts              -> rotas lazy /ibge (IbgePainel), /bcb (BcbPainel), /ipea (IpeaPainel), /ui; data.titulo vira o título da topbar
     core/formato/formato.ts    -> formatar(valor, formato) pt-BR (numero, decimal, percentual em pontos, moeda,
-                                  moeda-compacta, compacto) e formatarVariacao com sinal; SEM_DADO para nulo
+                                  moeda-compacta, dolar, compacto) e formatarVariacao com sinal; SEM_DADO para nulo
     core/brasil/ufs.ts         -> UFS: 27 UFs com código IBGE, sigla, nome e região; ufPorCodigo, ufPorSigla
     core/dados/valor-de.ts     -> valorDe(resource): valor ou undefined, sem lançar no estado de erro
     core/theme/theme-preference.ts -> ThemePreference: signal tema (light, dark, system), classe .dark, localStorage
     layout/shell/              -> Shell: sidebar (drawer no mobile), topbar com título da rota, router-outlet
       navegacao.ts             -> NAVEGACAO: grupos Painéis e Kit com rota, rótulo e ícone Font Awesome
     layout/theme-toggle/       -> ThemeToggle: radiogroup claro, escuro e sistema
-    dashboards/em-breve/       -> EmBreve: página provisória do painel ainda não construído (Ipeadata)
     dashboards/bcb/            -> painel do Banco Central em /bcb
       sgs.ts                   -> API do SGS: urlSerie por janela de datas (diária exige, até 10 anos), lerSerie
                                   (descarta datas futuras da meta Selic), mensalizar (fechamento), rotuloMes/Dia
       series.ts                -> SERIES_BCB: Selic 432, dólar 1, euro 21619, crédito 20539 (milhões),
                                   inadimplência 21082, IBC-Br 24364; resumirSerie (variação contra 12 meses antes)
       bcb-painel.ts            -> BcbPainel: período 1A/2A/5A refaz as consultas, KPIs, 4 gráficos, tabela mensal
+    dashboards/ipea/           -> painel do Ipeadata em /ipea
+      ipeadata.ts              -> API OData v4: urlValores (código validado por regex, vai entre aspas no OData),
+                                  lerValores (descarta item malformado), anualizar (último valor de cada ano).
+                                  O comentário da série nos metadados é HTML: não usar
+      series.ts                -> SERIES_IPEA: crescimento do PIB, PIB per capita em US$ (mil), salário mínimo
+                                  real (mensal), Gini; resumirIpea (variação contra o ano anterior)
+      ipea-painel.ts           -> IpeaPainel: período Desde 1995 / 1980 / Tudo recorta no navegador (a API
+                                  devolve a série inteira), KPIs, 4 gráficos e tabela anual
     dashboards/ibge/           -> painel do IBGE em /ibge (?uf=RJ filtra pela UF)
       agregados.ts             -> API de agregados v3: urlAgregado, lerValor (símbolos do IBGE viram null),
                                   lerAgregado (variável -> localidade -> pontos), rotuloPeriodo, ultimoValido
@@ -95,7 +102,8 @@ src/
       error-state/             -> ErrorState (mi-error-state): role alert e output tentarDeNovo
     charts/                    -> gráficos do kit (SVG próprio ou HTML), cada um com spec e doc
       escala.ts                -> funções puras: escalaLinear, passoAgradavel, eixoAgradavel, indicesDeRotulo
-      largura-do-host.ts       -> larguraDoHost(): signal com a largura do elemento (ResizeObserver)
+      largura-do-host.ts       -> larguraDoHost(): largura do elemento, começa em 0 e é medida após a primeira
+                                  renderização (ResizeObserver depois); gráfico só desenha com largura > 0
       sparkline/               -> Sparkline (mi-sparkline): tendência sem eixos, cor por currentColor
       kpi-card/                -> KpiCard (mi-kpi-card): valor, variação com sentidoBom, sparkline, referência
       line-chart/              -> LineChart (mi-line-chart): séries, eixo redondo, tooltip, setas, tabela sr-only

@@ -9,72 +9,77 @@
   </ul>
 }
 
-<svg
-  [attr.width]="largura()"
-  [attr.height]="altura()"
-  class="block touch-pan-y overflow-visible focus-visible:outline-offset-4"
-  role="img"
-  tabindex="0"
-  [attr.aria-label]="rotulo() + '. Use as setas para ler cada ponto.'"
-  (pointermove)="acompanharPonteiro($event)"
-  (pointerleave)="limparDestaque()"
-  (focus)="focarUltimoPonto()"
-  (blur)="limparDestaque()"
-  (keydown)="navegarComTeclado($event)"
->
-  <g class="text-grid" aria-hidden="true">
-    @for (marca of marcasY(); track marca.texto) {
-      <line [attr.x1]="area().x0" [attr.x2]="area().x1" [attr.y1]="marca.y" [attr.y2]="marca.y" stroke="currentColor" />
-    }
-  </g>
-  <g class="fill-muted text-[11px] tabular-nums" aria-hidden="true">
-    @for (marca of marcasY(); track marca.texto) {
-      <text [attr.x]="area().x0 - 8" [attr.y]="marca.y" text-anchor="end" dominant-baseline="middle">
-        {{ marca.texto }}
-      </text>
-    }
-    @for (rotuloX of rotulosX(); track $index) {
-      <text [attr.x]="rotuloX.x" [attr.y]="area().y1 + 18" [attr.text-anchor]="rotuloX.ancora">
-        {{ rotuloX.texto }}
-      </text>
-    }
-  </g>
-
-  @for (tracado of tracados(); track tracado.nome) {
-    <g [class]="tracado.cor" aria-hidden="true">
-      @if (tracado.preenchimento) {
-        <path [attr.d]="tracado.preenchimento" fill="currentColor" class="opacity-10" />
+<!-- Só desenha depois de medir a largura, para não transbordar o card no primeiro quadro. -->
+@if (largura() > 0) {
+  <svg
+    [attr.width]="largura()"
+    [attr.height]="altura()"
+    class="block touch-pan-y overflow-visible focus-visible:outline-offset-4"
+    role="img"
+    tabindex="0"
+    [attr.aria-label]="rotulo() + '. Use as setas para ler cada ponto.'"
+    (pointermove)="acompanharPonteiro($event)"
+    (pointerleave)="limparDestaque()"
+    (focus)="focarUltimoPonto()"
+    (blur)="limparDestaque()"
+    (keydown)="navegarComTeclado($event)"
+  >
+    <g class="text-grid" aria-hidden="true">
+      @for (marca of marcasY(); track marca.texto) {
+        <line [attr.x1]="area().x0" [attr.x2]="area().x1" [attr.y1]="marca.y" [attr.y2]="marca.y" stroke="currentColor" />
       }
-      <path
-        [attr.d]="tracado.linha"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linejoin="round"
-        stroke-linecap="round"
-      />
     </g>
-  }
+    <g class="fill-muted text-[11px] tabular-nums" aria-hidden="true">
+      @for (marca of marcasY(); track marca.texto) {
+        <text [attr.x]="area().x0 - 8" [attr.y]="marca.y" text-anchor="end" dominant-baseline="middle">
+          {{ marca.texto }}
+        </text>
+      }
+      @for (rotuloX of rotulosX(); track $index) {
+        <text [attr.x]="rotuloX.x" [attr.y]="area().y1 + 18" [attr.text-anchor]="rotuloX.ancora">
+          {{ rotuloX.texto }}
+        </text>
+      }
+    </g>
 
-  @if (destaque(); as d) {
-    <g aria-hidden="true">
-      <line
-        [attr.x1]="d.x"
-        [attr.x2]="d.x"
-        [attr.y1]="area().y0"
-        [attr.y2]="area().y1"
-        class="text-muted"
-        stroke="currentColor"
-        stroke-dasharray="3 3"
-      />
-      @for (item of d.itens; track item.nome) {
-        @if (item.y !== null) {
-          <circle [attr.cx]="d.x" [attr.cy]="item.y" r="4" [class]="item.cor" fill="currentColor" class="stroke-surface" stroke-width="2" />
+    @for (tracado of tracados(); track tracado.nome) {
+      <g [class]="tracado.cor" aria-hidden="true">
+        @if (tracado.preenchimento) {
+          <path [attr.d]="tracado.preenchimento" fill="currentColor" class="opacity-10" />
         }
-      }
-    </g>
-  }
-</svg>
+        <path
+          [attr.d]="tracado.linha"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linejoin="round"
+          stroke-linecap="round"
+        />
+      </g>
+    }
+
+    @if (destaque(); as d) {
+      <g aria-hidden="true">
+        <line
+          [attr.x1]="d.x"
+          [attr.x2]="d.x"
+          [attr.y1]="area().y0"
+          [attr.y2]="area().y1"
+          class="text-muted"
+          stroke="currentColor"
+          stroke-dasharray="3 3"
+        />
+        @for (item of d.itens; track item.nome) {
+          @if (item.y !== null) {
+            <circle [attr.cx]="d.x" [attr.cy]="item.y" r="4" [class]="item.cor" fill="currentColor" class="stroke-surface" stroke-width="2" />
+          }
+        }
+      </g>
+    }
+  </svg>
+} @else {
+  <div [style.height.px]="altura()"></div>
+}
 
 @if (destaque(); as d) {
   <div

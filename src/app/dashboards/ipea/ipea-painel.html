@@ -1,0 +1,85 @@
+<div class="grid gap-6">
+  <header class="flex flex-wrap items-end justify-between gap-4">
+    <div class="grid gap-1.5">
+      <h2 class="text-2xl font-bold tracking-tight">O Brasil em séries longas</h2>
+      <p class="max-w-2xl text-sm text-muted">
+        Séries históricas do Ipeadata, consultadas agora na API OData. Algumas começam em 1900: mude o período
+        para ver décadas de história econômica.
+      </p>
+    </div>
+    <div class="grid gap-1 text-xs font-semibold text-muted">
+      Período
+      <mi-segmented rotulo="Período dos gráficos" [opcoes]="opcoesPeriodo" [(valor)]="desde" />
+    </div>
+  </header>
+
+  <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Indicadores principais">
+    @for (painel of paineis(); track painel.serie.id) {
+      @if (painel.resumo; as resumo) {
+        <mi-kpi-card
+          [rotulo]="painel.serie.nome"
+          [valor]="resumo.valor"
+          [formato]="painel.serie.formato"
+          [variacao]="resumo.variacao"
+          [formatoVariacao]="painel.serie.formatoVariacao"
+          [rotuloVariacao]="resumo.rotuloVariacao"
+          [sentidoBom]="painel.serie.sentidoBom"
+          [serie]="resumo.serie"
+          [referencia]="resumo.referencia"
+        />
+      } @else if (painel.recurso.error()) {
+        <div class="rounded-xl border border-line bg-surface">
+          <mi-error-state
+            [titulo]="painel.serie.nome + ' indisponível'"
+            descricao="O Ipeadata não respondeu."
+            (tentarDeNovo)="painel.recurso.reload()"
+          />
+        </div>
+      } @else if (painel.recurso.isLoading()) {
+        <div class="grid gap-3 rounded-xl border border-line bg-surface p-4" aria-busy="true">
+          <mi-skeleton class="h-3 w-28" />
+          <mi-skeleton class="h-8 w-36" />
+          <mi-skeleton class="h-3 w-24" />
+        </div>
+      } @else {
+        <div class="grid place-items-center rounded-xl border border-line bg-surface p-4 text-center text-sm text-muted">
+          {{ painel.serie.nome }}: sem dado publicado.
+        </div>
+      }
+    }
+  </section>
+
+  <section class="grid gap-4 lg:grid-cols-2" aria-label="Séries históricas">
+    @for (painel of paineis(); track painel.serie.id) {
+      <mi-card [titulo]="painel.serie.nome" [descricao]="painel.serie.descricao" [fonte]="painel.serie.fonte">
+        @if (painel.grafico.length && painel.grafico[0].pontos.length > 1) {
+          <mi-line-chart
+            [rotulo]="painel.serie.nome + ', ' + painel.serie.descricao"
+            [formato]="painel.serie.formato"
+            [series]="painel.grafico"
+            [incluirZero]="painel.serie.incluirZero"
+            [altura]="220"
+          />
+        } @else if (painel.recurso.error()) {
+          <mi-error-state (tentarDeNovo)="painel.recurso.reload()" />
+        } @else if (painel.recurso.isLoading()) {
+          <mi-skeleton class="h-56" />
+        } @else {
+          <p class="py-16 text-center text-sm text-muted">Sem dados no período escolhido.</p>
+        }
+      </mi-card>
+    }
+  </section>
+
+  <mi-card titulo="Valores anuais" descricao="Último valor publicado em cada ano, no período escolhido" [fonte]="fonteTabela">
+    <mi-data-table
+      rotulo="Séries do Ipeadata por ano"
+      [linhas]="linhasTabela()"
+      [colunas]="colunasTabela"
+      [tamanhoPagina]="10"
+      [buscavel]="false"
+      exportavel
+      nomeArquivo="ipeadata-series-anuais"
+    />
+  </mi-card>
+</div>

@@ -17,8 +17,8 @@ export const routes: Routes = [
   {
     path: 'ipea',
     title: 'Ipeadata · Mirante',
-    data: { titulo: 'Ipeadata', descricao: 'Séries históricas consolidadas pelo Ipea.' },
-    loadComponent: () => import('./dashboards/em-breve/em-breve').then((m) => m.EmBreve),
+    data: { titulo: 'Ipeadata' },
+    loadComponent: () => import('./dashboards/ipea/ipea-painel').then((m) => m.IpeaPainel),
   },
   {
     path: 'ui',
