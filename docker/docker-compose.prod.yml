@@ -1,0 +1,10 @@
+# Produção: pluga o container na rede 'edge', onde o nginx de borda da VPS encaminha o domínio.
+services:
+  web:
+    networks:
+      - default
+      - edge
+
+networks:
+  edge:
+    external: true

@@ -20,6 +20,17 @@ npm run e2e            # testes de ponta a ponta (Playwright), desktop e celular
 
 Na primeira vez, instale o navegador do Playwright com `npx playwright install chromium`. A suíte de ponta a ponta não usa a rede: as respostas das APIs ficam gravadas em `e2e/dados/apis.har` e o relógio do navegador é fixado no dia da gravação. Ela cobre navegação, os três painéis, a galeria, acessibilidade com axe (WCAG 2.2 AA nos dois temas), alvo de toque de 40 px e ausência de rolagem lateral.
 
+## Publicação
+
+A imagem é um nginx com a SPA compilada (`docker/`), com CSP estrita e headers de segurança. Para rodar localmente:
+
+```bash
+docker compose -f docker/docker-compose.yml up -d --build   # http://localhost:8092
+E2E_BASE_URL=http://localhost:8092 npx playwright test      # E2E contra a imagem
+```
+
+Em produção, o pipeline (`azure-pipelines.yml`, disparado por `release/*`) roda os testes, monta a imagem, executa o E2E contra ela e a envia para a VPS.
+
 ## Fontes de dados
 
 Todas públicas, sem chave de acesso:

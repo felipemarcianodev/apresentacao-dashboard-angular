@@ -38,11 +38,11 @@ test.describe('painel do IBGE', () => {
     await expect(page.getByRole('heading', { level: 2, name: 'Minas Gerais em números' })).toBeVisible();
   });
 
-  test('ordena a tabela das UFs e exporta CSV', async ({ page }) => {
+  test('ordena a tabela das UFs e exporta CSV', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'no celular a tabela vira cartões');
     await page.goto('/ibge');
     await esperarDados(page);
     const tabela = page.getByRole('table', { name: 'Indicadores do IBGE por unidade da federação' });
-    test.skip(!(await tabela.isVisible()), 'no celular a tabela vira cartões');
     await tabela.getByRole('button', { name: /População/ }).click();
     await expect(tabela.getByRole('columnheader', { name: /População/ })).toHaveAttribute('aria-sort', /ascending|descending/);
     const download = page.waitForEvent('download');

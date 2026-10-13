@@ -8,6 +8,9 @@ export const APIS = /^https:\/\/(servicodados\.ibge\.gov\.br|api\.bcb\.gov\.br|w
 
 export const HAR = 'e2e/dados/apis.har';
 
+/** Origem da aplicação: ng serve local ou o container de produção (E2E_BASE_URL). */
+export const ORIGEM = new URL(process.env['E2E_BASE_URL'] || 'http://localhost:4300').origin;
+
 /**
  * Fixa o relógio e responde as APIs com a gravação. Com `gravar`, consulta as APIs de verdade e
  * salva as respostas (só a suíte gravar-apis.spec.ts usa, com GRAVAR=1).
@@ -16,7 +19,7 @@ export async function usarApisGravadas(page: Page, gravar = false): Promise<void
   await page.clock.setFixedTime(DATA_DA_GRAVACAO);
   await page.routeFromHAR(HAR, { url: APIS, update: gravar, updateContent: 'embed', notFound: 'abort' });
   await page.route(
-    (url) => url.origin !== 'http://localhost:4300' && !APIS.test(url.href),
+    (url) => url.origin !== ORIGEM && !APIS.test(url.href),
     (rota) => rota.abort(),
   );
 }
