@@ -47,9 +47,20 @@ describe('operações da tabela', () => {
     expect(asc.map((c) => c.nome)).toEqual(['Belém', 'Niterói', 'Rio de Janeiro', 'São Paulo']);
   });
 
+  it('ordena pela chave de ordenação quando a coluna define uma', () => {
+    const meses = [{ mes: '2026-09', rotulo: 'set/26' }, { mes: '2026-04', rotulo: 'abr/26' }, { mes: '2025-12', rotulo: 'dez/25' }];
+    const coluna = { id: 'mes', titulo: 'Mês', valor: (m: (typeof meses)[number]) => m.rotulo, chaveOrdenacao: (m: (typeof meses)[number]) => m.mes };
+    expect(ordenarLinhas(meses, [coluna], { coluna: 'mes', direcao: 'asc' }).map((m) => m.rotulo)).toEqual(['dez/25', 'abr/26', 'set/26']);
+  });
+
   it('não altera a lista original', () => {
     ordenarLinhas(LINHAS, COLUNAS, { coluna: 'nome', direcao: 'desc' });
     expect(LINHAS[0].nome).toBe('São Paulo');
+  });
+
+  it('neutraliza texto que o Excel executaria como fórmula', () => {
+    const csv = gerarCsv(COLUNAS, [{ nome: '=HYPERLINK("http://x")', uf: '+1', populacao: -5 }]);
+    expect(csv.split('\r\n')[1]).toBe(`"'=HYPERLINK(""http://x"")";'+1;-5`);
   });
 
   it('gera CSV para o Excel em português', () => {
