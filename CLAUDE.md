@@ -79,7 +79,9 @@ docs/                          -> documentação; plano-reconstrucao.md é local
 .claude/skills/executar-plano-faseado/ -> executa o plano fase a fase com os portões
 .claude/agents/seguranca-angular.md    -> auditor de segurança Angular (angular.dev/best-practices/security)
 public/
-  favicon.ico
+  favicon.svg                  -> ícone da marca (mountain-sun do Font Awesome em branco sobre o accent)
+  favicon.ico                  -> o mesmo ícone em 16, 32 e 48 px, para navegador sem suporte a SVG
+  apple-touch-icon.png         -> 180 px, atalho na tela inicial do celular
   robots.txt
   geo/br-uf.json               -> malha das 27 UFs (API de malhas do IBGE, coordenadas com 2 casas), usada pelo MapaUf
   theme-init.js                -> aplica .dark antes do Angular subir (evita piscar); arquivo estático por causa da CSP
