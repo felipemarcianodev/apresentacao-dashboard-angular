@@ -42,5 +42,6 @@ export const SEGMENTED_DOC: ComponentDoc = {
   acessibilidade: [
     'Padrão radiogroup do WAI-ARIA: só a opção selecionada entra na ordem do Tab.',
     'Setas para os lados (ou para cima e para baixo) trocam a opção e movem o foco.',
+    'Cada opção tem no mínimo 40 por 40 px, o alvo de toque do kit.',
   ],
 };

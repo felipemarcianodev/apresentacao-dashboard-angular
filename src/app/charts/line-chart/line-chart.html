@@ -101,24 +101,27 @@
   </div>
 }
 
-<table class="sr-only">
-  <caption>{{ rotulo() }}</caption>
-  <thead>
-    <tr>
-      <th scope="col">Período</th>
-      @for (serie of series(); track serie.nome) {
-        <th scope="col">{{ serie.nome }}</th>
-      }
-    </tr>
-  </thead>
-  <tbody>
-    @for (linha of tabela(); track linha.rotulo) {
+<!-- sr-only no próprio <table> não funciona: tabela ignora a largura de 1 px e alarga a página. -->
+<div class="sr-only">
+  <table>
+    <caption>{{ rotulo() }}</caption>
+    <thead>
       <tr>
-        <th scope="row">{{ linha.rotulo }}</th>
-        @for (valor of linha.valores; track $index) {
-          <td>{{ valor }}</td>
+        <th scope="col">Período</th>
+        @for (serie of series(); track serie.nome) {
+          <th scope="col">{{ serie.nome }}</th>
         }
       </tr>
-    }
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      @for (linha of tabela(); track linha.rotulo) {
+        <tr>
+          <th scope="row">{{ linha.rotulo }}</th>
+          @for (valor of linha.valores; track $index) {
+            <td>{{ valor }}</td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

@@ -89,5 +89,6 @@ export const DATA_TABLE_DOC: ComponentDoc = {
     'O resumo da paginação ("1 a 10 de 27") é anunciado a cada troca (aria-live).',
     'O campo de busca tem rótulo oculto com o nome da tabela.',
     'No celular, cada cartão é uma lista de definição (dl) com rótulo e valor.',
+    'Quando a tabela passa da largura, a área de rolagem recebe foco pelo Tab e rola pelas setas.',
   ],
 };

@@ -1,6 +1,6 @@
 @if (doc(); as doc) {
-  <article class="grid max-w-4xl gap-10">
-    <header class="grid gap-3">
+  <article class="grid grid-cols-1 max-w-4xl gap-10">
+    <header class="grid grid-cols-1 gap-3">
       <a routerLink="/ui" class="inline-flex w-fit items-center gap-1.5 text-sm text-muted hover:text-accent">
         <i class="fa-solid fa-arrow-left text-xs" aria-hidden="true"></i> Componentes
       </a>
@@ -14,15 +14,15 @@
       }
     </header>
 
-    <section class="grid gap-3" aria-labelledby="titulo-importacao">
+    <section class="grid grid-cols-1 gap-3" aria-labelledby="titulo-importacao">
       <h3 id="titulo-importacao" class="text-lg font-semibold">Importação</h3>
       <mi-bloco-codigo [codigo]="doc.importacao" linguagem="ts" />
     </section>
 
-    <section class="grid gap-6" aria-labelledby="titulo-exemplos">
+    <section class="grid grid-cols-1 gap-6" aria-labelledby="titulo-exemplos">
       <h3 id="titulo-exemplos" class="text-lg font-semibold">Exemplos</h3>
       @for (exemplo of doc.exemplos; track exemplo.titulo) {
-        <div class="grid gap-3">
+        <div class="grid grid-cols-1 gap-3">
           <div>
             <h4 class="font-semibold">{{ exemplo.titulo }}</h4>
             @if (exemplo.descricao) {
@@ -37,12 +37,18 @@
       }
     </section>
 
-    <section class="grid gap-6" aria-labelledby="titulo-api">
+    <section class="grid grid-cols-1 gap-6" aria-labelledby="titulo-api">
       <h3 id="titulo-api" class="text-lg font-semibold">API</h3>
       @for (secao of secoesApi(); track secao.titulo) {
-        <div class="grid gap-2">
+        <div class="grid grid-cols-1 gap-2">
           <h4 class="text-sm font-semibold text-muted">{{ secao.titulo }}</h4>
-          <div class="overflow-x-auto rounded-xl border border-line bg-surface">
+          <!-- Rolável pelo teclado (tabindex) quando a tabela passa da largura da tela. -->
+          <div
+            class="overflow-x-auto rounded-xl border border-line bg-surface"
+            tabindex="0"
+            role="region"
+            [attr.aria-label]="'API: ' + secao.titulo"
+          >
             <table class="w-full min-w-[36rem] text-left text-sm">
               <thead class="border-b border-line text-xs text-muted uppercase">
                 <tr>
@@ -73,9 +79,9 @@
       }
     </section>
 
-    <section class="grid gap-3" aria-labelledby="titulo-a11y">
+    <section class="grid grid-cols-1 gap-3" aria-labelledby="titulo-a11y">
       <h3 id="titulo-a11y" class="text-lg font-semibold">Acessibilidade</h3>
-      <ul class="grid gap-2">
+      <ul class="grid grid-cols-1 gap-2">
         @for (item of doc.acessibilidade; track $index) {
           <li class="flex gap-2.5 text-sm text-muted">
             <i class="fa-solid fa-universal-access mt-0.5 text-accent" aria-hidden="true"></i>

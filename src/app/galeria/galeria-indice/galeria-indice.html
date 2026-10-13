@@ -1,5 +1,5 @@
-<div class="grid gap-10">
-  <section class="grid max-w-3xl gap-3">
+<div class="grid grid-cols-1 gap-10">
+  <section class="grid grid-cols-1 max-w-3xl gap-3">
     <p class="text-xs font-semibold tracking-wider text-accent uppercase">Kit Mirante</p>
     <h2 class="text-2xl font-bold tracking-tight text-balance sm:text-3xl">Componentes para reaproveitar</h2>
     <p class="text-muted">
@@ -9,15 +9,15 @@
     </p>
   </section>
 
-  <section class="grid gap-3" aria-labelledby="titulo-primeiros-passos">
+  <section class="grid grid-cols-1 gap-3" aria-labelledby="titulo-primeiros-passos">
     <h2 id="titulo-primeiros-passos" class="text-lg font-semibold">Primeiros passos</h2>
     <mi-bloco-codigo [codigo]="primeirosPassos" linguagem="ts" />
   </section>
 
   @for (grupo of grupos; track grupo.categoria) {
-    <section class="grid gap-4" [attr.aria-labelledby]="'categoria-' + $index">
+    <section class="grid grid-cols-1 gap-4" [attr.aria-labelledby]="'categoria-' + $index">
       <h2 [id]="'categoria-' + $index" class="text-lg font-semibold">{{ grupo.categoria }}</h2>
-      <ul class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <ul class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         @for (doc of grupo.docs; track doc.slug) {
           <li>
             <a
