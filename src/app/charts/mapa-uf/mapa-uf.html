@@ -1,0 +1,61 @@
+@if (mapa(); as m) {
+  <div class="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+    <svg
+      [attr.viewBox]="'0 0 ' + m.largura + ' ' + m.altura"
+      class="mx-auto block h-auto w-full max-w-xl"
+      role="group"
+      [attr.aria-label]="rotulo()"
+    >
+      @for (uf of ufs(); track uf.codigo) {
+        <path
+          [attr.d]="uf.caminho"
+          [class]="uf.cor"
+          class="cursor-pointer transition-opacity outline-none hover:opacity-80 focus-visible:stroke-fg focus-visible:stroke-2"
+          [class.stroke-surface]="selecionada() !== uf.sigla"
+          [class.stroke-1]="selecionada() !== uf.sigla"
+          [class.stroke-fg]="selecionada() === uf.sigla"
+          [class.stroke-2]="selecionada() === uf.sigla"
+          tabindex="0"
+          role="button"
+          [attr.aria-label]="uf.nome + ': ' + uf.texto"
+          [attr.aria-pressed]="selecionada() === uf.sigla"
+          (pointerenter)="ufEmFoco.set(uf.sigla)"
+          (pointerleave)="ufEmFoco.set(null)"
+          (focus)="ufEmFoco.set(uf.sigla)"
+          (blur)="ufEmFoco.set(null)"
+          (click)="escolher(uf.sigla)"
+          (keydown)="escolherComTeclado($event, uf.sigla)"
+        >
+          <title>{{ uf.nome }}: {{ uf.texto }}</title>
+        </path>
+      }
+    </svg>
+
+    <div class="grid gap-3 sm:w-44">
+      <div class="min-h-14 rounded-lg border border-line bg-sunken px-3 py-2" aria-live="polite">
+        @if (detalhe(); as d) {
+          <p class="text-xs text-muted">{{ d.nome }}</p>
+          <p class="text-lg font-bold tabular-nums">{{ d.texto }}</p>
+        } @else {
+          <p class="text-xs text-muted">Passe o mouse ou foque uma UF para ver o valor.</p>
+        }
+      </div>
+      <ul class="grid gap-1 text-xs text-muted" aria-label="Legenda">
+        @for (faixa of legenda(); track faixa.texto) {
+          <li class="flex items-center gap-2">
+            <svg class="size-3 shrink-0" aria-hidden="true"><rect width="12" height="12" rx="2" [class]="faixa.cor" /></svg>
+            <span class="tabular-nums">{{ faixa.texto }}</span>
+          </li>
+        }
+        <li class="flex items-center gap-2">
+          <svg class="size-3 shrink-0" aria-hidden="true"><rect width="12" height="12" rx="2" class="fill-sunken stroke-line" /></svg>
+          <span>{{ semDado }}</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+} @else if (malha.error()) {
+  <p class="py-10 text-center text-sm text-muted">Não foi possível carregar o mapa.</p>
+} @else {
+  <mi-skeleton class="aspect-square max-h-96 w-full" />
+}

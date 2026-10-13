@@ -1,0 +1,133 @@
+@if (buscavel() || exportavel()) {
+  <div class="mb-3 flex flex-wrap items-center gap-3">
+    @if (buscavel()) {
+      <label class="relative min-w-0 flex-1 sm:max-w-xs">
+        <span class="sr-only">Buscar em {{ rotulo() }}</span>
+        <i
+          class="fa-solid fa-magnifying-glass pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-xs text-muted"
+          aria-hidden="true"
+        ></i>
+        <input
+          type="search"
+          class="min-h-10 w-full rounded-lg border border-line bg-surface pr-3 pl-8 text-sm placeholder:text-muted focus:border-accent focus:outline-none"
+          placeholder="Buscar"
+          [value]="busca()"
+          (input)="atualizarBusca($event)"
+        />
+      </label>
+    }
+    @if (exportavel()) {
+      <button miButton variante="secundario" tamanho="sm" icone="fa-file-csv" class="ml-auto" (click)="exportarCsv()">
+        Exportar CSV
+      </button>
+    }
+  </div>
+}
+
+@if (visiveis().length === 0) {
+  <div class="rounded-xl border border-line bg-surface">
+    <mi-empty-state
+      icone="fa-magnifying-glass"
+      [titulo]="busca() ? 'Nenhum resultado para “' + busca() + '”' : 'Sem dados para exibir'"
+      [descricao]="busca() ? 'Confira a grafia ou busque por outro termo.' : ''"
+    >
+      @if (busca()) {
+        <button miButton variante="secundario" tamanho="sm" (click)="limparBusca()">Limpar busca</button>
+      }
+    </mi-empty-state>
+  </div>
+} @else {
+  <!-- Tabela a partir de 640 px -->
+  <div class="hidden overflow-x-auto rounded-xl border border-line bg-surface sm:block">
+    <table class="w-full text-left text-sm">
+      <caption class="sr-only">{{ rotulo() }}</caption>
+      <thead class="border-b border-line bg-sunken/60 text-xs text-muted">
+        <tr>
+          @for (cabecalho of cabecalhos(); track cabecalho.id) {
+            <th
+              scope="col"
+              class="font-semibold whitespace-nowrap"
+              [class.text-right]="cabecalho.direita"
+              [attr.aria-sort]="cabecalho.ordenavel ? cabecalho.ariaSort : null"
+            >
+              @if (cabecalho.ordenavel) {
+                <button
+                  type="button"
+                  class="inline-flex min-h-10 w-full items-center gap-1.5 px-4 hover:text-fg"
+                  [class.justify-end]="cabecalho.direita"
+                  [class.text-fg]="cabecalho.ativa"
+                  (click)="alternarOrdenacao(cabecalho.id)"
+                >
+                  {{ cabecalho.titulo }}
+                  <i class="fa-solid text-[0.7em]" [class]="cabecalho.icone" [class.opacity-40]="!cabecalho.ativa" aria-hidden="true"></i>
+                </button>
+              } @else {
+                <span class="inline-flex min-h-10 items-center px-4">{{ cabecalho.titulo }}</span>
+              }
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-line">
+        @for (linha of visiveis(); track $index) {
+          <tr class="hover:bg-sunken/50">
+            @for (celula of linha.celulas; track celula.id) {
+              <td
+                class="px-4"
+                [class.py-3]="!compacta()"
+                [class.py-1.5]="compacta()"
+                [class.text-right]="celula.direita"
+                [class.tabular-nums]="celula.direita"
+              >
+                {{ celula.texto }}
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Cartões abaixo de 640 px -->
+  <ul class="grid gap-2 sm:hidden" [attr.aria-label]="rotulo()">
+    @for (linha of visiveis(); track $index) {
+      <li class="rounded-xl border border-line bg-surface p-3">
+        <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+          @for (celula of linha.celulas; track celula.id) {
+            <dt class="text-muted">{{ celula.titulo }}</dt>
+            <dd class="text-right font-medium" [class.tabular-nums]="celula.direita">{{ celula.texto }}</dd>
+          }
+        </dl>
+      </li>
+    }
+  </ul>
+}
+
+<nav class="mt-3 flex flex-wrap items-center justify-between gap-3 text-sm text-muted" aria-label="Paginação">
+  <p aria-live="polite" class="tabular-nums">{{ resumo() }}</p>
+  @if (totalPaginas() > 1) {
+    <div class="flex items-center gap-2">
+      <button
+        miButton
+        variante="secundario"
+        tamanho="sm"
+        icone="fa-chevron-left"
+        [disabled]="pagina() === 0"
+        (click)="irParaPagina(pagina() - 1)"
+      >
+        Anterior
+      </button>
+      <span class="tabular-nums">{{ pagina() + 1 }} / {{ totalPaginas() }}</span>
+      <button
+        miButton
+        variante="secundario"
+        tamanho="sm"
+        [disabled]="pagina() === totalPaginas() - 1"
+        (click)="irParaPagina(pagina() + 1)"
+      >
+        Próxima
+        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+      </button>
+    </div>
+  }
+</nav>
