@@ -289,7 +289,7 @@ npm run e2e            # Playwright, desktop e celular (portão das telas tocada
 GRAVAR=1 npx playwright test gravar-apis --project=desktop   # regrava as respostas das APIs
 E2E_BASE_URL=http://localhost:8092 npx playwright test       # E2E contra a imagem de produção (CSP real)
 dotnet build backend/Mirante.slnx                            # backend, 0 avisos (avisos são erro)
-dotnet test --solution backend/Mirante.slnx                  # unidade e integração (Docker de pé)
+cd backend && dotnet test --solution Mirante.slnx            # unidade e integração (Docker de pé); de dentro de backend/, onde o global.json liga o Microsoft Testing Platform
 cd backend && dotnet tool restore && dotnet ef migrations add Nome --project src/Mirante.Dados --output-dir Migrations
 ```
 
