@@ -11,8 +11,8 @@ export const routes: Routes = [
   {
     path: 'bcb',
     title: 'Banco Central · Mirante',
-    data: { titulo: 'Banco Central', descricao: 'Selic, câmbio e crédito pela API SGS.' },
-    loadComponent: () => import('./dashboards/em-breve/em-breve').then((m) => m.EmBreve),
+    data: { titulo: 'Banco Central' },
+    loadComponent: () => import('./dashboards/bcb/bcb-painel').then((m) => m.BcbPainel),
   },
   {
     path: 'ipea',

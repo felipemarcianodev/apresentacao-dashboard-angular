@@ -71,7 +71,7 @@ export const DATA_TABLE_DOC: ComponentDoc = {
     "import { DataTable } from './table/data-table/data-table';\nimport { ColunaTabela } from './table/coluna-tabela.model';",
   entradas: [
     { nome: 'linhas', tipo: 'readonly T[]', obrigatoria: true, descricao: 'Dados da tabela.' },
-    { nome: 'colunas', tipo: 'readonly ColunaTabela<T>[]', obrigatoria: true, descricao: '{ id, titulo, valor(linha), formato?, alinhamento?, ordenavel? }.' },
+    { nome: 'colunas', tipo: 'readonly ColunaTabela<T>[]', obrigatoria: true, descricao: '{ id, titulo, valor(linha), formato?, alinhamento?, ordenavel?, chaveOrdenacao? }. Use chaveOrdenacao quando o texto exibido não ordena certo (mês "set/26").' },
     { nome: 'rotulo', tipo: 'string', obrigatoria: true, descricao: 'Legenda da tabela para leitor de tela.' },
     { nome: 'tamanhoPagina', tipo: 'number', padrao: '10', descricao: 'Linhas por página.' },
     { nome: 'densidade', tipo: "'confortavel' | 'compacta'", padrao: "'confortavel'", descricao: 'Altura das linhas.' },

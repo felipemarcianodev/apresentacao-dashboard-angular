@@ -6,6 +6,7 @@ import { KpiCard } from '../../charts/kpi-card/kpi-card';
 import { LineChart, SerieGrafico } from '../../charts/line-chart/line-chart';
 import { MapaUf } from '../../charts/mapa-uf/mapa-uf';
 import { UFS, Uf, ufPorSigla } from '../../core/brasil/ufs';
+import { valorDe } from '../../core/dados/valor-de';
 import { ColunaTabela } from '../../table/coluna-tabela.model';
 import { DataTable } from '../../table/data-table/data-table';
 import { Badge } from '../../ui/badge/badge';
@@ -29,11 +30,6 @@ function recursoAgregado(consulta: ConsultaAgregado): HttpResourceRef<Agregado |
   return httpResource<Agregado>(() => urlAgregado(consulta), {
     parse: (resposta) => lerAgregado(resposta as RespostaVariavel[]),
   });
-}
-
-/** value() lança exceção quando o resource está em erro; aqui o erro vira "sem valor". */
-function valorDe(recurso: HttpResourceRef<Agregado | undefined>): Agregado | undefined {
-  return recurso.hasValue() ? recurso.value() : undefined;
 }
 
 const INDICADOR = Object.fromEntries(INDICADORES_UF.map((i) => [i.id, i])) as Record<IdIndicadorUf, IndicadorUf>;

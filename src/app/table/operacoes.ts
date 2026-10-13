@@ -56,9 +56,10 @@ export function ordenarLinhas<T>(
     return linhas;
   }
   const sinal = ordenacao.direcao === 'asc' ? 1 : -1;
+  const chave = coluna.chaveOrdenacao ?? coluna.valor;
   return [...linhas].sort((x, y) => {
-    const a = coluna.valor(x);
-    const b = coluna.valor(y);
+    const a = chave(x);
+    const b = chave(y);
     const vazioA = a === null || a === '';
     const vazioB = b === null || b === '';
     if (vazioA || vazioB) {
@@ -70,10 +71,16 @@ export function ordenarLinhas<T>(
 
 /**
  * CSV no formato que o Excel em português abre direto: separador ponto e vírgula, números com
- * vírgula decimal, aspas quando preciso e BOM para os acentos.
+ * vírgula decimal, aspas quando preciso e BOM para os acentos. Texto que o Excel leria como
+ * fórmula é neutralizado, porque a tabela é do kit e pode receber texto vindo de API.
  */
 export function gerarCsv<T>(colunas: readonly ColunaTabela<T>[], linhas: readonly T[]): string {
-  const escapar = (texto: string) => (/[";\n\r]/.test(texto) ? `"${texto.replace(/"/g, '""')}"` : texto);
+  // Texto que começa com = + - @ vira fórmula no Excel; o apóstrofo força o conteúdo como texto.
+  const neutralizar = (texto: string) => (/^[=+\-@\t\r]/.test(texto) ? `'${texto}` : texto);
+  const escapar = (bruto: string) => {
+    const texto = neutralizar(bruto);
+    return /[";\n\r]/.test(texto) ? `"${texto.replace(/"/g, '""')}"` : texto;
+  };
   const celula = (valor: ValorCelula) =>
     typeof valor === 'number' ? String(valor).replace('.', ',') : escapar(valor ?? '');
   const cabecalho = colunas.map((c) => escapar(c.titulo)).join(';');

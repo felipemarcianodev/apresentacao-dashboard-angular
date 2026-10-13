@@ -1,0 +1,82 @@
+<div class="grid gap-6">
+  <header class="flex flex-wrap items-end justify-between gap-4">
+    <div class="grid gap-1.5">
+      <h2 class="text-2xl font-bold tracking-tight">Juros, câmbio e crédito</h2>
+      <p class="max-w-2xl text-sm text-muted">
+        Séries do Banco Central, consultadas agora na API do SGS. A variação compara com o mesmo mês do ano
+        anterior.
+      </p>
+    </div>
+    <div class="grid gap-1 text-xs font-semibold text-muted">
+      Período
+      <mi-segmented rotulo="Período dos gráficos" [opcoes]="opcoesPeriodo" [(valor)]="periodo" />
+    </div>
+  </header>
+
+  <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Indicadores principais">
+    @for (kpi of kpis(); track kpi.serie.id) {
+      @if (kpi.resumo; as resumo) {
+        <mi-kpi-card
+          [rotulo]="kpi.serie.nome"
+          [valor]="resumo.valor"
+          [formato]="kpi.serie.formato"
+          [variacao]="resumo.variacao"
+          [formatoVariacao]="kpi.serie.formatoVariacao"
+          [rotuloVariacao]="resumo.rotuloVariacao"
+          [sentidoBom]="kpi.serie.sentidoBom"
+          [serie]="resumo.serie"
+          [referencia]="resumo.referencia"
+        />
+      } @else if (kpi.recurso.error()) {
+        <div class="rounded-xl border border-line bg-surface">
+          <mi-error-state
+            [titulo]="kpi.serie.nome + ' indisponível'"
+            descricao="O Banco Central não respondeu."
+            (tentarDeNovo)="kpi.recurso.reload()"
+          />
+        </div>
+      } @else if (kpi.recurso.isLoading()) {
+        <div class="grid gap-3 rounded-xl border border-line bg-surface p-4" aria-busy="true">
+          <mi-skeleton class="h-3 w-28" />
+          <mi-skeleton class="h-8 w-36" />
+          <mi-skeleton class="h-3 w-24" />
+        </div>
+      } @else {
+        <div class="grid place-items-center rounded-xl border border-line bg-surface p-4 text-center text-sm text-muted">
+          {{ kpi.serie.nome }}: sem dado no período.
+        </div>
+      }
+    }
+  </section>
+
+  <section class="grid gap-4 lg:grid-cols-2" aria-label="Séries históricas">
+    @for (grafico of graficos(); track grafico.id) {
+      <mi-card [titulo]="grafico.titulo" [descricao]="grafico.descricao" [fonte]="grafico.fonte">
+        @if (grafico.series.length) {
+          <mi-line-chart
+            [rotulo]="grafico.titulo + ', ' + grafico.descricao"
+            [formato]="grafico.formato"
+            [series]="grafico.series"
+            [altura]="220"
+          />
+        } @else if (grafico.erro) {
+          <mi-error-state (tentarDeNovo)="grafico.recarregar()" />
+        } @else {
+          <mi-skeleton class="h-56" />
+        }
+      </mi-card>
+    }
+  </section>
+
+  <mi-card titulo="Valores mensais" descricao="Fechamento de cada mês no período escolhido" [fonte]="fonteTabela">
+    <mi-data-table
+      rotulo="Séries do Banco Central por mês"
+      [linhas]="linhasTabela()"
+      [colunas]="colunasTabela"
+      [tamanhoPagina]="12"
+      [buscavel]="false"
+      exportavel
+      nomeArquivo="bcb-series-mensais"
+    />
+  </mi-card>
+</div>

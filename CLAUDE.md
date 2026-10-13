@@ -62,21 +62,28 @@ src/
   app/
     app.ts                     -> componente raiz (mi-root), só monta o shell
     app.config.ts              -> providers: zoneless, router com withComponentInputBinding, HttpClient com fetch
-    app.routes.ts              -> rotas lazy /ibge (IbgePainel), /bcb, /ipea, /ui; data.titulo vira o título da topbar
+    app.routes.ts              -> rotas lazy /ibge (IbgePainel), /bcb (BcbPainel), /ipea, /ui; data.titulo vira o título da topbar
     core/formato/formato.ts    -> formatar(valor, formato) pt-BR (numero, decimal, percentual em pontos, moeda,
                                   moeda-compacta, compacto) e formatarVariacao com sinal; SEM_DADO para nulo
     core/brasil/ufs.ts         -> UFS: 27 UFs com código IBGE, sigla, nome e região; ufPorCodigo, ufPorSigla
+    core/dados/valor-de.ts     -> valorDe(resource): valor ou undefined, sem lançar no estado de erro
     core/theme/theme-preference.ts -> ThemePreference: signal tema (light, dark, system), classe .dark, localStorage
     layout/shell/              -> Shell: sidebar (drawer no mobile), topbar com título da rota, router-outlet
       navegacao.ts             -> NAVEGACAO: grupos Painéis e Kit com rota, rótulo e ícone Font Awesome
     layout/theme-toggle/       -> ThemeToggle: radiogroup claro, escuro e sistema
-    dashboards/em-breve/       -> EmBreve: página provisória dos painéis ainda não construídos (BCB, Ipeadata)
+    dashboards/em-breve/       -> EmBreve: página provisória do painel ainda não construído (Ipeadata)
+    dashboards/bcb/            -> painel do Banco Central em /bcb
+      sgs.ts                   -> API do SGS: urlSerie por janela de datas (diária exige, até 10 anos), lerSerie
+                                  (descarta datas futuras da meta Selic), mensalizar (fechamento), rotuloMes/Dia
+      series.ts                -> SERIES_BCB: Selic 432, dólar 1, euro 21619, crédito 20539 (milhões),
+                                  inadimplência 21082, IBC-Br 24364; resumirSerie (variação contra 12 meses antes)
+      bcb-painel.ts            -> BcbPainel: período 1A/2A/5A refaz as consultas, KPIs, 4 gráficos, tabela mensal
     dashboards/ibge/           -> painel do IBGE em /ibge (?uf=RJ filtra pela UF)
       agregados.ts             -> API de agregados v3: urlAgregado, lerValor (símbolos do IBGE viram null),
                                   lerAgregado (variável -> localidade -> pontos), rotuloPeriodo, ultimoValido
       indicadores.ts           -> INDICADORES_UF (população 6579, desocupação 4099, PIB 5938) e IPCA (1737, só
                                   Brasil); resumir (valor, variação, série) e valoresPorUf
-      ibge-painel.ts           -> IbgePainel: httpResource por agregado (valorDe protege o estado de erro),
+      ibge-painel.ts           -> IbgePainel: httpResource por agregado (lidos com valorDe),
                                   KPIs, linhas de desocupação e IPCA, mapa com ranking e tabela das 27 UFs
     ui/                        -> primitivos do kit, um por pasta (componente, template, spec, doc)
       button/                  -> Button: seletor button[miButton], a[miButton]; variante, tamanho, icone, carregando
@@ -97,7 +104,8 @@ src/
         projecao.ts            -> projetarMalha (equiretangular), limitesPorQuantil, classeDoValor
         malha-de-teste.ts      -> malha mínima para specs
     table/                     -> tabela de dados do kit
-      coluna-tabela.model.ts   -> ColunaTabela<T> (id, titulo, valor, formato, alinhamento, ordenavel), Ordenacao
+      coluna-tabela.model.ts   -> ColunaTabela<T> (id, titulo, valor, formato, alinhamento, ordenavel,
+                                  chaveOrdenacao), Ordenacao
       operacoes.ts             -> funções puras: textoDaCelula, normalizar (sem acento), filtrarLinhas,
                                   ordenarLinhas (pt-BR, vazios no fim), gerarCsv (Excel pt-BR com BOM)
       data-table/              -> DataTable (mi-data-table): busca, aria-sort, paginação com linkedSignal,
@@ -163,7 +171,7 @@ Font Awesome Free (`@fortawesome/fontawesome-free`), empacotado no bundle (sem C
 ## Dados das APIs públicas
 
 - Consumo por `httpResource` com `parse` que já devolve o modelo tipado; o mapeamento fica em funções puras testadas.
-- **Nunca ler `.value()` de um resource sem `hasValue()`**: em estado de erro ele lança exceção e derruba a tela. Use um helper como `valorDe()` do painel do IBGE.
+- **Nunca ler `.value()` de um resource sem `hasValue()`**: em estado de erro ele lança exceção e derruba a tela. Use `valorDe()` de `core/dados/valor-de.ts`.
 - Símbolos de dado ausente das fontes ("-", "...", "X") viram `null` e aparecem como "sem dado", nunca como zero.
 - Cada card com dado preenche `fonte` com o órgão e a tabela de origem; o período de referência aparece junto do número.
 - Testes nunca batem na rede: `HttpTestingController` com respostas mínimas.

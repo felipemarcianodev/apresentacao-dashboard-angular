@@ -12,6 +12,8 @@ export interface ColunaTabela<T> {
   /** Padrão: direita para número, esquerda para texto. */
   readonly alinhamento?: 'esquerda' | 'direita';
   readonly ordenavel?: boolean;
+  /** Chave usada só para ordenar, quando o texto exibido não ordena certo ("set/26" -> "2026-09"). */
+  readonly chaveOrdenacao?: (linha: T) => string | number | null;
 }
 
 export type DirecaoOrdenacao = 'asc' | 'desc';
