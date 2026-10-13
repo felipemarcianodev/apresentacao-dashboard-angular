@@ -51,7 +51,9 @@ README.md                      -> apresentação pública do projeto
                                   Node fica manual), com PR contra a main
 .postcssrc.json                -> liga o Tailwind v4 (@tailwindcss/postcss) ao build do Angular
 angular.json                   -> projeto "mirante", prefixo mi; estilos globais: Inter, Font Awesome (só o core e
-                                  o solid) e src/styles.css; produção sem CSS crítico inline (exigência da CSP)
+                                  o solid) e src/styles.css; produção sem CSS crítico inline (exigência da CSP);
+                                  ng serve com proxy.conf.json
+proxy.conf.json                -> npm start encaminha /api para a API local (localhost:5110)
 VERSION                        -> versão semântica do Mirante; o build a embute no rodapé da barra lateral
 azure-pipelines.yml            -> release/*: npm audit, unitários, build, imagem, E2E contra o container, envio
                                   da imagem por scp e troca do container na VPS (variable group mirante-producao)
@@ -87,26 +89,32 @@ docker/
                                   healthcheck em /health
   Dockerfile.web.dockerignore  -> evita levar node_modules, dist e e2e do host para a imagem
   nginx/nginx.conf             -> SPA com try_files, gzip (inclusive atrás da borda, HTTP/1.0), cache imutável
-                                  para arquivos com hash e no-cache para o resto
-  nginx/seguranca.conf         -> CSP estrita (sem unsafe-inline, Trusted Types, connect-src só nas 3 APIs) e
+                                  para arquivos com hash e no-cache para o resto; /api/ encaminhado para mirante-api
+                                  (resolvido a cada requisição; sem a API, só o /api dá 502; /health/ready não sai)
+  nginx/seguranca.conf         -> CSP estrita (sem unsafe-inline, Trusted Types, connect-src só 'self') e
                                   headers; incluído em cada location
   docker-compose.yml           -> web (127.0.0.1:8092, 64 MB), api (127.0.0.1:8093, 128 MB), postgres (192 MB,
                                   volume) e redis (64 MB, sem persistência, LRU); redes site (web e api) e interna
                                   (api, postgres e redis, sem internet); log com teto; só leitura e capacidades
                                   mínimas. O deploy atual troca só o web
   docker-compose.prod.yml      -> pluga o web na rede externa edge da VPS
-  borda/site-mirante.conf      -> cópia de referência do server block do nginx de borda (vale o do repo planuz)
+  borda/site-mirante.conf      -> cópia de referência do server block do nginx de borda (vale o do repo planuz);
+                                  já com connect-src 'self', que a borda só adota depois que a API estiver no ar
   setup-letsencrypt-mirante.sh -> emissão inicial do certificado na VPS (volumes do planuz-certbot)
 package.json                   -> scripts start, build:deploy, test:ci, e2e
 playwright.config.ts           -> E2E: projetos desktop (1366 px) e celular (360 px), pt-BR, fuso de São Paulo,
                                   sobe ng serve na porta 4300
 e2e/                           -> testes de ponta a ponta (Playwright)
-  apis.ts                      -> test com APIs gravadas (HAR), relógio fixo e falha em erro de console;
-                                  ROTAS e esperarDados
-  dados/apis.har               -> respostas reais das três APIs (só corpo e Content-Type, sem cookies)
-  gravar-apis.spec.ts          -> regrava o HAR (GRAVAR=1); depois, atualizar DATA_DA_GRAVACAO em apis.ts
+  apis.ts                      -> test com a API do Mirante respondida pelo HAR (endereços das fontes reescritos
+                                  para /api da origem testada), relógio fixo, tudo fora da origem bloqueado e falha
+                                  em erro de console; API, ROTAS e esperarDados
+  dados/apis.har               -> respostas reais das três fontes (só corpo e Content-Type, sem cookies), com os
+                                  endereços das fontes
+  gravar-apis.spec.ts          -> regrava o HAR pela API do Mirante (GRAVAR=1, compose de pé); depois, atualizar
+                                  DATA_DA_GRAVACAO em apis.ts
   navegacao.spec.ts            -> menu, título, tema (claro, escuro, sistema), atalho de teclado, gaveta no celular
   paineis.spec.ts              -> IBGE (UF por lista, URL e mapa; tabela; erro e Tentar de novo), BCB, Ipeadata
+                                  (inclusive o aviso de dado guardado, com axe nos dois temas)
   galeria.spec.ts              -> todas as páginas de componente, slug inválido, botão de copiar
   acessibilidade.spec.ts       -> axe WCAG 2.2 AA nos dois temas e alvo de toque de 40 px
   responsivo.spec.ts           -> nenhuma rota rola para o lado nem vaza conteúdo da tela
@@ -137,6 +145,8 @@ src/
                                   moeda-compacta, dolar, compacto) e formatarVariacao com sinal; SEM_DADO para nulo
     core/brasil/ufs.ts         -> UFS: 27 UFs com código IBGE, sigla, nome e região; ufPorCodigo, ufPorSigla
     core/dados/valor-de.ts     -> valorDe(resource): valor ou undefined, sem lançar no estado de erro
+    core/dados/origem.ts       -> obtidoNaReserva(recursos): quando a API serviu dado guardado (X-Mirante-Origem
+                                  reserva), o momento mais antigo entre eles; null se nenhum
     core/theme/theme-preference.ts -> ThemePreference: signal tema (light, dark, system), classe .dark, localStorage
     layout/shell/              -> Shell: sidebar (drawer no mobile), topbar com título da rota, router-outlet;
                                   a gaveta fecha a cada navegação, menos a inicial (aparelho lento); rodapé fixo
@@ -144,14 +154,16 @@ src/
       navegacao.ts             -> NAVEGACAO: grupos Painéis e Kit com rota, rótulo e ícone Font Awesome
       outros-projetos.ts       -> OUTROS_PROJETOS: Planuz, portfólio e blog, em "Conheça também" (abre em nova aba)
     layout/theme-toggle/       -> ThemeToggle: radiogroup claro, escuro e sistema
+    dashboards/aviso-de-reserva/ -> AvisoDeReserva (mi-aviso-de-reserva): "Dado guardado" com a data, quando a
+                                  fonte está fora; específico dos painéis, fora do kit
     dashboards/bcb/            -> painel do Banco Central em /bcb
-      sgs.ts                   -> API do SGS: urlSerie por janela de datas (diária exige, até 10 anos), lerSerie
+      sgs.ts                   -> SGS pela API do Mirante (/api/bcb/serie): urlSerie por janela de datas (diária exige, até 10 anos), lerSerie
                                   (descarta datas futuras da meta Selic), mensalizar (fechamento), rotuloMes/Dia
       series.ts                -> SERIES_BCB: Selic 432, dólar 1, euro 21619, crédito 20539 (milhões),
                                   inadimplência 21082, IBC-Br 24364; resumirSerie (variação contra 12 meses antes)
       bcb-painel.ts            -> BcbPainel: período 1A/2A/5A refaz as consultas, KPIs, 4 gráficos, tabela mensal
     dashboards/ipea/           -> painel do Ipeadata em /ipea
-      ipeadata.ts              -> API OData v4: urlValores (código validado por regex, vai entre aspas no OData),
+      ipeadata.ts              -> OData v4 do Ipeadata pela API do Mirante (/api/ipea/odata4): urlValores (código validado por regex, vai entre aspas no OData),
                                   lerValores (descarta item malformado), anualizar (último valor de cada ano).
                                   O comentário da série nos metadados é HTML: não usar
       series.ts                -> SERIES_IPEA: crescimento do PIB, PIB per capita em US$ (mil), salário mínimo
@@ -159,7 +171,7 @@ src/
       ipea-painel.ts           -> IpeaPainel: período Desde 1995 / 1980 / Tudo recorta no navegador (a API
                                   devolve a série inteira), KPIs, 4 gráficos e tabela anual
     dashboards/ibge/           -> painel do IBGE em /ibge (?uf=RJ filtra pela UF)
-      agregados.ts             -> API de agregados v3: urlAgregado, lerValor (símbolos do IBGE viram null),
+      agregados.ts             -> agregados v3 do IBGE pela API do Mirante (/api/ibge/agregados): urlAgregado, lerValor (símbolos do IBGE viram null),
                                   lerAgregado (variável -> localidade -> pontos), rotuloPeriodo, ultimoValido
       indicadores.ts           -> INDICADORES_UF (população 6579, desocupação 4099, PIB 5938) e IPCA (1737, só
                                   Brasil); resumir (valor, variação, série) e valoresPorUf
@@ -255,15 +267,16 @@ Font Awesome Free (`@fortawesome/fontawesome-free`), empacotado no bundle (sem C
 - **Nunca ler `.value()` de um resource sem `hasValue()`**: em estado de erro ele lança exceção e derruba a tela. Use `valorDe()` de `core/dados/valor-de.ts`.
 - Símbolos de dado ausente das fontes ("-", "...", "X") viram `null` e aparecem como "sem dado", nunca como zero.
 - Cada card com dado preenche `fonte` com o órgão e a tabela de origem; o período de referência aparece junto do número.
-- Testes nunca batem na rede: unidade com `HttpTestingController` e respostas mínimas; E2E com o HAR gravado (host fora das três APIs é bloqueado).
+- O navegador só fala com a própria origem: os painéis chamam `/api/...`, e a API do Mirante consulta as fontes (cache, reserva e lista permitida). Cada painel mostra o aviso de dado guardado quando a API serviu a reserva.
+- Testes nunca batem na rede: unidade com `HttpTestingController` e respostas mínimas; E2E com o HAR gravado (tudo fora da origem é bloqueado).
 
 ## Segurança
 
 - Sem `bypassSecurityTrust*` sobre dado vindo de API.
 - Link externo com `rel="noopener noreferrer"`.
 - Nada em `localStorage` além da preferência de tema.
-- Sem script de terceiro (analytics, pixel). Hosts externos permitidos: só as três APIs de dados.
-- A CSP fica em dois lugares, iguais: `docker/nginx/seguranca.conf` (imagem) e o server block do nginx de borda (repo planuz, cópia em `docker/borda/`). Host novo de API entra nos dois e no `APIS` de `e2e/apis.ts`.
+- Sem script de terceiro (analytics, pixel). O navegador não fala com host externo: `connect-src 'self'`.
+- A CSP fica em dois lugares, iguais: `docker/nginx/seguranca.conf` (imagem) e o server block do nginx de borda (repo planuz, cópia em `docker/borda/`). Fonte nova entra na lista permitida da API (`ListaPermitida`), não na CSP.
 - Nada de script ou estilo inline no `index.html`: a CSP não tem `unsafe-inline` e usa Trusted Types.
 - Sem `console.*` com objeto de resposta em código de produção.
 - Antes de release, rodar o agente `seguranca-angular`.
@@ -286,7 +299,7 @@ npm start              # servidor local
 npm run build:deploy   # build de produção (portão de toda fase)
 npm run test:ci        # testes unitários em ChromeHeadless, sem watch (portão de toda fase)
 npm run e2e            # Playwright, desktop e celular (portão das telas tocadas; suíte inteira antes de release)
-GRAVAR=1 npx playwright test gravar-apis --project=desktop   # regrava as respostas das APIs
+GRAVAR=1 E2E_BASE_URL=http://localhost:8092 npx playwright test gravar-apis --project=desktop   # regrava o HAR (compose de pé)
 E2E_BASE_URL=http://localhost:8092 npx playwright test       # E2E contra a imagem de produção (CSP real)
 dotnet build backend/Mirante.slnx                            # backend, 0 avisos (avisos são erro)
 cd backend && dotnet test --solution Mirante.slnx            # unidade e integração (Docker de pé); de dentro de backend/, onde o global.json liga o Microsoft Testing Platform

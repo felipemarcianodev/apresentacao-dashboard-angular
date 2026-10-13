@@ -67,7 +67,8 @@
               "buildTarget": "mirante:build:production"
             },
             "development": {
-              "buildTarget": "mirante:build:development"
+              "buildTarget": "mirante:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

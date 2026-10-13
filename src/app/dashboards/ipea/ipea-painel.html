@@ -13,6 +13,10 @@
     </div>
   </header>
 
+  @if (obtidoNaReserva(); as obtidoEm) {
+    <mi-aviso-de-reserva [obtidoEm]="obtidoEm" />
+  }
+
   <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Indicadores principais">
     @for (painel of paineis(); track painel.serie.id) {
       @if (painel.resumo; as resumo) {

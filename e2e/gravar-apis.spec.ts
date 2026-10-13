@@ -1,10 +1,10 @@
 import { Page, test } from '@playwright/test';
-import { readFileSync, writeFileSync } from 'node:fs';
-import { APIS, HAR, usarApisGravadas } from './apis';
+import { API, salvarGravacao, usarApisGravadas } from './apis';
 
 /**
- * Regrava e2e/dados/apis.har com as respostas reais das APIs. Só roda com GRAVAR=1:
- * GRAVAR=1 npx playwright test gravar-apis --project=desktop
+ * Regrava e2e/dados/apis.har com as respostas reais das fontes, consultadas pela API do Mirante.
+ * Só roda com GRAVAR=1 e contra o compose de pé (web, api, postgres e redis):
+ * GRAVAR=1 E2E_BASE_URL=http://localhost:8092 npx playwright test gravar-apis --project=desktop
  * Depois, atualizar DATA_DA_GRAVACAO em apis.ts para o dia da gravação.
  */
 test.skip(process.env['GRAVAR'] !== '1', 'só com GRAVAR=1');
@@ -14,18 +14,21 @@ test.skip(process.env['GRAVAR'] !== '1', 'só com GRAVAR=1');
  * APIs trazem cookies de balanceador e identificadores de infraestrutura que não precisam ir para
  * o git, e o replay só usa o corpo e o Content-Type.
  */
-test.afterAll(() => {
-  const har = JSON.parse(readFileSync(HAR, 'utf8'));
-  for (const entrada of har.log.entries) {
-    entrada.request.headers = [];
-    entrada.request.cookies = [];
-    entrada.response.cookies = [];
-    entrada.response.headers = entrada.response.headers.filter(
-      (h: { name: string }) => h.name.toLowerCase() === 'content-type',
-    );
-  }
-  writeFileSync(HAR, JSON.stringify(har));
-});
+test.afterAll(() =>
+  salvarGravacao((har) => {
+    for (const entrada of har.log.entries as EntradaHar[]) {
+      entrada.request.headers = [];
+      entrada.request.cookies = [];
+      entrada.response.cookies = [];
+      entrada.response.headers = entrada.response.headers.filter((h) => h.name.toLowerCase() === 'content-type');
+    }
+  }),
+);
+
+interface EntradaHar {
+  request: { headers: unknown[]; cookies: unknown[] };
+  response: { cookies: unknown[]; headers: { name: string }[] };
+}
 
 /**
  * Executa o passo e espera todas as consultas às APIs que ele disparou terminarem. Sem isso, o
@@ -34,8 +37,8 @@ test.afterAll(() => {
 async function aguardarConsultas(page: Page, passo: () => Promise<unknown>): Promise<void> {
   let pendentes = 0;
   let iniciadas = 0;
-  const inicio = (r: { url(): string }) => APIS.test(r.url()) && (pendentes++, iniciadas++);
-  const fim = (r: { url(): string }) => APIS.test(r.url()) && pendentes--;
+  const inicio = (r: { url(): string }) => API.test(r.url()) && (pendentes++, iniciadas++);
+  const fim = (r: { url(): string }) => API.test(r.url()) && pendentes--;
   page.on('request', inicio);
   page.on('requestfinished', fim);
   page.on('requestfailed', fim);

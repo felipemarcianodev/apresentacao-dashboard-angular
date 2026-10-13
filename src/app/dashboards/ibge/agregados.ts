@@ -3,7 +3,8 @@
  * Tudo aqui é função pura: monta a URL, lê a resposta e transforma em séries tipadas.
  */
 
-export const BASE_AGREGADOS = 'https://servicodados.ibge.gov.br/api/v3/agregados';
+/** A API do Mirante, na mesma origem do site, responde pelos agregados no mesmo caminho (com cache e reserva). */
+export const BASE_AGREGADOS = '/api/ibge/agregados';
 
 /** Formato devolvido pela API: uma entrada por variável. */
 export interface RespostaVariavel {

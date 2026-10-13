@@ -11,9 +11,8 @@ test('o nginx entrega CSP, headers de segurança e cache certo', async ({ reques
   expect(pagina.status()).toBe(200);
   const h = pagina.headers();
   expect(h['content-security-policy']).toContain("script-src 'self';");
-  expect(h['content-security-policy']).toContain(
-    'connect-src \'self\' https://servicodados.ibge.gov.br https://api.bcb.gov.br https://www.ipeadata.gov.br;',
-  );
+  // O navegador só fala com a própria origem: as fontes oficiais são consultadas pela API do Mirante.
+  expect(h['content-security-policy']).toContain("connect-src 'self';");
   expect(h['content-security-policy']).not.toContain('unsafe-inline');
   expect(h['x-content-type-options']).toBe('nosniff');
   expect(h['x-frame-options']).toBe('DENY');

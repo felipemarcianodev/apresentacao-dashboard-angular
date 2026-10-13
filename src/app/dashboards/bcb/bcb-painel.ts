@@ -12,6 +12,8 @@ import { OpcaoSegmented, Segmented } from '../../ui/segmented/segmented';
 import { Skeleton } from '../../ui/skeleton/skeleton';
 import { IdSerieBcb, ResumoSerie, SERIES_BCB, SERIE_BCB, resumirSerie } from './series';
 import { PontoDiario, inicioDoPeriodo, lerSerie, rotuloMes, urlSerie } from './sgs';
+import { obtidoNaReserva } from '../../core/dados/origem';
+import { AvisoDeReserva } from '../aviso-de-reserva/aviso-de-reserva';
 
 type Recurso = HttpResourceRef<PontoDiario[] | undefined>;
 
@@ -72,7 +74,7 @@ const GRAFICOS: readonly GraficoBcb[] = [
  */
 @Component({
   selector: 'mi-bcb-painel',
-  imports: [KpiCard, LineChart, DataTable, Card, Segmented, Skeleton, ErrorState],
+  imports: [AvisoDeReserva, KpiCard, LineChart, DataTable, Card, Segmented, Skeleton, ErrorState],
   templateUrl: './bcb-painel.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -95,6 +97,7 @@ export class BcbPainel {
       ),
     ]),
   ) as Record<IdSerieBcb, Recurso>;
+  protected readonly obtidoNaReserva = computed(() => obtidoNaReserva(Object.values(this.recursos)));
 
   private readonly resumos = Object.fromEntries(
     SERIES_BCB.map((serie) => [serie.id, computed(() => resumirSerie(valorDe(this.recursos[serie.id]), serie))]),

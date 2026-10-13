@@ -1,11 +1,12 @@
 /**
- * Leitura da API OData v4 do Ipeadata: http://www.ipeadata.gov.br/api/
+ * Leitura da API OData v4 do Ipeadata: https://www.ipeadata.gov.br/api/
  * A rota ValoresSerie devolve a série inteira (o filtro por data é ignorado pelo servidor), então
  * o recorte de período é feito no navegador. Os metadados trazem HTML no comentário da série: o
  * painel não usa esse campo.
  */
 
-export const BASE_IPEADATA = 'https://www.ipeadata.gov.br/api/odata4';
+/** A API do Mirante, na mesma origem do site, responde pelo Ipeadata no mesmo caminho (com cache e reserva). */
+export const BASE_IPEADATA = '/api/ipea/odata4';
 
 export interface ValorIpea {
   readonly VALDATA: string;
