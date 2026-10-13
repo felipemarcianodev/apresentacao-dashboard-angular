@@ -1,6 +1,6 @@
 ---
 name: executar-plano-faseado
-description: Executa um plano faseado em markdown do Mirante (`docs/plano-*.md` ou outro apontado) fase a fase, com os portões combinados (build de produção, testes unitários e, quando existir backend, build da solução .slnx e suítes de unidade e integração), correção até verde, status registrado no próprio plano, commit e push na master, e só então a próxima fase. Use quando o usuário disser "execute o plano", "pode seguir com as fases", "faça fase a fase", ou apontar um plano faseado para implementar.
+description: Executa um plano faseado em markdown do Mirante (`docs/plano-*.md` ou outro apontado) fase a fase, com os portões combinados (build de produção, testes unitários e, quando existir backend, build da solução .slnx e suítes de unidade e integração), correção até verde, status registrado no próprio plano, commit e push no branch de trabalho, e só então a próxima fase. Use quando o usuário disser "execute o plano", "pode seguir com as fases", "faça fase a fase", ou apontar um plano faseado para implementar.
 ---
 
 # Executar plano faseado
@@ -9,7 +9,7 @@ description: Executa um plano faseado em markdown do Mirante (`docs/plano-*.md` 
 
 - **Uma fase por vez.** Antes da próxima, os portões do que a fase tocou, todos verdes. Erro: corrigir até verde. Só então commit e push.
 - **Decida e execute.** Parar para perguntar só em três casos: ação irreversível ou destrutiva fora do que o plano já prevê, mudança de escopo, ou regra sem definição que impede a fase de existir. Fase marcada "requer aprovação" ou "alto risco" no plano cai no segundo caso: perguntar item a item antes. Fora disso, escolher a opção mais defensável e declarar a escolha no resumo.
-- **Commit** no padrão do `CLAUDE.md` ("Padrão de commits"): `tipo(escopo): descrição` em português com acentuação, texto puro, corpo com o motivo e os números reais de teste, **sem** `Co-Authored-By` nem assinatura de IA. Adicionar arquivo por caminho, só o que a fase tocou (conferir `git status` e deixar de fora mudança do usuário). Push na `master`, nunca `--force`.
+- **Commit** no padrão do `CLAUDE.md` ("Padrão de commits"): `tipo(escopo): descrição` em português com acentuação, texto puro, corpo com o motivo e os números reais de teste, **sem** `Co-Authored-By` nem assinatura de IA. Adicionar arquivo por caminho, só o que a fase tocou (conferir `git status` e deixar de fora mudança do usuário). Push no branch de trabalho (a `master` é protegida e só recebe PR), nunca `--force`.
 - **Não mexer no estado do git para investigar** (stash, reset, checkout de arquivo, restore). Ler com `git show`, `git diff`, `git log`.
 - **Status no plano:** marcar a fase `[x]`, registrar o que foi feito e sub-itens descobertos como `[ ]`. O plano em `docs/` pode ser local (fora do git): nesse caso, atualizar o arquivo e não tentar commitá-lo.
 - **Mapa do `CLAUDE.md` no mesmo commit** quando a fase criar, mover ou remover arquivo relevante.
@@ -28,7 +28,7 @@ Rodar um build pesado de cada vez; nada em paralelo ao Playwright.
 ## Antes de começar
 
 1. Ler o plano inteiro e o `CLAUDE.md` (regras bloqueantes, style guide, mapa, commits).
-2. Confirmar o estado: `git status` (separar o que é do usuário), `git fetch` e `master` alinhada com `origin/master`.
+2. Confirmar o estado: `git status` (separar o que é do usuário), `git fetch` e branch de trabalho alinhado com o remoto.
 3. Se o plano tiver decisão em aberto que muda o desenho, perguntar uma vez, agrupado, antes da primeira fase.
 
 ## Por fase

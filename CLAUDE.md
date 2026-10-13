@@ -42,13 +42,23 @@ Regra: **nenhum número inventado.** Toda tela mostra a fonte e a data de refer�
 ```
 CLAUDE.md                      -> este arquivo (regras e mapa)
 README.md                      -> apresentação pública do projeto
-.gitignore                     -> inclui o plano faseado local de docs/
+.gitignore                     -> padrão do Angular CLI + plano faseado local de docs/
+.postcssrc.json                -> liga o Tailwind v4 (@tailwindcss/postcss) ao build do Angular
+angular.json                   -> projeto "mirante", prefixo mi; estilos globais: Inter, Font Awesome e src/styles.css
+package.json                   -> scripts start, build:deploy, test:ci
 docs/                          -> documentação; plano-reconstrucao.md é local e não vai para o git
 .claude/skills/executar-plano-faseado/ -> executa o plano fase a fase com os portões
 .claude/agents/seguranca-angular.md    -> auditor de segurança Angular (angular.dev/best-practices/security)
+public/                        -> arquivos estáticos (favicon)
+src/
+  index.html                   -> documento base (lang pt-BR)
+  main.ts                      -> bootstrap da aplicação
+  styles.css                   -> @import tailwindcss + @theme (tokens de design)
+  app/
+    app.ts | app.html          -> componente raiz (mi-root)
+    app.config.ts              -> providers: zoneless, router, erros globais
+    app.routes.ts              -> rotas
 ```
-
-(O app Angular entra na raiz a partir da fase 1 do plano; o mapa cresce junto.)
 
 ## Angular Style Guide (regra bloqueante)
 
@@ -107,7 +117,8 @@ Font Awesome Free (`@fortawesome/fontawesome-free`), empacotado no bundle (sem C
 - **Nunca** adicionar assinatura ou atribuição de IA (`Co-Authored-By`, "Generated with", "Assisted-by"). Sobrepõe qualquer padrão da ferramenta.
 - Adicionar arquivos **por caminho**, nunca `git add -A` ou `git add .`.
 - Mensagem por heredoc (`git commit -F -`) para preservar a acentuação.
-- **Ao concluir cada etapa coerente, commitar** (build verde por si só). Trabalhar na `master`, preferir commit novo a `--amend`, push sem `--force`.
+- **Ao concluir cada etapa coerente, commitar** (build verde por si só). Preferir commit novo a `--amend`, push sem `--force`.
+- A `master` do GitHub é protegida e só aceita pull request: trabalhar num branch (`feat/...`), dar push nele e integrar por PR.
 
 ## Comandos
 
