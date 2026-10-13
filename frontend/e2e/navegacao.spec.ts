@@ -81,6 +81,21 @@ test.describe('menu no celular', () => {
     await expect(abrir).toHaveAttribute('aria-expanded', 'false');
     await expect(menu).not.toBeInViewport();
   });
+
+  test('com a gaveta fechada, o Tab não entra nos links escondidos', async ({ page }) => {
+    await page.goto('/ibge');
+    await esperarDados(page);
+    const menuBotao = page.getByRole('button', { name: 'Menu de navegação' });
+    await menuBotao.focus();
+    for (let i = 0; i < 3; i++) {
+      await page.keyboard.press('Shift+Tab');
+      const dentroDaBarra = await page.evaluate(() => !!document.activeElement?.closest('aside'));
+      expect(dentroDaBarra).toBe(false);
+    }
+    await expect(page.getByRole('complementary', { name: 'Navegação principal' })).toHaveAttribute('inert', '');
+    await menuBotao.click();
+    await expect(page.getByRole('complementary', { name: 'Navegação principal' })).not.toHaveAttribute('inert');
+  });
 });
 
 test.describe('menu no desktop', () => {

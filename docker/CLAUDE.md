@@ -28,7 +28,8 @@ CLAUDE.md                      -> este arquivo (regras e mapa da infraestrutura)
 README.md                      -> runbook: rodar local, publicar, conferir, voltar versão, certificado
 Dockerfile.web                 -> build do frontend/ no node:22-alpine (lê o VERSION da raiz), entrega no
                                   nginx:1.30-alpine, ambos por digest; healthcheck em /health
-Dockerfile.web.dockerignore    -> leva só o necessário do frontend (sem node_modules, dist, e2e e backend)
+Dockerfile.web.dockerignore    -> leva só o necessário do frontend (sem node_modules, dist, e2e, backend, .github,
+                                  .vscode, markdown e .env)
 Dockerfile.api                 -> build do backend/ no SDK 10 alpine, execução no aspnet 10 alpine sem root,
                                   digests fixos; healthcheck em /health
 Dockerfile.api.dockerignore    -> leva só o backend, sem bin, obj e testes

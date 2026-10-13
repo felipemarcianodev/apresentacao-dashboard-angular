@@ -42,7 +42,8 @@ e2e/                           -> testes de ponta a ponta (Playwright)
   gravar-apis.spec.ts          -> regrava o HAR pela API do Mirante (GRAVAR=1, compose de pé); depois, atualizar
                                   DATA_DA_GRAVACAO em apis.ts
   navegacao.spec.ts            -> menu, título, tema (claro, escuro, sistema), atalho de teclado, gaveta no celular,
-                                  barra recolhida no desktop (axe) e barra sem rolagem a 1366x768
+                                  Tab sem entrar na gaveta fechada, barra recolhida no desktop (axe) e barra sem
+                                  rolagem a 1366x768
   paineis.spec.ts              -> IBGE (UF por lista, URL e mapa; tabela; erro e Tentar de novo), BCB, Ipeadata
                                   (inclusive o aviso de dado guardado, com axe nos dois temas)
   galeria.spec.ts              -> todas as páginas de componente, slug inválido, botão de copiar
@@ -78,7 +79,7 @@ src/
     core/theme/theme-preference.ts -> ThemePreference: signal tema (light, dark, system), classe .dark, localStorage
     layout/shell/              -> Shell: sidebar, topbar com título da rota e o MenuHamburguer, router-outlet.
                                   Celular: o menu abre a gaveta (com o X), que fecha a cada navegação, menos a
-                                  inicial (aparelho lento). Desktop: o menu recolhe a barra numa faixa de ícones
+                                  inicial (aparelho lento); fechada, a barra fica inert (fora do Tab e do leitor). Desktop: o menu recolhe a barra numa faixa de ícones
                                   (nome em sr-only e dica em title), sem virar X. Cabe sem rolar a 1366x768.
                                   Rodapé fixo com o link do código e a versão (ligada à tag do GitHub)
       navegacao.ts             -> NAVEGACAO: grupos Painéis e Kit com rota, rótulo e ícone Font Awesome

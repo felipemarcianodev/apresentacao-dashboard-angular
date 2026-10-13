@@ -114,4 +114,15 @@ describe('Shell', () => {
     await fixture.whenStable();
     expect(barra.classList).toContain('w-64');
   });
+
+  it('no celular, a barra fechada fica inert e deixa de ser inert ao abrir a gaveta', async () => {
+    const { fixture, html, botaoMenu, router } = montar();
+    await router.navigateByUrl('/ibge');
+    await fixture.whenStable();
+    const barra = html.querySelector('aside')!;
+    expect(barra.hasAttribute('inert')).toBeTrue();
+    botaoMenu().click();
+    await fixture.whenStable();
+    expect(barra.hasAttribute('inert')).toBeFalse();
+  });
 });

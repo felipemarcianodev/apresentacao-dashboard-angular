@@ -20,6 +20,7 @@
   [class.w-64]="!compacta()"
   [class.w-16]="compacta()"
   [class.-translate-x-full]="!menuAberto()"
+  [attr.inert]="gavetaFechada() ? '' : null"
   aria-label="Navegação principal"
 >
   <div class="flex h-16 shrink-0 items-center gap-2.5 border-b border-line" [class.px-5]="!compacta()" [class.justify-center]="compacta()">

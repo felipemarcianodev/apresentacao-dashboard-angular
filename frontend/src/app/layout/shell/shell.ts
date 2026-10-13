@@ -43,6 +43,11 @@ export class Shell {
   protected readonly recolhida = signal(false);
   /** A barra está em faixa de ícones agora: recolhida e numa tela larga. */
   protected readonly compacta = computed(() => this.larga() && this.recolhida());
+  /**
+   * Gaveta fechada no celular: a barra sai da tela e fica inert, para os links dela não receberem
+   * foco pelo Tab nem serem lidos pelo leitor de tela enquanto não aparecem.
+   */
+  protected readonly gavetaFechada = computed(() => !this.larga() && !this.menuAberto());
   /** O que o menu hambúrguer anuncia em aria-expanded, conforme o tamanho da tela. */
   protected readonly menuExpandido = computed(() => (this.larga() ? !this.recolhida() : this.menuAberto()));
   protected readonly classeDoConteudo = computed(
