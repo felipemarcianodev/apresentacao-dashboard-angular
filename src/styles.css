@@ -1,5 +1,103 @@
 @import 'tailwindcss';
 
+/* Dark mode por classe no <html>, aplicada pelo ThemePreference e pelo public/theme-init.js. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+  Tokens do Mirante. A escala primary é a mesma do blog do portfólio; as cores de superfície e as
+  semânticas têm valor claro aqui e são redefinidas em .dark logo abaixo. Componentes usam só estes
+  tokens (bg-surface, text-fg, border-line, text-up...), nunca hex solto.
+*/
 @theme {
   --font-sans: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Code', 'JetBrains Mono', Consolas, monospace;
+
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
+
+  --color-bg: #f7f9fc;
+  --color-surface: #ffffff;
+  --color-sunken: #eef2f8;
+  --color-fg: #1f2937;
+  --color-muted: #5b6577;
+  --color-line: #dde3ec;
+  --color-grid: #e5e9f0;
+
+  --color-accent: #2563eb;
+  --color-accent-soft: #dbeafe;
+  --color-accent-ink: #1e40af;
+
+  --color-up: #15803d;
+  --color-up-soft: #dcfce7;
+  --color-down: #b91c1c;
+  --color-down-soft: #fee2e2;
+  --color-warn: #b45309;
+  --color-warn-soft: #fef3c7;
+  --color-violet: #6d28d9;
+  --color-violet-soft: #ede9fe;
+}
+
+@layer base {
+  .dark {
+    color-scheme: dark;
+    --color-bg: #0b1220;
+    --color-surface: #111a2c;
+    --color-sunken: #0e1626;
+    --color-fg: #e5eaf3;
+    --color-muted: #9aa6bb;
+    --color-line: #223047;
+    --color-grid: #1c283d;
+
+    --color-accent: #60a5fa;
+    --color-accent-soft: #172a4d;
+    --color-accent-ink: #bfdbfe;
+
+    --color-up: #4ade80;
+    --color-up-soft: #12301f;
+    --color-down: #f87171;
+    --color-down-soft: #3a1717;
+    --color-warn: #fbbf24;
+    --color-warn-soft: #36290c;
+    --color-violet: #a78bfa;
+    --color-violet-soft: #251c45;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Foco visível só no teclado: clique e toque não acendem o anel. */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }

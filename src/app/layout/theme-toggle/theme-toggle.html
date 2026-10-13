@@ -1,0 +1,19 @@
+<div class="inline-flex rounded-lg border border-line bg-sunken p-0.5" role="radiogroup" aria-label="Tema">
+  @for (opcao of opcoes; track opcao.valor) {
+    <button
+      type="button"
+      role="radio"
+      class="grid size-9 place-items-center rounded-md text-sm transition-colors hover:text-fg"
+      [class.bg-surface]="preferencia.tema() === opcao.valor"
+      [class.text-fg]="preferencia.tema() === opcao.valor"
+      [class.shadow-sm]="preferencia.tema() === opcao.valor"
+      [class.text-muted]="preferencia.tema() !== opcao.valor"
+      [attr.aria-checked]="preferencia.tema() === opcao.valor"
+      [attr.aria-label]="opcao.rotulo"
+      [title]="opcao.rotulo"
+      (click)="preferencia.definir(opcao.valor)"
+    >
+      <i class="fa-solid" [class]="opcao.icone" aria-hidden="true"></i>
+    </button>
+  }
+</div>
