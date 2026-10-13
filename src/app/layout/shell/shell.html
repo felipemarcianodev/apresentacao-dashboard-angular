@@ -1,0 +1,88 @@
+<a
+  href="#conteudo"
+  class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-md focus:bg-surface focus:px-4 focus:py-2 focus:shadow-lg"
+  >Pular para o conteúdo</a
+>
+
+<!-- Fundo escurecido do menu no celular -->
+@if (menuAberto()) {
+  <button
+    type="button"
+    class="fixed inset-0 z-30 bg-slate-950/40 lg:hidden"
+    aria-label="Fechar menu"
+    (click)="fecharMenu()"
+  ></button>
+}
+
+<aside
+  id="menu-lateral"
+  class="fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-line bg-surface transition-transform duration-200 lg:translate-x-0"
+  [class.-translate-x-full]="!menuAberto()"
+  aria-label="Navegação principal"
+>
+  <div class="flex h-16 items-center gap-2.5 border-b border-line px-5">
+    <i class="fa-solid fa-mountain-sun text-xl text-accent" aria-hidden="true"></i>
+    <span class="text-lg font-bold tracking-tight">Mirante</span>
+  </div>
+
+  <nav class="flex-1 overflow-y-auto px-3 py-5">
+    @for (grupo of navegacao; track grupo.titulo) {
+      <p class="mb-2 px-3 text-xs font-semibold tracking-wider text-muted uppercase">
+        {{ grupo.titulo }}
+      </p>
+      <ul class="mb-6 grid gap-0.5">
+        @for (item of grupo.itens; track item.rota) {
+          <li>
+            <a
+              [routerLink]="item.rota"
+              routerLinkActive="bg-accent-soft font-semibold text-accent-ink"
+              #link="routerLinkActive"
+              [attr.aria-current]="link.isActive ? 'page' : null"
+              class="flex min-h-10 items-center gap-3 rounded-lg px-3 text-sm transition-colors hover:bg-sunken"
+            >
+              <i class="fa-solid w-4 text-center" [class]="item.icone" aria-hidden="true"></i>
+              {{ item.rotulo }}
+            </a>
+          </li>
+        }
+      </ul>
+    }
+  </nav>
+
+  <div class="border-t border-line px-5 py-4 text-xs text-muted">
+    <p>Dados abertos, sem login.</p>
+    <a
+      href="https://github.com/felipemarcianodev/apresentacao-dashboard-angular"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="mt-1 inline-flex items-center gap-1.5 font-medium text-fg hover:text-accent"
+    >
+      <i class="fa-brands fa-github" aria-hidden="true"></i> Código no GitHub
+    </a>
+  </div>
+</aside>
+
+<div class="lg:pl-64">
+  <header
+    class="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-line bg-surface/85 px-4 backdrop-blur sm:px-6"
+  >
+    <button
+      type="button"
+      class="grid size-10 place-items-center rounded-lg text-muted hover:bg-sunken hover:text-fg lg:hidden"
+      aria-controls="menu-lateral"
+      [attr.aria-expanded]="menuAberto()"
+      aria-label="Abrir menu"
+      (click)="alternarMenu()"
+    >
+      <i class="fa-solid fa-bars" aria-hidden="true"></i>
+    </button>
+    <h1 class="truncate text-base font-semibold">{{ titulo() }}</h1>
+    <div class="ml-auto">
+      <mi-theme-toggle />
+    </div>
+  </header>
+
+  <main id="conteudo" class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:py-8">
+    <router-outlet />
+  </main>
+</div>

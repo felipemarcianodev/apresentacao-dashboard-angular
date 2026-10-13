@@ -49,15 +49,24 @@ package.json                   -> scripts start, build:deploy, test:ci
 docs/                          -> documentação; plano-reconstrucao.md é local e não vai para o git
 .claude/skills/executar-plano-faseado/ -> executa o plano fase a fase com os portões
 .claude/agents/seguranca-angular.md    -> auditor de segurança Angular (angular.dev/best-practices/security)
-public/                        -> arquivos estáticos (favicon)
+public/
+  favicon.ico
+  theme-init.js                -> aplica .dark antes do Angular subir (evita piscar); arquivo estático por causa da CSP
 src/
-  index.html                   -> documento base (lang pt-BR)
+  index.html                   -> documento base (lang pt-BR), carrega theme-init.js
   main.ts                      -> bootstrap da aplicação
-  styles.css                   -> @import tailwindcss + @theme (tokens de design)
+  styles.css                   -> @import tailwindcss + @theme: escala primary do blog, tokens de superfície
+                                  (bg, surface, sunken, fg, muted, line, grid), accent e semânticas (up, down,
+                                  warn, violet); valores escuros em .dark; foco visível e reduced-motion
   app/
-    app.ts | app.html          -> componente raiz (mi-root)
-    app.config.ts              -> providers: zoneless, router, erros globais
-    app.routes.ts              -> rotas
+    app.ts                     -> componente raiz (mi-root), só monta o shell
+    app.config.ts              -> providers: zoneless, router com withComponentInputBinding, erros globais
+    app.routes.ts              -> rotas lazy /ibge, /bcb, /ipea, /ui; data.titulo vira o título da topbar
+    core/theme/theme-preference.ts -> ThemePreference: signal tema (light, dark, system), classe .dark, localStorage
+    layout/shell/              -> Shell: sidebar (drawer no mobile), topbar com título da rota, router-outlet
+      navegacao.ts             -> NAVEGACAO: grupos Painéis e Kit com rota, rótulo e ícone Font Awesome
+    layout/theme-toggle/       -> ThemeToggle: radiogroup claro, escuro e sistema
+    dashboards/em-breve/       -> EmBreve: página provisória de painel ainda não construído
 ```
 
 ## Angular Style Guide (regra bloqueante)

@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Shell } from './layout/shell/shell';
 
 @Component({
   selector: 'mi-root',
-  imports: [RouterOutlet],
-  templateUrl: './app.html',
+  imports: [Shell],
+  template: '<mi-shell />',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {}
