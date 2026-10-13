@@ -44,7 +44,8 @@ Regra: **nenhum número inventado.** Toda tela mostra a fonte e a data de refer�
 CLAUDE.md                      -> este arquivo (regras e mapa)
 README.md                      -> apresentação pública do projeto
 .gitignore                     -> padrão do Angular CLI + plano faseado local de docs/
-.github/dependabot.yml         -> atualizações semanais do npm (Angular, testes e Tailwind em grupos) e das
+.github/dependabot.yml         -> atualizações semanais do npm (Angular, testes e Tailwind em grupos; versão maior do
+                                  Angular e do TypeScript fica para o ng update) e das
                                   imagens base do docker/ (só digest novo; troca de versão do nginx e maior do
                                   Node fica manual), com PR contra a main
 .postcssrc.json                -> liga o Tailwind v4 (@tailwindcss/postcss) ao build do Angular

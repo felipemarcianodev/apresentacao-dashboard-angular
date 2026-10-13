@@ -9,6 +9,15 @@ updates:
       day: monday
       timezone: America/Sao_Paulo
     open-pull-requests-limit: 5
+    # Versão maior do Angular (e o TypeScript que vem junto) se atualiza com ng update, que roda
+    # as migrações; o Dependabot só traz versão menor e correção.
+    ignore:
+      - dependency-name: '@angular/*'
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@angular-devkit/*'
+        update-types: ['version-update:semver-major']
+      - dependency-name: typescript
+        update-types: ['version-update:semver-major', 'version-update:semver-minor']
     groups:
       angular:
         patterns: ['@angular/*', '@angular-devkit/*', 'typescript']
