@@ -55,13 +55,15 @@ steps:
       set -e
       npm ci --ignore-scripts
       npm audit --omit=dev --audit-level=high
-    displayName: "Dependências e npm audit (produção)"
+    displayName: "Front: dependências e npm audit (produção)"
+    workingDirectory: frontend
 
   - script: |
       set -e
       npm run test:ci
       npm run build:deploy
-    displayName: "Testes unitários e build de produção"
+    displayName: "Front: testes unitários e build de produção"
+    workingDirectory: frontend
 
   - task: UseDotNet@2
     displayName: "Instalar .NET 10"
@@ -71,12 +73,12 @@ steps:
 
   - script: |
       set -e
-      cd backend
       dotnet build Mirante.slnx -c Release
       # De dentro de backend/: o global.json liga o Microsoft Testing Platform. A integração
       # usa o Docker do agente (Testcontainers).
       dotnet test --solution Mirante.slnx -c Release --no-build
     displayName: "Backend: build e testes (unidade e integração)"
+    workingDirectory: backend
 
   - script: |
       set -e
@@ -90,6 +92,7 @@ steps:
       docker run -d --name mirante-e2e -p 8092:80 mirante-web:latest
       npx playwright install --with-deps chromium
       for i in $(seq 1 20); do curl -fsS http://localhost:8092/health && break; sleep 1; done
+      cd frontend
       E2E_BASE_URL=http://localhost:8092 CI=1 npx playwright test
     displayName: "E2E contra o container (CSP e headers de produção)"
     condition: and(succeeded(), eq('${{ parameters.rodarE2e }}', 'true'))

@@ -12,22 +12,25 @@ description: Executa um plano faseado em markdown do Mirante (`docs/plano-*.md` 
 - **Commit** no padrão do `CLAUDE.md` ("Padrão de commits"): `tipo(escopo): descrição` em português com acentuação, texto puro, corpo com o motivo e os números reais de teste, **sem** `Co-Authored-By` nem assinatura de IA. Adicionar arquivo por caminho, só o que a fase tocou (conferir `git status` e deixar de fora mudança do usuário). Push no branch de trabalho (a `main` é protegida e só recebe PR), nunca `--force`.
 - **Não mexer no estado do git para investigar** (stash, reset, checkout de arquivo, restore). Ler com `git show`, `git diff`, `git log`.
 - **Status no plano:** marcar a fase `[x]`, registrar o que foi feito e sub-itens descobertos como `[ ]`. O plano em `docs/` pode ser local (fora do git): nesse caso, atualizar o arquivo e não tentar commitá-lo.
-- **Mapa do `CLAUDE.md` no mesmo commit** quando a fase criar, mover ou remover arquivo relevante.
+- **Documentação viva no mesmo commit:** o `CLAUDE.md` (mapa e regras) e o `README.md` de cada área tocada (`frontend/`, `backend/`, `docker/`) acompanham o código; contrato entre front e API atualizado nos dois lados.
 - **Componente novo do kit entra documentado** na galeria `/ui` (arquivo `*.doc.ts` ao lado do componente) no mesmo commit.
 
 ## Portões de cada fase
 
 Rodar um build pesado de cada vez; nada em paralelo ao Playwright.
 
+Comandos do front rodam de dentro de `frontend/`; os do backend, de dentro de `backend/`.
+
 1. Frontend: `npm run build:deploy` sem erro nem warning novo.
 2. Frontend: `npm run test:ci` com 0 falhas. Fase que cria lógica (escala de gráfico, formatação, mapeamento de API) cria o teste junto.
 3. E2E (a partir da fase de qualidade): `npx playwright test` das telas tocadas; suíte inteira no fim do plano. Se não rodou, dizer no resumo e por quê.
-4. Backend (quando existir): `dotnet build backend/Mirante.slnx` com 0 erros, `dotnet test` dos projetos de unidade e **suíte de integração inteira** (Testcontainers, Docker de pé). Rodar só o teste que falhou não conta.
-5. Segurança: se a fase tocou HTML dinâmico, URL vinda de API, interceptor ou dependência, rodar o agente `seguranca-angular` sobre o diff antes do commit.
+4. Backend: `dotnet build Mirante.slnx` com 0 avisos, `dotnet test` dos projetos de unidade e **suíte de integração inteira** (Testcontainers, Docker de pé). Rodar só o teste que falhou não conta.
+5. Segurança: se a fase tocou HTML dinâmico, URL vinda de API, interceptor ou dependência, rodar o agente `seguranca-angular` sobre o diff antes do commit; se tocou o backend (validação, cache, proteção), uma revisão de segurança do backend.
+6. Documentação: o diff da fase traz o `CLAUDE.md` e o `README.md` de cada área tocada atualizados. Sem isso a fase não fecha.
 
 ## Antes de começar
 
-1. Ler o plano inteiro e o `CLAUDE.md` (regras bloqueantes, style guide, mapa, commits).
+1. Ler o plano inteiro, o `CLAUDE.md` da raiz (regras gerais, commits) e o `CLAUDE.md` de cada área que a fase vai tocar (mapa, regras).
 2. Confirmar o estado: `git status` (separar o que é do usuário), `git fetch` e branch de trabalho alinhado com o remoto.
 3. Se o plano tiver decisão em aberto que muda o desenho, perguntar uma vez, agrupado, antes da primeira fase.
 
