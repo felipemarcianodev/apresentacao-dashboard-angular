@@ -53,7 +53,8 @@ VERSION                        -> versão semântica do Mirante
 azure-pipelines.yml            -> release/*: npm audit, unitários, build, imagem, E2E contra o container, envio
                                   da imagem por scp e troca do container na VPS (variable group mirante-producao)
 docker/
-  Dockerfile.web               -> build no node:22-alpine, entrega no nginx:1.27-alpine, healthcheck em /health
+  Dockerfile.web               -> build no node:22-alpine, entrega no nginx:1.30-alpine (ambos fixados por digest),
+                                  healthcheck em /health
   Dockerfile.web.dockerignore  -> evita levar node_modules, dist e e2e do host para a imagem
   nginx/nginx.conf             -> SPA com try_files, gzip (inclusive atrás da borda, HTTP/1.0), cache imutável
                                   para arquivos com hash e no-cache para o resto
