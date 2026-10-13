@@ -9,16 +9,19 @@ using Mirante.Fontes;
 namespace Mirante.Testes.Integracao;
 
 /// <summary>
-/// A API de verdade, em memória, apontando para as conexões informadas. Com <paramref name="fontes"/>,
-/// as três fontes oficiais respondem pelo simulador (nenhum teste bate na rede).
+/// A API de verdade, em memória, apontando para as conexões informadas. As três fontes oficiais
+/// respondem pelo simulador (nenhum teste bate na rede). Cada instância tem o próprio prefixo de
+/// chave no Redis e na reserva, a não ser que o teste passe um para compartilhar.
 /// </summary>
-public sealed class ApiDeTeste(string postgres, string redis, FontesSimuladas? fontes = null) : WebApplicationFactory<Program>
+public sealed class ApiDeTeste(string postgres, string redis, FontesSimuladas? fontes = null, string? prefixo = null)
+    : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testes");
         builder.UseSetting("ConnectionStrings:Postgres", postgres);
         builder.UseSetting("ConnectionStrings:Redis", redis);
+        builder.UseSetting("Cache:Prefixo", prefixo ?? $"teste-{Guid.NewGuid():N}:");
         // Só avisos e erros no log dos testes: a saída fica legível quando algo falha.
         builder.ConfigureLogging(logging => logging.SetMinimumLevel(LogLevel.Warning));
 

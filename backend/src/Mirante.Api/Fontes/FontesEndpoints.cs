@@ -14,24 +14,24 @@ public static class FontesEndpoints
         var api = app.MapGroup("/api");
 
         api.MapGet("/ibge/agregados/{agregado:int}/periodos/{periodos}/variaveis/{variaveis}",
-            (int agregado, string periodos, string variaveis, string? localidades, ClienteDasFontes fontes, HttpContext contexto) =>
-                Responder(ConsultaIbge.Validar(agregado, periodos, variaveis, localidades), fontes, contexto));
+            (int agregado, string periodos, string variaveis, string? localidades, ConsultasComCache consultas, HttpContext contexto) =>
+                Responder(ConsultaIbge.Validar(agregado, periodos, variaveis, localidades), consultas, contexto));
 
         api.MapGet("/bcb/serie/{serie}/dados",
-            (string serie, string? formato, string? dataInicial, string? dataFinal, ClienteDasFontes fontes, TimeProvider relogio, HttpContext contexto) =>
+            (string serie, string? formato, string? dataInicial, string? dataFinal, ConsultasComCache consultas, TimeProvider relogio, HttpContext contexto) =>
                 Responder(
                     ConsultaBcb.Validar(serie, formato, dataInicial, dataFinal, DateOnly.FromDateTime(relogio.GetUtcNow().UtcDateTime)),
-                    fontes,
+                    consultas,
                     contexto));
 
         api.MapGet("/ipea/odata4/{recurso}",
-            (string recurso, ClienteDasFontes fontes, HttpContext contexto) =>
-                Responder(ConsultaIpea.Validar(recurso, contexto.Request.Query["$select"]), fontes, contexto));
+            (string recurso, ConsultasComCache consultas, HttpContext contexto) =>
+                Responder(ConsultaIpea.Validar(recurso, contexto.Request.Query["$select"]), consultas, contexto));
 
         return app;
     }
 
-    private static async Task<IResult> Responder(Validacao validacao, ClienteDasFontes fontes, HttpContext contexto)
+    private static async Task<IResult> Responder(Validacao validacao, ConsultasComCache consultas, HttpContext contexto)
     {
         if (validacao.Consulta is not { } consulta)
         {
@@ -42,10 +42,13 @@ public static class FontesEndpoints
 
         try
         {
-            var json = await fontes.BuscarAsync(consulta, contexto.RequestAborted);
-            contexto.Response.Headers["X-Mirante-Origem"] = "fonte";
-            contexto.Response.Headers["X-Mirante-Obtido-Em"] = DateTimeOffset.UtcNow.ToString("O", CultureInfo.InvariantCulture);
-            return Results.Text(json, "application/json; charset=utf-8");
+            var resposta = await consultas.ObterAsync(consulta, contexto.RequestAborted);
+            var cabecalhos = contexto.Response.Headers;
+            cabecalhos["X-Mirante-Origem"] = resposta.Origem.ToString().ToLowerInvariant();
+            cabecalhos["X-Mirante-Obtido-Em"] = resposta.ObtidoEm.ToString("O", CultureInfo.InvariantCulture);
+            // O navegador guarda por pouco tempo; dado da reserva, nem isso: a fonte pode voltar já.
+            cabecalhos.CacheControl = resposta.Origem == Origem.Reserva ? "no-store" : "public, max-age=300";
+            return Results.Text(resposta.Json, "application/json; charset=utf-8");
         }
         catch (FonteIndisponivelException)
         {
