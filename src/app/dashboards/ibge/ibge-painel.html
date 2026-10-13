@@ -1,0 +1,128 @@
+<div class="grid gap-6">
+  <header class="flex flex-wrap items-end justify-between gap-4">
+    <div class="grid gap-1.5">
+      <div class="flex flex-wrap items-center gap-2">
+        <h2 class="text-2xl font-bold tracking-tight">{{ nomeLocal() }} em números</h2>
+        @if (ufSelecionada(); as uf) {
+          <mi-badge tom="info">{{ uf.regiao }}</mi-badge>
+        }
+      </div>
+      <p class="max-w-2xl text-sm text-muted">
+        Dados abertos do IBGE, consultados agora na API de agregados. Clique numa UF do mapa ou escolha na lista
+        para ver o recorte.
+      </p>
+    </div>
+    <label class="grid gap-1 text-xs font-semibold text-muted">
+      Localidade
+      <select
+        class="min-h-10 rounded-lg border border-line bg-surface px-3 text-sm font-normal text-fg focus:border-accent focus:outline-none"
+        (change)="escolherUfNaLista($event)"
+      >
+        <option value="" [selected]="!ufSelecionada()">Brasil</option>
+        @for (uf of ufs; track uf.sigla) {
+          <option [value]="uf.sigla" [selected]="ufSelecionada()?.sigla === uf.sigla">{{ uf.nome }}</option>
+        }
+      </select>
+    </label>
+  </header>
+
+  <!-- Indicadores -->
+  <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Indicadores principais">
+    @for (kpi of kpis(); track kpi.id) {
+      @if (kpi.resumo; as resumo) {
+        <mi-kpi-card
+          [rotulo]="kpi.rotulo"
+          [valor]="resumo.valor"
+          [formato]="kpi.formato"
+          [variacao]="resumo.variacao"
+          [formatoVariacao]="kpi.formatoVariacao"
+          [rotuloVariacao]="resumo.rotuloVariacao"
+          [sentidoBom]="kpi.sentidoBom"
+          [serie]="resumo.serie"
+          [referencia]="kpi.id === 'ipca' && ufSelecionada() ? resumo.referencia + ' · índice nacional' : resumo.referencia"
+        />
+      } @else if (kpi.recurso.error()) {
+        <div class="rounded-xl border border-line bg-surface">
+          <mi-error-state [titulo]="kpi.rotulo + ' indisponível'" descricao="O IBGE não respondeu." (tentarDeNovo)="kpi.recurso.reload()" />
+        </div>
+      } @else if (kpi.recurso.isLoading()) {
+        <div class="grid gap-3 rounded-xl border border-line bg-surface p-4" aria-busy="true">
+          <mi-skeleton class="h-3 w-28" />
+          <mi-skeleton class="h-8 w-36" />
+          <mi-skeleton class="h-3 w-24" />
+        </div>
+      } @else {
+        <div class="grid place-items-center rounded-xl border border-line bg-surface p-4 text-center text-sm text-muted">
+          {{ kpi.rotulo }}: sem dado para {{ nomeLocal() }}.
+        </div>
+      }
+    }
+  </section>
+
+  <!-- Séries históricas -->
+  <section class="grid gap-4 lg:grid-cols-2" aria-label="Séries históricas">
+    <mi-card
+      titulo="Taxa de desocupação"
+      [descricao]="ufSelecionada() ? 'Brasil e ' + ufSelecionada()!.nome + ', últimos 12 trimestres, em %' : 'Últimos 12 trimestres, em %'"
+      [fonte]="fonteDesocupacao"
+    >
+      @if (seriesDesocupacao().length) {
+        <mi-line-chart rotulo="Taxa de desocupação por trimestre, em %" formato="percentual" [series]="seriesDesocupacao()" [altura]="240" />
+      } @else if (recursos.desocupacao.error()) {
+        <mi-error-state (tentarDeNovo)="recursos.desocupacao.reload()" />
+      } @else {
+        <mi-skeleton class="h-60" />
+      }
+    </mi-card>
+
+    <mi-card titulo="IPCA acumulado em 12 meses" descricao="Inflação oficial, índice nacional, em %" [fonte]="fonteIpca">
+      @if (seriesIpca().length) {
+        <mi-line-chart rotulo="IPCA acumulado em 12 meses, em %" formato="percentual" [series]="seriesIpca()" [altura]="240" />
+      } @else if (ipca.error()) {
+        <mi-error-state (tentarDeNovo)="ipca.reload()" />
+      } @else {
+        <mi-skeleton class="h-60" />
+      }
+    </mi-card>
+  </section>
+
+  <!-- Panorama por UF -->
+  <mi-card
+    titulo="Panorama por UF"
+    [descricao]="definicaoMapa().nome + (referenciaMapa() ? ', ' + referenciaMapa() : '')"
+    [fonte]="definicaoMapa().fonte"
+  >
+    <mi-segmented acoes rotulo="Indicador do mapa" [opcoes]="opcoesMapa" [(valor)]="indicadorMapa" />
+    @if (recursoMapa().hasValue()) {
+      <div class="grid gap-8 lg:grid-cols-[3fr_2fr]">
+        <mi-mapa-uf
+          [rotulo]="definicaoMapa().nome + ' por UF'"
+          [formato]="definicaoMapa().formatoTabela"
+          [valores]="valoresMapa()"
+          [selecionada]="ufSelecionada()?.sigla ?? null"
+          (selecionar)="alternarUfNoMapa($event)"
+        />
+        <div class="grid content-start gap-3">
+          <h3 class="text-sm font-semibold">10 maiores</h3>
+          <mi-bar-list [itens]="ranking()" [formato]="definicaoMapa().formatoTabela" [limite]="10" />
+        </div>
+      </div>
+    } @else if (recursoMapa().error()) {
+      <mi-error-state (tentarDeNovo)="recursoMapa().reload()" />
+    } @else {
+      <mi-skeleton class="h-96" />
+    }
+  </mi-card>
+
+  <!-- Tabela -->
+  <mi-card titulo="Unidades da federação" descricao="Valor mais recente de cada indicador" [fonte]="'IBGE, ' + fontesTabela">
+    <mi-data-table
+      rotulo="Indicadores do IBGE por unidade da federação"
+      [linhas]="linhasTabela()"
+      [colunas]="colunasTabela"
+      [tamanhoPagina]="9"
+      exportavel
+      nomeArquivo="ibge-indicadores-por-uf"
+    />
+  </mi-card>
+</div>
