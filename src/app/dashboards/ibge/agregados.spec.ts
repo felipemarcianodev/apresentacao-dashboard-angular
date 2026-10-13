@@ -19,7 +19,7 @@ const RESPOSTA: RespostaVariavel[] = [
 describe('agregados do IBGE', () => {
   it('monta a URL com períodos, variáveis e níveis', () => {
     expect(urlAgregado({ agregado: 4099, variaveis: [4099], periodos: -12, localidades: ['N1', 'N3'] })).toBe(
-      'https://servicodados.ibge.gov.br/api/v3/agregados/4099/periodos/-12/variaveis/4099?localidades=N1[all]|N3[all]',
+      '/api/ibge/agregados/4099/periodos/-12/variaveis/4099?localidades=N1[all]|N3[all]',
     );
     expect(urlAgregado({ agregado: 1737, variaveis: [2265, 63], periodos: ['202608', '202609'], localidades: ['N1'] })).toContain(
       '/1737/periodos/202608|202609/variaveis/2265|63?localidades=N1[all]',

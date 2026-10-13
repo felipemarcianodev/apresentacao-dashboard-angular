@@ -27,12 +27,12 @@ describe('IpeaPainel', () => {
     });
   });
 
-  async function montar() {
+  async function montar(cabecalhos: Record<string, string> = {}) {
     const fixture = TestBed.createComponent(IpeaPainel);
     TestBed.tick();
     const http = TestBed.inject(HttpTestingController);
     const requisicoes = http.match((r) => r.url.startsWith(BASE_IPEADATA));
-    requisicoes.forEach((r) => r.flush(RESPOSTAS[codigoDa(r)]));
+    requisicoes.forEach((r) => r.flush(RESPOSTAS[codigoDa(r)], { headers: cabecalhos }));
     await fixture.whenStable();
     return { fixture, http, requisicoes, html: fixture.nativeElement as HTMLElement };
   }
@@ -40,6 +40,18 @@ describe('IpeaPainel', () => {
   it('consulta as quatro séries uma única vez', async () => {
     const { requisicoes } = await montar();
     expect(requisicoes.map(codigoDa).sort()).toEqual(['GAC12_SALMINRE12', 'GAC_PIBCAPUSN', 'PNADS_GINI', 'SCN10_PIBG10']);
+  });
+
+  it('sem aviso quando os dados vêm da fonte ou do cache', async () => {
+    const { html } = await montar({ 'X-Mirante-Origem': 'cache' });
+    expect(html.querySelector('mi-aviso-de-reserva')).toBeNull();
+  });
+
+  it('avisa com a data quando a API serviu a reserva (fonte fora do ar)', async () => {
+    const { html } = await montar({ 'X-Mirante-Origem': 'reserva', 'X-Mirante-Obtido-Em': '2026-10-12T21:30:00+00:00' });
+    const aviso = html.querySelector('mi-aviso-de-reserva [role="status"]')!;
+    expect(aviso.textContent).toContain('Dado guardado');
+    expect(aviso.textContent).toContain('12/10/2026, 18:30');
   });
 
   it('mostra os indicadores com a unidade certa', async () => {

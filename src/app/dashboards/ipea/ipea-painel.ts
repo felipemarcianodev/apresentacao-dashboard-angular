@@ -11,6 +11,8 @@ import { OpcaoSegmented, Segmented } from '../../ui/segmented/segmented';
 import { Skeleton } from '../../ui/skeleton/skeleton';
 import { PontoIpea, lerValores, urlValores } from './ipeadata';
 import { IdSerieIpea, ResumoIpea, SERIES_IPEA, resumirIpea } from './series';
+import { obtidoNaReserva } from '../../core/dados/origem';
+import { AvisoDeReserva } from '../aviso-de-reserva/aviso-de-reserva';
 
 type Desde = '1995' | '1980' | '1900';
 
@@ -25,7 +27,7 @@ interface LinhaAno {
  */
 @Component({
   selector: 'mi-ipea-painel',
-  imports: [KpiCard, LineChart, DataTable, Card, Segmented, Skeleton, ErrorState],
+  imports: [AvisoDeReserva, KpiCard, LineChart, DataTable, Card, Segmented, Skeleton, ErrorState],
   templateUrl: './ipea-painel.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -43,6 +45,7 @@ export class IpeaPainel {
       httpResource<PontoIpea[]>(() => urlValores(serie.codigo), { parse: lerValores }),
     ]),
   ) as Record<IdSerieIpea, HttpResourceRef<PontoIpea[] | undefined>>;
+  protected readonly obtidoNaReserva = computed(() => obtidoNaReserva(Object.values(this.recursos)));
 
   private readonly resumos = Object.fromEntries(
     SERIES_IPEA.map((serie) => [

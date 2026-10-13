@@ -5,7 +5,7 @@ const HOJE = new Date(2026, 9, 12);
 describe('SGS do Banco Central', () => {
   it('monta a URL com janela de datas no formato da API', () => {
     expect(urlSerie(432, new Date(2025, 9, 1), HOJE)).toBe(
-      'https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados?formato=json&dataInicial=01/10/2025&dataFinal=12/10/2026',
+      '/api/bcb/serie/bcdata.sgs.432/dados?formato=json&dataInicial=01/10/2025&dataFinal=12/10/2026',
     );
   });
 

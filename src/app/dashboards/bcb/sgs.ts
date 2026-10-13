@@ -4,7 +4,11 @@
  * consulta "últimos N" aceita no máximo 20 valores. Por isso o painel sempre pede por data.
  */
 
-export const BASE_SGS = 'https://api.bcb.gov.br/dados/serie/bcdata.sgs';
+/**
+ * A API do Mirante, na mesma origem do site, responde pelo SGS no mesmo caminho (com cache e
+ * reserva); só aceita as janelas que o painel pede (1, 2 ou 5 anos até hoje).
+ */
+export const BASE_SGS = '/api/bcb/serie/bcdata.sgs';
 
 /** Formato devolvido pela API: data em dd/mm/aaaa e valor como texto. */
 export interface RespostaSgs {

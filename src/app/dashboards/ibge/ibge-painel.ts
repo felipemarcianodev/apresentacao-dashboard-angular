@@ -16,6 +16,8 @@ import { OpcaoSegmented, Segmented } from '../../ui/segmented/segmented';
 import { Skeleton } from '../../ui/skeleton/skeleton';
 import { ConsultaAgregado, RespostaVariavel, VariavelLida, lerAgregado, urlAgregado } from './agregados';
 import { ID_BRASIL, INDICADORES_UF, IPCA, IdIndicadorUf, IndicadorUf, resumir, valoresPorUf } from './indicadores';
+import { obtidoNaReserva } from '../../core/dados/origem';
+import { AvisoDeReserva } from '../aviso-de-reserva/aviso-de-reserva';
 
 type Agregado = ReadonlyMap<string, VariavelLida>;
 
@@ -40,7 +42,7 @@ const INDICADOR = Object.fromEntries(INDICADORES_UF.map((i) => [i.id, i])) as Re
  */
 @Component({
   selector: 'mi-ibge-painel',
-  imports: [KpiCard, LineChart, MapaUf, BarList, DataTable, Card, Badge, Segmented, Skeleton, ErrorState],
+  imports: [AvisoDeReserva, KpiCard, LineChart, MapaUf, BarList, DataTable, Card, Badge, Segmented, Skeleton, ErrorState],
   templateUrl: './ibge-painel.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -60,6 +62,7 @@ export class IbgePainel {
     pib: recursoAgregado(INDICADOR.pib.consulta),
   };
   protected readonly ipca = recursoAgregado(IPCA.consulta);
+  protected readonly obtidoNaReserva = computed(() => obtidoNaReserva([...Object.values(this.recursos), this.ipca]));
 
   protected readonly ufSelecionada = computed(() => ufPorSigla(this.uf()) ?? null);
   private readonly localidade = computed(() => this.ufSelecionada()?.codigo ?? ID_BRASIL);

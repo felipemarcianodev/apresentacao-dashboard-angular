@@ -8,7 +8,7 @@ const GINI = SERIES_IPEA.find((s) => s.id === 'gini')!;
 describe('Ipeadata', () => {
   it('monta a URL da série e recusa código fora do padrão', () => {
     expect(urlValores('PNADS_GINI')).toBe(
-      "https://www.ipeadata.gov.br/api/odata4/ValoresSerie(SERCODIGO='PNADS_GINI')?$select=VALDATA,VALVALOR",
+      "/api/ipea/odata4/ValoresSerie(SERCODIGO='PNADS_GINI')?$select=VALDATA,VALVALOR",
     );
     expect(() => urlValores("X')/Metadados?$top=1&a=('")).toThrow();
   });
