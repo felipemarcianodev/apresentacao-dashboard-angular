@@ -67,6 +67,20 @@ src/
       navegacao.ts             -> NAVEGACAO: grupos Painéis e Kit com rota, rótulo e ícone Font Awesome
     layout/theme-toggle/       -> ThemeToggle: radiogroup claro, escuro e sistema
     dashboards/em-breve/       -> EmBreve: página provisória de painel ainda não construído
+    ui/                        -> primitivos do kit, um por pasta (componente, template, spec, doc)
+      button/                  -> Button: seletor button[miButton], a[miButton]; variante, tamanho, icone, carregando
+      badge/                   -> Badge (mi-badge): tom semântico e ícone
+      card/                    -> Card (mi-card): título, descrição, slot [acoes], rodapé "Fonte:"
+      segmented/               -> Segmented (mi-segmented): radiogroup com model() valor e navegação por setas
+      skeleton/                -> Skeleton (mi-skeleton): bloco ou linhas de texto; tamanho por classe de quem usa
+      empty-state/             -> EmptyState (mi-empty-state): ícone, título, descrição e ação projetada
+      error-state/             -> ErrorState (mi-error-state): role alert e output tentarDeNovo
+    galeria/                   -> documentação do kit em /ui (lazy, galeria.routes.ts)
+      component-doc.model.ts   -> ComponentDoc, PropriedadeDoc, ExemploDoc
+      docs.ts                  -> DOCS: registro de todas as documentações; buscarDoc(slug)
+      galeria-indice/          -> /ui: primeiros passos e componentes por categoria
+      pagina-componente/       -> /ui/:slug: descrição, importação, exemplos vivos, API e acessibilidade
+      bloco-codigo/            -> BlocoCodigo: código como texto (nunca HTML) com botão de copiar
 ```
 
 ## Angular Style Guide (regra bloqueante)
@@ -96,6 +110,16 @@ Seguir https://angular.dev/style-guide. Em resumo, o que é cobrado em revisão:
 - **Sem CSS inline** (`style="..."`) em template. Valor dinâmico de gráfico vai por atributo SVG ou `[style.x]` calculado.
 - **Sem biblioteca de componentes** (Material, PrimeNG, DaisyUI) e **sem biblioteca de gráficos** (Chart.js, ECharts): gráficos são SVG próprio.
 - Dark mode por classe `.dark` no `<html>` (variante customizada no `@theme`).
+
+## Componente do kit (regra bloqueante)
+
+Todo componente reaproveitável vive em `src/app/ui/<nome>/` (ou na área de gráficos e dados) com:
+
+- `<nome>.ts` (e `.html` quando o template passa de umas 15 linhas);
+- `<nome>.spec.ts` cobrindo o comportamento (não o visual);
+- `<nome>.doc.ts` exportando um `ComponentDoc`, registrado em `src/app/galeria/docs.ts` no mesmo commit.
+
+No `.doc.ts`, o template de cada exemplo é uma constante usada **ao mesmo tempo** no `@Component({ template })` do exemplo e no campo `codigo` da doc. Assim o código mostrado na galeria é sempre o que roda. A tabela de API lista todo input, model, output e slot de conteúdo; a seção de acessibilidade diz o que o componente garante e o que fica com quem usa.
 
 ## Ícones
 

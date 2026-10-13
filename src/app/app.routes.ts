@@ -26,8 +26,8 @@ export const routes: Routes = [
   {
     path: 'ui',
     title: 'Componentes · Mirante',
-    data: { titulo: 'Componentes', descricao: 'Documentação de cada componente do kit.' },
-    loadComponent: () => import('./dashboards/em-breve/em-breve').then((m) => m.EmBreve),
+    data: { titulo: 'Componentes' },
+    loadChildren: () => import('./galeria/galeria.routes').then((m) => m.GALERIA_ROUTES),
   },
   { path: '**', redirectTo: 'ibge' },
 ];

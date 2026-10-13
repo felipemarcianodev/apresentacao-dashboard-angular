@@ -1,0 +1,96 @@
+@if (doc(); as doc) {
+  <article class="grid max-w-4xl gap-10">
+    <header class="grid gap-3">
+      <a routerLink="/ui" class="inline-flex w-fit items-center gap-1.5 text-sm text-muted hover:text-accent">
+        <i class="fa-solid fa-arrow-left text-xs" aria-hidden="true"></i> Componentes
+      </a>
+      <div class="flex flex-wrap items-center gap-3">
+        <h2 class="text-2xl font-bold tracking-tight sm:text-3xl">{{ doc.nome }}</h2>
+        <mi-badge tom="info">{{ doc.categoria }}</mi-badge>
+      </div>
+      <code class="w-fit rounded bg-sunken px-2 py-1 font-mono text-sm">{{ doc.seletor }}</code>
+      @for (paragrafo of doc.descricao; track $index) {
+        <p class="max-w-prose text-muted">{{ paragrafo }}</p>
+      }
+    </header>
+
+    <section class="grid gap-3" aria-labelledby="titulo-importacao">
+      <h3 id="titulo-importacao" class="text-lg font-semibold">Importação</h3>
+      <mi-bloco-codigo [codigo]="doc.importacao" linguagem="ts" />
+    </section>
+
+    <section class="grid gap-6" aria-labelledby="titulo-exemplos">
+      <h3 id="titulo-exemplos" class="text-lg font-semibold">Exemplos</h3>
+      @for (exemplo of doc.exemplos; track exemplo.titulo) {
+        <div class="grid gap-3">
+          <div>
+            <h4 class="font-semibold">{{ exemplo.titulo }}</h4>
+            @if (exemplo.descricao) {
+              <p class="text-sm text-muted">{{ exemplo.descricao }}</p>
+            }
+          </div>
+          <div class="rounded-xl border border-line bg-bg p-6">
+            <ng-container *ngComponentOutlet="exemplo.componente" />
+          </div>
+          <mi-bloco-codigo [codigo]="exemplo.codigo" />
+        </div>
+      }
+    </section>
+
+    <section class="grid gap-6" aria-labelledby="titulo-api">
+      <h3 id="titulo-api" class="text-lg font-semibold">API</h3>
+      @for (secao of secoesApi(); track secao.titulo) {
+        <div class="grid gap-2">
+          <h4 class="text-sm font-semibold text-muted">{{ secao.titulo }}</h4>
+          <div class="overflow-x-auto rounded-xl border border-line bg-surface">
+            <table class="w-full min-w-[36rem] text-left text-sm">
+              <thead class="border-b border-line text-xs text-muted uppercase">
+                <tr>
+                  <th scope="col" class="px-4 py-2.5 font-semibold">Nome</th>
+                  <th scope="col" class="px-4 py-2.5 font-semibold">Tipo</th>
+                  <th scope="col" class="px-4 py-2.5 font-semibold">Padrão</th>
+                  <th scope="col" class="px-4 py-2.5 font-semibold">Descrição</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-line">
+                @for (prop of secao.propriedades; track prop.nome) {
+                  <tr class="align-top">
+                    <td class="px-4 py-3 font-mono text-xs font-semibold whitespace-nowrap">
+                      {{ prop.nome }}
+                      @if (prop.obrigatoria) {
+                        <span class="ml-1 font-sans font-normal text-down">obrigatório</span>
+                      }
+                    </td>
+                    <td class="px-4 py-3 font-mono text-xs text-accent-ink">{{ prop.tipo }}</td>
+                    <td class="px-4 py-3 font-mono text-xs text-muted">{{ prop.padrao ?? '—' }}</td>
+                    <td class="px-4 py-3 text-muted">{{ prop.descricao }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+    </section>
+
+    <section class="grid gap-3" aria-labelledby="titulo-a11y">
+      <h3 id="titulo-a11y" class="text-lg font-semibold">Acessibilidade</h3>
+      <ul class="grid gap-2">
+        @for (item of doc.acessibilidade; track $index) {
+          <li class="flex gap-2.5 text-sm text-muted">
+            <i class="fa-solid fa-universal-access mt-0.5 text-accent" aria-hidden="true"></i>
+            <span>{{ item }}</span>
+          </li>
+        }
+      </ul>
+    </section>
+  </article>
+} @else {
+  <mi-empty-state
+    icone="fa-shapes"
+    titulo="Componente não encontrado"
+    descricao="O endereço não corresponde a nenhum componente do kit."
+  >
+    <a routerLink="/ui" class="text-sm font-semibold text-accent hover:underline">Ver todos os componentes</a>
+  </mi-empty-state>
+}

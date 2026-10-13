@@ -1,0 +1,19 @@
+<div class="inline-flex rounded-lg border border-line bg-sunken p-0.5" role="radiogroup" [attr.aria-label]="rotulo()">
+  @for (opcao of opcoes(); track opcao.valor; let i = $index) {
+    <button
+      type="button"
+      role="radio"
+      class="min-h-9 rounded-md px-3 text-xs font-semibold transition-colors hover:text-fg"
+      [class.bg-surface]="valor() === opcao.valor"
+      [class.text-fg]="valor() === opcao.valor"
+      [class.shadow-sm]="valor() === opcao.valor"
+      [class.text-muted]="valor() !== opcao.valor"
+      [attr.aria-checked]="valor() === opcao.valor"
+      [attr.tabindex]="valor() === opcao.valor ? 0 : -1"
+      (click)="selecionar(opcao.valor)"
+      (keydown)="moverComTeclado($event, i)"
+    >
+      {{ opcao.rotulo }}
+    </button>
+  }
+</div>
