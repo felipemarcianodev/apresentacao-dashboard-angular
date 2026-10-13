@@ -41,7 +41,8 @@ e2e/                           -> testes de ponta a ponta (Playwright)
                                   endereços das fontes
   gravar-apis.spec.ts          -> regrava o HAR pela API do Mirante (GRAVAR=1, compose de pé); depois, atualizar
                                   DATA_DA_GRAVACAO em apis.ts
-  navegacao.spec.ts            -> menu, título, tema (claro, escuro, sistema), atalho de teclado, gaveta no celular
+  navegacao.spec.ts            -> menu, título, tema (claro, escuro, sistema), atalho de teclado, gaveta no celular,
+                                  barra recolhida no desktop (axe) e barra sem rolagem a 1366x768
   paineis.spec.ts              -> IBGE (UF por lista, URL e mapa; tabela; erro e Tentar de novo), BCB, Ipeadata
                                   (inclusive o aviso de dado guardado, com axe nos dois temas)
   galeria.spec.ts              -> todas as páginas de componente, slug inválido, botão de copiar
@@ -73,10 +74,13 @@ src/
     core/dados/valor-de.ts     -> valorDe(resource): valor ou undefined, sem lançar no estado de erro
     core/dados/origem.ts       -> obtidoNaReserva(recursos): quando a API serviu dado guardado (X-Mirante-Origem
                                   reserva), o momento mais antigo entre eles; null se nenhum
+    core/layout/tela-larga.ts  -> telaLarga(): signal do breakpoint lg (1024 px), via matchMedia
     core/theme/theme-preference.ts -> ThemePreference: signal tema (light, dark, system), classe .dark, localStorage
-    layout/shell/              -> Shell: sidebar (drawer no mobile), topbar com título da rota, router-outlet;
-                                  a gaveta fecha a cada navegação, menos a inicial (aparelho lento); rodapé fixo
-                                  com o link do código e a versão (ligada à tag do GitHub)
+    layout/shell/              -> Shell: sidebar, topbar com título da rota e o MenuHamburguer, router-outlet.
+                                  Celular: o menu abre a gaveta (com o X), que fecha a cada navegação, menos a
+                                  inicial (aparelho lento). Desktop: o menu recolhe a barra numa faixa de ícones
+                                  (nome em sr-only e dica em title), sem virar X. Cabe sem rolar a 1366x768.
+                                  Rodapé fixo com o link do código e a versão (ligada à tag do GitHub)
       navegacao.ts             -> NAVEGACAO: grupos Painéis e Kit com rota, rótulo e ícone Font Awesome
       outros-projetos.ts       -> OUTROS_PROJETOS: Planuz, portfólio e blog, em "Conheça também" (abre em nova aba)
     layout/theme-toggle/       -> ThemeToggle: radiogroup claro, escuro e sistema
@@ -111,6 +115,8 @@ src/
       skeleton/                -> Skeleton (mi-skeleton): bloco ou linhas de texto; tamanho por classe de quem usa
       empty-state/             -> EmptyState (mi-empty-state): ícone, título, descrição e ação projetada
       error-state/             -> ErrorState (mi-error-state): role alert e output tentarDeNovo
+      menu-hamburguer/         -> MenuHamburguer: seletor button[miMenuHamburguer]; aberto, controla, rotulo,
+                                  virarX; três barras que viram X, aria-expanded e aria-controls
     charts/                    -> gráficos do kit (SVG próprio ou HTML), cada um com spec e doc
       escala.ts                -> funções puras: escalaLinear, passoAgradavel, eixoAgradavel, indicesDeRotulo
       largura-do-host.ts       -> larguraDoHost(): largura do elemento, começa em 0 e é medida após a primeira
