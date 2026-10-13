@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "http": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5110",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ConnectionStrings__Postgres": "Host=localhost;Port=5433;Database=mirante;Username=mirante;Password=mirante-local",
+        "ConnectionStrings__Redis": "localhost:6380"
+      }
+    }
+  }
+}

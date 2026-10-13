@@ -28,7 +28,7 @@ Regra: **nenhum número inventado.** Toda tela mostra a fonte e a data de refer�
 
 - **Frontend:** Angular 20 (standalone, zoneless, signals), TypeScript, Tailwind CSS v4 (CSS-first, `@theme`), Font Awesome Free empacotado localmente, fonte Inter auto-hospedada.
 - **Testes:** Karma + Jasmine (ChromeHeadless) para unidade; Playwright + axe-core para E2E, com as APIs gravadas em HAR.
-- **Futuro:** backend .NET 10 + EF Core 10, solução `.slnx`, testes de unidade e de integração (Testcontainers). Quando entrar, os portões da skill `executar-plano-faseado` ganham `dotnet build` e `dotnet test`.
+- **Backend (em construção, plano local `docs/plano-evolucao.md`):** .NET 10, minimal APIs, solução `backend/Mirante.slnx`, EF Core 10 + PostgreSQL (reserva da última resposta boa), Redis (cache), xUnit v3 no Microsoft Testing Platform, Testcontainers nos testes de integração. Os portões da skill `executar-plano-faseado` incluem `dotnet build` e `dotnet test` da solução.
 
 ### Ambientes
 
@@ -36,6 +36,7 @@ Regra: **nenhum número inventado.** Toda tela mostra a fonte e a data de refer�
 |---|---|
 | Local | `http://localhost:4200` (`npm start`) |
 | Container local | `http://localhost:8092` (`docker compose -f docker/docker-compose.yml up -d --build`) |
+| API local | `http://localhost:5110` (`dotnet run --project backend/src/Mirante.Api`, com o Postgres e o Redis do compose); no compose, `http://localhost:8093` |
 | Produção | `https://mirante.felipemarcianodev.com` (VPS do portfólio, atrás do nginx de borda do Planuz) |
 
 ## Mapa de arquivos
@@ -54,7 +55,19 @@ angular.json                   -> projeto "mirante", prefixo mi; estilos globais
 VERSION                        -> versão semântica do Mirante; o build a embute no rodapé da barra lateral
 azure-pipelines.yml            -> release/*: npm audit, unitários, build, imagem, E2E contra o container, envio
                                   da imagem por scp e troca do container na VPS (variable group mirante-producao)
+backend/                       -> API .NET 10 (solução Mirante.slnx)
+  global.json                  -> SDK 10 e executor de testes Microsoft Testing Platform
+  Directory.Build.props        -> net10.0, nullable, avisos como erro, analisadores
+  Directory.Packages.props     -> versões de pacote centralizadas
+  src/Mirante.Api/             -> minimal API: Program, Configuracao/ (Conexoes validadas na subida, Postgres
+                                  e Redis), Saude/ (/health vivo, /health/ready com Postgres e Redis, sem detalhe
+                                  de erro no corpo)
+  src/Mirante.Dados/           -> MiranteDb (EF Core 10, Npgsql): reserva das séries
+  tests/Mirante.Testes.Unidade/    -> xUnit v3, sem rede nem banco
+  tests/Mirante.Testes.Integracao/ -> API real (WebApplicationFactory) com Postgres e Redis em Testcontainers
 docker/
+  Dockerfile.api               -> build no SDK 10 alpine, execução no aspnet 10 alpine sem root, digests fixos
+  Dockerfile.api.dockerignore  -> leva só o backend, sem bin, obj e testes
   Dockerfile.web               -> build no node:22-alpine, entrega no nginx:1.30-alpine (ambos fixados por digest),
                                   healthcheck em /health
   Dockerfile.web.dockerignore  -> evita levar node_modules, dist e e2e do host para a imagem
@@ -62,7 +75,9 @@ docker/
                                   para arquivos com hash e no-cache para o resto
   nginx/seguranca.conf         -> CSP estrita (sem unsafe-inline, Trusted Types, connect-src só nas 3 APIs) e
                                   headers; incluído em cada location
-  docker-compose.yml           -> serviço web (mirante-web), 127.0.0.1:8092, 64 MB, só leitura, sem capacidades extras
+  docker-compose.yml           -> web (127.0.0.1:8092, 64 MB), api (127.0.0.1:8093, 128 MB), postgres (192 MB,
+                                  volume) e redis (64 MB, sem persistência, LRU); só leitura e sem capacidades
+                                  extras onde dá. O deploy atual troca só o web
   docker-compose.prod.yml      -> pluga o web na rede externa edge da VPS
   borda/site-mirante.conf      -> cópia de referência do server block do nginx de borda (vale o do repo planuz)
   setup-letsencrypt-mirante.sh -> emissão inicial do certificado na VPS (volumes do planuz-certbot)
@@ -257,6 +272,8 @@ npm run test:ci        # testes unitários em ChromeHeadless, sem watch (portão
 npm run e2e            # Playwright, desktop e celular (portão das telas tocadas; suíte inteira antes de release)
 GRAVAR=1 npx playwright test gravar-apis --project=desktop   # regrava as respostas das APIs
 E2E_BASE_URL=http://localhost:8092 npx playwright test       # E2E contra a imagem de produção (CSP real)
+dotnet build backend/Mirante.slnx                            # backend, 0 avisos (avisos são erro)
+dotnet test --solution backend/Mirante.slnx                  # unidade e integração (Docker de pé)
 ```
 
 Armadilhas de layout que o E2E pega: `sr-only` direto em `<table>` não funciona (a tabela ignora a largura de 1 px e alarga a página; envolver numa `div.sr-only`), e `grid` sem `grid-cols-1` deixa um `<pre>` largo esticar a coluna. Área com `overflow-x-auto` precisa de `tabindex="0"` para rolar pelo teclado.

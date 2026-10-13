@@ -45,3 +45,42 @@ updates:
     commit-message:
       prefix: build
       include: scope
+
+  - package-ecosystem: nuget
+    directory: /backend
+    schedule:
+      interval: weekly
+      day: monday
+      timezone: America/Sao_Paulo
+    open-pull-requests-limit: 5
+    groups:
+      microsoft:
+        patterns: ['Microsoft.*', 'Npgsql*']
+      testes:
+        patterns: ['xunit*', 'Testcontainers*']
+    # Versão maior do .NET e do EF Core acompanha a troca do SDK, feita à mão.
+    ignore:
+      - dependency-name: 'Microsoft.*'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'Npgsql*'
+        update-types: ['version-update:semver-major']
+    commit-message:
+      prefix: build
+      include: scope
+
+  - package-ecosystem: docker-compose
+    directory: /docker
+    schedule:
+      interval: weekly
+      day: monday
+      timezone: America/Sao_Paulo
+    # Postgres e Redis: só digest novo da mesma versão maior (troca de versão maior do Postgres
+    # exige migrar o volume de dados).
+    ignore:
+      - dependency-name: postgres
+        update-types: ['version-update:semver-major']
+      - dependency-name: redis
+        update-types: ['version-update:semver-major']
+    commit-message:
+      prefix: build
+      include: scope
