@@ -5,6 +5,7 @@
 **/.git
 **/test-results
 **/playwright-report
-e2e
+frontend/e2e
+backend
 docs
 .claude
