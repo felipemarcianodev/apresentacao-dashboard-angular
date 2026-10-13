@@ -2,7 +2,7 @@
 # ============================================
 # Mirante — Emissao inicial de cert Let's Encrypt
 # ============================================
-# Uso: ssh root@<vps>; cd /opt/mirante/docker; bash setup-letsencrypt-mirante.sh
+# Uso: ssh root@<vps>; cd /opt/mirante/docker; LETSENCRYPT_EMAIL=<seu e-mail> bash setup-letsencrypt-mirante.sh
 #
 # O Mirante NAO tem nginx publico proprio: quem detem as portas 80/443 e o nginx
 # do PLANUZ (container planuz-nginx), que roteia por dominio via
@@ -21,7 +21,8 @@
 set -e
 
 DOMAIN="${DOMAIN:-mirante.felipemarcianodev.com}"
-EMAIL="${LETSENCRYPT_EMAIL:-philmarciano84@gmail.com}"
+# E-mail de aviso do Let's Encrypt: obrigatório e fora do repositório (que é público).
+EMAIL="${LETSENCRYPT_EMAIL:?Defina LETSENCRYPT_EMAIL, ex.: LETSENCRYPT_EMAIL=voce@exemplo.com bash setup-letsencrypt-mirante.sh}"
 CERTS_VOL="planuz_certbot-certs"
 WEBROOT_VOL="planuz_certbot-webroot"
 PLANUZ_DIR="${PLANUZ_DIR:-/opt/planuz/docker}"
