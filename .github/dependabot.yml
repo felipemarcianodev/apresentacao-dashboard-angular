@@ -26,6 +26,13 @@ updates:
       interval: weekly
       day: monday
       timezone: America/Sao_Paulo
+    # Só digest novo da mesma linha. Troca de versão do nginx (ímpar é a mainline, não a estável)
+    # e de versão maior do Node é decisão de manutenção, feita à mão.
+    ignore:
+      - dependency-name: nginx
+        update-types: ['version-update:semver-major', 'version-update:semver-minor']
+      - dependency-name: node
+        update-types: ['version-update:semver-major']
     commit-message:
       prefix: build
       include: scope
