@@ -89,6 +89,12 @@ src/
       mapa-uf/                 -> MapaUf (mi-mapa-uf): coroplético por quantil, seleção por clique ou Enter
         projecao.ts            -> projetarMalha (equiretangular), limitesPorQuantil, classeDoValor
         malha-de-teste.ts      -> malha mínima para specs
+    table/                     -> tabela de dados do kit
+      coluna-tabela.model.ts   -> ColunaTabela<T> (id, titulo, valor, formato, alinhamento, ordenavel), Ordenacao
+      operacoes.ts             -> funções puras: textoDaCelula, normalizar (sem acento), filtrarLinhas,
+                                  ordenarLinhas (pt-BR, vazios no fim), gerarCsv (Excel pt-BR com BOM)
+      data-table/              -> DataTable (mi-data-table): busca, aria-sort, paginação com linkedSignal,
+                                  CSV, densidade e cartões abaixo de 640 px
     galeria/                   -> documentação do kit em /ui (lazy, galeria.routes.ts)
       component-doc.model.ts   -> ComponentDoc, PropriedadeDoc, ExemploDoc
       docs.ts                  -> DOCS: registro de todas as documentações; buscarDoc(slug)
@@ -165,7 +171,7 @@ Font Awesome Free (`@fortawesome/fontawesome-free`), empacotado no bundle (sem C
 - Adicionar arquivos **por caminho**, nunca `git add -A` ou `git add .`.
 - Mensagem por heredoc (`git commit -F -`) para preservar a acentuação.
 - **Ao concluir cada etapa coerente, commitar** (build verde por si só). Preferir commit novo a `--amend`, push sem `--force`.
-- A `master` do GitHub é protegida e só aceita pull request: trabalhar num branch (`feat/...`), dar push nele e integrar por PR.
+- A `main` do GitHub (antes `master`) é protegida e só aceita pull request: trabalhar num branch (`feat/...`), dar push nele e integrar por PR.
 
 ## Comandos
 
