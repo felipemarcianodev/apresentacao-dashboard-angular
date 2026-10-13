@@ -9,3 +9,7 @@ frontend/e2e
 backend
 docs
 .claude
+.github
+.vscode
+**/*.md
+docker/.env
