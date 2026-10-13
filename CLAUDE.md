@@ -44,6 +44,8 @@ Regra: **nenhum número inventado.** Toda tela mostra a fonte e a data de refer�
 CLAUDE.md                      -> este arquivo (regras e mapa)
 README.md                      -> apresentação pública do projeto
 .gitignore                     -> padrão do Angular CLI + plano faseado local de docs/
+.github/dependabot.yml         -> atualizações semanais do npm (Angular, testes e Tailwind em grupos) e das
+                                  imagens base do docker/, com PR contra a main
 .postcssrc.json                -> liga o Tailwind v4 (@tailwindcss/postcss) ao build do Angular
 angular.json                   -> projeto "mirante", prefixo mi; estilos globais: Inter, Font Awesome (só o core e
                                   o solid) e src/styles.css; produção sem CSS crítico inline (exigência da CSP)
@@ -51,7 +53,8 @@ VERSION                        -> versão semântica do Mirante
 azure-pipelines.yml            -> release/*: npm audit, unitários, build, imagem, E2E contra o container, envio
                                   da imagem por scp e troca do container na VPS (variable group mirante-producao)
 docker/
-  Dockerfile.web               -> build no node:22-alpine, entrega no nginx:1.27-alpine, healthcheck em /health
+  Dockerfile.web               -> build no node:22-alpine, entrega no nginx:1.30-alpine (ambos fixados por digest),
+                                  healthcheck em /health
   Dockerfile.web.dockerignore  -> evita levar node_modules, dist e e2e do host para a imagem
   nginx/nginx.conf             -> SPA com try_files, gzip (inclusive atrás da borda, HTTP/1.0), cache imutável
                                   para arquivos com hash e no-cache para o resto
@@ -237,7 +240,7 @@ Font Awesome Free (`@fortawesome/fontawesome-free`), empacotado no bundle (sem C
 - Adicionar arquivos **por caminho**, nunca `git add -A` ou `git add .`.
 - Mensagem por heredoc (`git commit -F -`) para preservar a acentuação.
 - **Ao concluir cada etapa coerente, commitar** (build verde por si só). Preferir commit novo a `--amend`, push sem `--force`.
-- A `main` do GitHub (antes `master`) é protegida e só aceita pull request: trabalhar num branch (`feat/...`), dar push nele e integrar por PR.
+- A `main` do GitHub (antes `master`) é protegida e só aceita pull request: trabalhar num branch (`feat/...`), dar push nele e integrar por PR. Nunca mandar nada para `master`.
 
 ## Comandos
 

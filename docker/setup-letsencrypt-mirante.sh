@@ -26,6 +26,9 @@ EMAIL="${LETSENCRYPT_EMAIL:?Defina LETSENCRYPT_EMAIL, ex.: LETSENCRYPT_EMAIL=voc
 CERTS_VOL="planuz_certbot-certs"
 WEBROOT_VOL="planuz_certbot-webroot"
 PLANUZ_DIR="${PLANUZ_DIR:-/opt/planuz/docker}"
+# Versões fixadas: este script roda como root na VPS com acesso ao volume de certificados.
+CERTBOT_IMAGE="certbot/certbot:v5.7.0@sha256:34ee91d2f43008eb78a007d22f23ed4b2eaa9a454cb27ca2c042b49527a695b4"
+ALPINE_IMAGE="alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6"
 
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
@@ -58,7 +61,7 @@ fi
 # existe; qualquer outro código é falha do docker, e aí o script para em vez de sobrescrever um
 # cert real.
 set +e
-docker run --rm -v "${CERTS_VOL}:/etc/letsencrypt:ro" alpine:3 test -f "/etc/letsencrypt/renewal/${DOMAIN}.conf"
+docker run --rm -v "${CERTS_VOL}:/etc/letsencrypt:ro" "${ALPINE_IMAGE}" test -f "/etc/letsencrypt/renewal/${DOMAIN}.conf"
 CERT_RC=$?
 set -e
 case "${CERT_RC}" in
@@ -76,7 +79,7 @@ esac
 cyan "--- 1/4: Gerando cert dummy self-signed ---"
 docker run --rm -v "${CERTS_VOL}:/etc/letsencrypt" \
     --entrypoint /bin/sh \
-    certbot/certbot:latest -c "
+    "${CERTBOT_IMAGE}" -c "
         mkdir -p /etc/letsencrypt/live/${DOMAIN}
         openssl req -x509 -nodes -newkey rsa:2048 \
             -keyout /etc/letsencrypt/live/${DOMAIN}/privkey.pem \
@@ -96,19 +99,19 @@ ok "Nginx do Planuz no ar com o dominio do Mirante."
 cyan "--- 3/4: Emitindo cert real via certbot --webroot ---"
 docker run --rm -v "${CERTS_VOL}:/etc/letsencrypt" \
     --entrypoint /bin/sh \
-    certbot/certbot:latest -c "rm -rf /etc/letsencrypt/live/${DOMAIN} /etc/letsencrypt/archive/${DOMAIN} /etc/letsencrypt/renewal/${DOMAIN}.conf 2>/dev/null || true"
+    "${CERTBOT_IMAGE}" -c "rm -rf /etc/letsencrypt/live/${DOMAIN} /etc/letsencrypt/archive/${DOMAIN} /etc/letsencrypt/renewal/${DOMAIN}.conf 2>/dev/null || true"
 
 if ! docker run --rm \
     -v "${CERTS_VOL}:/etc/letsencrypt" \
     -v "${WEBROOT_VOL}:/var/www/certbot" \
-    certbot/certbot:latest \
+    "${CERTBOT_IMAGE}" \
     certonly --webroot -w /var/www/certbot \
         --email "${EMAIL}" --agree-tos --no-eff-email --non-interactive \
         -d "${DOMAIN}"; then
     fail "Emissao falhou (DNS propagado? porta 80 acessivel?). Restaurando cert dummy para o nginx nao cair."
     docker run --rm -v "${CERTS_VOL}:/etc/letsencrypt" \
         --entrypoint /bin/sh \
-        certbot/certbot:latest -c "
+        "${CERTBOT_IMAGE}" -c "
             mkdir -p /etc/letsencrypt/live/${DOMAIN}
             openssl req -x509 -nodes -newkey rsa:2048 \
                 -keyout /etc/letsencrypt/live/${DOMAIN}/privkey.pem \

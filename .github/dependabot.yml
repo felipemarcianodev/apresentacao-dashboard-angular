@@ -1,0 +1,31 @@
+# Atualizações de dependência pelo Dependabot. Os PRs abrem contra a main e passam pelo mesmo
+# fluxo de revisão; o deploy só acontece num branch release/*.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      timezone: America/Sao_Paulo
+    open-pull-requests-limit: 5
+    groups:
+      angular:
+        patterns: ['@angular/*', '@angular-devkit/*', 'typescript']
+      testes:
+        patterns: ['@playwright/*', '@axe-core/*', 'karma*', 'jasmine*', '@types/jasmine']
+      tailwind:
+        patterns: ['tailwindcss', '@tailwindcss/*', 'postcss']
+    commit-message:
+      prefix: build
+      include: scope
+
+  - package-ecosystem: docker
+    directory: /docker
+    schedule:
+      interval: weekly
+      day: monday
+      timezone: America/Sao_Paulo
+    commit-message:
+      prefix: build
+      include: scope
