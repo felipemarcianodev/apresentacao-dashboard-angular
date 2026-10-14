@@ -172,6 +172,7 @@ Seguir https://angular.dev/style-guide. Em resumo, o que é cobrado em revisão:
 - **Sem CSS inline** (`style="..."`) em template. Valor dinâmico de gráfico vai por atributo SVG ou `[style.x]` calculado.
 - **Sem biblioteca de componentes** (Material, PrimeNG, DaisyUI) e **sem biblioteca de gráficos** (Chart.js, ECharts): gráficos são SVG próprio.
 - Dark mode por classe `.dark` no `<html>` (variante customizada no `@theme`).
+- **Classe com ponto não vai em `[class.x]`:** o Tailwind não gera `translate-y-1.5` escrita como `[class.translate-y-1.5]`. Classe condicional com ponto ou barra fica inteira numa string do TypeScript (um `computed` que devolve a lista de classes).
 
 ## Componente do kit (regra bloqueante)
 
@@ -202,6 +203,7 @@ Font Awesome Free (`@fortawesome/fontawesome-free`), empacotado no bundle (sem C
 - Símbolos de dado ausente das fontes ("-", "...", "X") viram `null` e aparecem como "sem dado", nunca como zero.
 - Cada card com dado preenche `fonte` com o órgão e a tabela de origem; o período de referência aparece junto do número.
 - Testes nunca batem na rede: unidade com `HttpTestingController` e respostas mínimas; E2E com o HAR gravado (tudo fora da origem é bloqueado).
+- Texto de tela não diz que o painel consulta a fonte direto: os dados passam pela API do Mirante.
 
 ## Segurança do front
 
@@ -222,5 +224,9 @@ npm run e2e            # Playwright, desktop e celular (portão das telas tocada
 E2E_BASE_URL=http://localhost:8092 npx playwright test       # E2E contra a imagem de produção (CSP real)
 GRAVAR=1 E2E_BASE_URL=http://localhost:8092 npx playwright test gravar-apis --project=desktop   # regrava o HAR (compose de pé)
 ```
+
+Portão de E2E: a suíte inteira roda contra o container (`E2E_BASE_URL=http://localhost:8092`). Em paralelo contra o `ng serve`, testes estouram o tempo por carga do servidor de desenvolvimento; ali, rodar só as telas tocadas.
+
+Verificação com Playwright (inclusive script avulso): usar asserção que espera (`expect(locator).toHaveAttribute(...)`), nunca ler atributo ou medir tamanho logo depois de um clique. O Angular redesenha em seguida e as transições levam 200 ms.
 
 Armadilhas de layout que o E2E pega: `sr-only` direto em `<table>` não funciona (a tabela ignora a largura de 1 px e alarga a página; envolver numa `div.sr-only`), e `grid` sem `grid-cols-1` deixa um `<pre>` largo esticar a coluna. Área com `overflow-x-auto` precisa de `tabindex="0"` para rolar pelo teclado.

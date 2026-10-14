@@ -24,6 +24,12 @@ Intermediária entre o site e as três fontes oficiais, na mesma origem do site 
 - Log com `LoggerMessage`; nada de cadeia de conexão, corpo de resposta ou exceção no corpo HTTP.
 - Série ou agregado novo: entra em `ListaPermitida` **e** na definição do painel no front, no mesmo PR.
 - Testes nunca batem na rede: as fontes são simuladas (`FontesSimuladas`); Postgres e Redis são reais (Testcontainers).
+- **Isolamento nos testes de integração:** os containers são compartilhados pela suíte, então cada `ApiDeTeste` tem o próprio prefixo de chave (cache e reserva). Para simular cache vazio com a mesma reserva, apontar para outro banco do Redis (`{conexao},defaultDatabase=N`).
+- **Docker de pé:** a integração precisa do Docker Desktop, que pode estar parado depois de reiniciar o PC. Erro `DockerUnavailableException` é ambiente, não código.
+- **Horário no Postgres:** `timestamptz` guarda até o microssegundo; o .NET tem décimos de microssegundo. Arredondar antes de comparar (a reserva grava em segundos).
+- **json e não jsonb** para guardar resposta como veio: o jsonb reformata o texto e reordena chaves.
+- **Métodos HTTP iguais aos do nginx:** o nginx do site deixa passar GET e HEAD (o `limit_except GET` inclui HEAD); a API aceita os dois e não escreve corpo no HEAD.
+- **Resiliência:** prazo esgotado e disjuntor aberto chegam como `ExecutionRejectedException` do Polly, não como `TimeoutException`; o `ClienteDasFontes` converte para `FonteIndisponivelException` (senão vira 500 e a reserva não é usada).
 
 ## Mapa de arquivos
 
