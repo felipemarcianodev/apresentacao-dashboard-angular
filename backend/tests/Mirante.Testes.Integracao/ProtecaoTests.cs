@@ -96,7 +96,18 @@ public sealed class ProtecaoTests(Infraestrutura infra)
     }
 
     [Fact]
-    public async Task So_GET_e_aceito_na_API()
+    public async Task HEAD_responde_como_o_GET_sem_corpo()
+    {
+        await using var api = ApiComLimite(10);
+
+        var resposta = await api.CreateClient().SendAsync(new HttpRequestMessage(HttpMethod.Head, Gini), Cancelamento);
+
+        Assert.Equal(HttpStatusCode.OK, resposta.StatusCode);
+        Assert.Empty(await resposta.Content.ReadAsByteArrayAsync(Cancelamento));
+    }
+
+    [Fact]
+    public async Task Escrita_nao_e_aceita_na_API()
     {
         await using var api = ApiComLimite(10);
 

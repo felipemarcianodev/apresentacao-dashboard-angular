@@ -88,7 +88,15 @@ docs/                          -> planos faseados locais (plano-*.md, fora do gi
 - Adicionar arquivos **por caminho**, nunca `git add -A` ou `git add .`.
 - Mensagem por heredoc (`git commit -F -`) para preservar a acentuação.
 - **Ao concluir cada etapa coerente, commitar** (build verde por si só). Preferir commit novo a `--amend`, push sem `--force`.
-- A `main` do GitHub é protegida e só aceita pull request: trabalhar num branch (`feat/...`), dar push nele e integrar por PR. Nunca mandar nada para `master`. Release: branch `release/vX.Y.Z` a partir da `main` (dispara o pipeline) e tag `vX.Y.Z`.
+- A `main` do GitHub é protegida e só aceita pull request: trabalhar num branch (`feat/...`), dar push nele e integrar por PR. Nunca mandar nada para `master`.
+
+## Release e PRs (aprendido na prática)
+
+- **Versão:** semver. Desde a última release entrou `feat`, sobe a do meio (1.1.0 para 1.2.0); só `fix`, `docs`, `chore`, sobe a última (1.2.0 para 1.2.1). Major só quando o dono pedir.
+- **Ordem:** o `VERSION` sobe num PR (a `main` é protegida); depois do merge, branch `release/vX.Y.Z` a partir da `main` (o push dispara o pipeline) e tag `vX.Y.Z`. Conferir em produção depois: versão no rodapé, painéis sem erro no console.
+- **PRs empilhados:** o merge é squash, então o PR seguinte entra em conflito com a `main` (o mesmo arquivo "criado dos dois lados"). Resolver trazendo a `main` com merge (sem force push) e conferir que o diff restante é só o da própria fase. Evitar empilhar mais de dois.
+- **Cabeçalho YAML de skill e agente** (`.claude/`): valor com `:` vai entre aspas. Um dois-pontos solto invalida o arquivo e o agente some sem aviso. Ao mexer nesses arquivos, validar o YAML.
+- **Teste de carga em produção:** nunca da rede do dono. O IP de saída é o mesmo do navegador dele, e o rate limiter (120 por minuto) o bloqueia junto.
 
 ## Comandos de cada área
 

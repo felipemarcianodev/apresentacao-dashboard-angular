@@ -17,7 +17,7 @@ API em **.NET 10** que fica entre o site do Mirante e as fontes oficiais (IBGE, 
 | `GET /health` | processo de pé |
 | `GET /health/ready` | Postgres e Redis respondendo (não exposto pelo site) |
 
-Respostas: o JSON da fonte como veio, com `X-Mirante-Origem` (`cache`, `fonte` ou `reserva`) e `X-Mirante-Obtido-Em`. Erros em ProblemDetails: 400 consulta malformada, 404 fora da lista, 429 limite de consultas (com `Retry-After`), 502 fonte fora sem reserva.
+Os três endpoints de dados aceitam também HEAD (os mesmos cabeçalhos, sem corpo). Respostas: o JSON da fonte como veio, com `X-Mirante-Origem` (`cache`, `fonte` ou `reserva`) e `X-Mirante-Obtido-Em`. Erros em ProblemDetails: 400 consulta malformada, 404 fora da lista, 429 limite de consultas (com `Retry-After`), 502 fonte fora sem reserva.
 
 ## Rodando
 

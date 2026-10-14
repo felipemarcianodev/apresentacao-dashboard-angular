@@ -63,6 +63,10 @@ setup-letsencrypt-mirante.sh   -> emissão inicial do certificado na VPS (volume
 - **CSP em dois lugares, iguais:** `nginx/seguranca.conf` e o server block da borda (repo planuz). A cópia em `borda/` acompanha.
 - **Compilar só no agente do Azure:** compilar na VPS esgota a memória e derruba os outros apps. A VPS é compartilhada: limites de memória em todo serviço e prune só com `label=app=mirante`.
 - **Deploy por SHA:** o pipeline valida o SHA (40 hexadecimais) e faz `git reset --hard` nele na VPS; a imagem e o compose são do mesmo commit.
+- **Variável obrigatória nova no compose de produção** (`${X:?}`) só entra junto com a mudança do deploy que a fornece: o compose valida as variáveis de todos os serviços, mesmo subindo um só, e quebraria o deploy atual.
+- **Ordem da CSP:** restringir a CSP da borda (repo planuz) só depois que o front que dispensa o host estiver no ar; antes disso, o site em produção quebra. Ampliar segue a ordem inversa (borda primeiro).
+- **Borda no Planuz:** mudança no `site-mirante.conf` vai para a `main` do Planuz e só chega à VPS na release dele (skill `gerar-release` daquele repositório, com os gates de lá).
+- **Docker Desktop local** pode estar parado depois de reiniciar o PC: conferir com `docker info` antes de subir a stack ou rodar a integração.
 
 ## Variable group `mirante-producao`
 
