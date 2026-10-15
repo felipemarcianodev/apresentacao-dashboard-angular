@@ -66,7 +66,7 @@ VERSION                        -> versão semântica do Mirante; o build do fron
                                   /testes, ligações, unitários) e build; actions fixadas por SHA
 scripts/verificar-documentacao.mjs -> mudança estrutural numa área sem o CLAUDE.md e o README.md dela no diff falha
                                   (--hook: modo do hook Stop, devolve o bloqueio para o Claude completar)
-scripts/verificar-documentacao.test.mjs -> node --test scripts/ (da raiz): regras do verificador
+scripts/verificar-documentacao.test.mjs -> node --test scripts/verificar-documentacao.test.mjs (da raiz): regras do verificador
 azure-pipelines.yml            -> release/*: front (audit, unitários, build), backend (build e testes com
                                   Testcontainers), imagens web e api, E2E contra o site, envio por scp e subida
                                   da stack com --wait (detalhes em docker/CLAUDE.md)

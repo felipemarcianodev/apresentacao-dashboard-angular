@@ -34,7 +34,7 @@ jobs:
 
       - name: Documentação viva
         run: |
-          node --test scripts/
+          node --test scripts/verificar-documentacao.test.mjs
           node scripts/verificar-documentacao.mjs --base origin/${{ github.base_ref }}
 
       - name: Dependências do front

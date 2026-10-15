@@ -1,4 +1,4 @@
-// node --test scripts/ (da raiz). Regras do verificar-documentacao.mjs.
+// node --test scripts/verificar-documentacao.test.mjs (da raiz). Regras do verificar-documentacao.mjs.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { exigencias, lerNameStatus } from './verificar-documentacao.mjs';
