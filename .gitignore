@@ -4,6 +4,8 @@
 /frontend/dist
 /frontend/tmp
 /frontend/out-tsc
+# Capturas de tela do Vitest quando um unitário falha
+/frontend/.vitest
 /frontend/bazel-out
 
 # Node

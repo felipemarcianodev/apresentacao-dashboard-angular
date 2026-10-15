@@ -5,6 +5,7 @@ Kit de dashboard em **Angular 22** e **Tailwind CSS v4**, com painéis sobre dad
 - Componentes standalone, zoneless e baseados em signals, seguindo o [Angular Style Guide](https://angular.dev/style-guide).
 - Tailwind usado de forma pura: sem biblioteca de componentes e sem biblioteca de gráficos. Os gráficos são SVG próprio.
 - A rota `/ui` documenta cada componente do kit, com exemplo, API e trecho de uso, para quem quiser reaproveitar.
+- A rota `/testes` mostra os testes de ponta a ponta por persona (celular, teclado, leitor de tela e outras), gerada dos próprios specs.
 - Cada painel tem o próprio cartão de prévia do link (título, descrição e imagem) no WhatsApp, LinkedIn e Slack, sem SSR.
 
 ## Arquitetura

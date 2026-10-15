@@ -17,6 +17,6 @@ describe('App', () => {
     const html = fixture.nativeElement as HTMLElement;
     expect(html.textContent).toContain('Mirante');
     const rotulos = Array.from(html.querySelectorAll('nav a:not([target])')).map((a) => a.textContent?.trim());
-    expect(rotulos).toEqual(['IBGE', 'Banco Central', 'Ipeadata', 'Componentes']);
+    expect(rotulos).toEqual(['IBGE', 'Banco Central', 'Ipeadata', 'Componentes', 'Testes']);
   });
 });

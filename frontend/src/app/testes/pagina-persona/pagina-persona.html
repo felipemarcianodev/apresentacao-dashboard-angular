@@ -1,0 +1,72 @@
+@if (dados(); as persona) {
+  <div class="grid grid-cols-1 gap-10">
+    <section class="grid grid-cols-1 max-w-3xl gap-3">
+      <a routerLink="/testes" class="inline-flex items-center gap-2 text-sm font-semibold text-accent hover:underline">
+        <i class="fa-solid fa-arrow-left text-xs" aria-hidden="true"></i>
+        Testes por persona
+      </a>
+      <p class="text-xs font-semibold tracking-wider text-accent uppercase">{{ persona.categoria }}</p>
+      <h2 class="flex items-center gap-3 text-2xl font-bold tracking-tight text-balance sm:text-3xl">
+        <i class="fa-solid text-accent" [class]="persona.icone" aria-hidden="true"></i>
+        {{ persona.nome }}
+      </h2>
+      <p class="text-muted">{{ persona.descricao }}</p>
+      <p class="text-sm text-muted">
+        {{ total() }} cenários com a tag <code class="rounded bg-sunken px-1.5 py-0.5 font-mono text-[0.85em]">&#64;{{ persona.id }}</code>,
+        em {{ areas().length }} áreas do site.
+      </p>
+    </section>
+
+    <section class="grid grid-cols-1 gap-3" aria-labelledby="titulo-so-esta">
+      <h2 id="titulo-so-esta" class="text-lg font-semibold">Rodar só esta persona</h2>
+      <mi-bloco-codigo [codigo]="comando()" linguagem="bash" />
+    </section>
+
+    @for (area of areas(); track area.arquivo) {
+      <section class="grid grid-cols-1 gap-3" [attr.aria-labelledby]="'area-' + $index">
+        <h2 [id]="'area-' + $index" class="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-lg font-semibold">
+          {{ area.nome }}
+          <span class="font-mono text-xs font-normal text-muted">e2e/{{ area.arquivo }}</span>
+        </h2>
+        <ul class="grid grid-cols-1 divide-y divide-line rounded-xl border border-line bg-surface">
+          @for (cenario of area.cenarios; track cenario.linha + cenario.grupo + cenario.titulo) {
+            <li class="flex flex-col gap-2 p-4 sm:flex-row sm:items-start sm:justify-between">
+              <div class="grid min-w-0 grid-cols-1 gap-1">
+                @if (cenario.grupo) {
+                  <span class="text-xs text-muted">{{ cenario.grupo }}</span>
+                }
+                <span class="font-medium break-words">{{ cenario.titulo }}</span>
+                @if (cenario.outras.length) {
+                  <span class="flex flex-wrap gap-1.5">
+                    <span class="sr-only">Também vale para:</span>
+                    @for (outra of cenario.outras; track outra) {
+                      <mi-badge>{{ outra }}</mi-badge>
+                    }
+                  </span>
+                }
+              </div>
+              <a
+                [href]="cenario.codigo"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex min-h-10 shrink-0 items-center gap-1.5 font-mono text-xs text-accent hover:underline"
+              >
+                linha {{ cenario.linha }}
+                <i class="fa-solid fa-arrow-up-right-from-square text-[0.7em]" aria-hidden="true"></i>
+                <span class="sr-only">de {{ cenario.arquivo }} (código do teste no GitHub, abre em nova aba)</span>
+              </a>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  </div>
+} @else {
+  <mi-empty-state
+    icone="fa-vial-circle-check"
+    titulo="Persona não encontrada"
+    descricao="O endereço não corresponde a nenhuma persona da galeria de testes."
+  >
+    <a routerLink="/testes" class="text-sm font-semibold text-accent hover:underline">Ver todas as personas</a>
+  </mi-empty-state>
+}

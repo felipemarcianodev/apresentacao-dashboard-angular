@@ -5,7 +5,7 @@ import { ROTAS, esperarDados, expect, test } from './apis';
  * (360 px), é o portão que os unitários não alcançam.
  */
 for (const rota of ROTAS) {
-  test(`${rota} cabe na largura da tela`, async ({ page }) => {
+  test(`${rota} cabe na largura da tela`, { tag: ['@celular'] }, async ({ page }) => {
     await page.goto(rota);
     await esperarDados(page);
     const larguras = await page.evaluate(() => ({

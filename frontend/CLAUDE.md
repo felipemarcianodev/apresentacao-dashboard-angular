@@ -31,7 +31,8 @@ angular.json                   -> projeto "mirante", prefixo mi; estilos globais
                                   ng serve com proxy.conf.json
 proxy.conf.json                -> npm start encaminha /api para a API local (localhost:5110)
 package.json                   -> scripts start, build:deploy (ng build e os cartões por rota), test:ci (testes
-                                  dos scripts no node --test e Vitest), e2e, capas
+                                  dos scripts no node --test, catálogo de testes em dia e Vitest), e2e, capas,
+                                  testes:catalogo
 playwright.config.ts           -> E2E: projetos desktop (1366 px) e celular (360 px), pt-BR, fuso de São Paulo,
                                   sobe ng serve na porta 4300
 e2e/                           -> testes de ponta a ponta (Playwright)
@@ -50,15 +51,21 @@ e2e/                           -> testes de ponta a ponta (Playwright)
   galeria.spec.ts              -> todas as páginas de componente, slug inválido, botão de copiar
   acessibilidade.spec.ts       -> axe WCAG 2.2 AA nos dois temas e alvo de toque de 40 px
   responsivo.spec.ts           -> nenhuma rota rola para o lado nem vaza conteúdo da tela
+  testes.spec.ts               -> galeria /testes: índice por categoria, página da persona (link direto, código de
+                                  cada cenário), persona desconhecida e Como rodar
   producao.spec.ts             -> só com E2E_BASE_URL: CSP, headers e cache do nginx da imagem; cartão do link de
                                   cada rota no HTML servido e imagem em /og
 scripts/                       -> scripts Node fora do bundle
   rotas-publicas.mjs           -> ROTAS_PUBLICAS: título, descrição e capa do cartão do link de cada rota (/, /ibge,
-                                  /bcb, /ipea, /ui); ORIGEM de produção (o Open Graph exige URL absoluta)
+                                  /bcb, /ipea, /ui, /testes); ORIGEM de produção (o Open Graph exige URL absoluta)
   cartoes-por-rota.mjs         -> depois do ng build: grava ibge/index.html e as outras cópias com o cartão da rota
                                   (os robôs da prévia não rodam JavaScript; o nginx serve $uri/index.html)
   cartoes-por-rota.test.mjs    -> node --test: troca sem duplicar, escape, index.html do código igual ao geral,
                                   capas de 1200x630
+  catalogo-de-testes.mjs       -> npm run testes:catalogo: lista os testes pelo Playwright e grava
+                                  src/app/testes/catalogo.ts; --verificar (no test:ci) falha com catálogo desatualizado,
+                                  teste sem persona ou persona desconhecida
+  catalogo-de-testes.test.mjs  -> node --test: achatar a listagem, grupos, problemas, escape, personas lidas
   gerar-capas.mjs              -> npm run capas: regera public/og/*.png pelo Playwright (manual; sem número nenhum)
 public/
   favicon.svg                  -> ícone da marca (mountain-sun do Font Awesome em branco sobre o accent)
@@ -79,7 +86,8 @@ src/
   app/
     app.ts                     -> componente raiz (mi-root), só monta o shell
     app.config.ts              -> providers: zoneless, router com withComponentInputBinding, HttpClient com fetch
-    app.routes.ts              -> rotas lazy /ibge (IbgePainel), /bcb (BcbPainel), /ipea (IpeaPainel), /ui; data.titulo vira o título da topbar
+    app.routes.ts              -> rotas lazy /ibge (IbgePainel), /bcb (BcbPainel), /ipea (IpeaPainel), /ui, /testes;
+                                  data.titulo vira o título da topbar (só a filha de caminho vazio herda o da mãe)
     core/versao/versao.ts      -> VERSAO: lida do VERSION da raiz do repositório como texto (import com loader text)
     core/formato/formato.ts    -> formatar(valor, formato) pt-BR (numero, decimal, percentual em pontos, moeda,
                                   moeda-compacta, dolar, compacto) e formatarVariacao com sinal; SEM_DADO para nulo
@@ -94,7 +102,7 @@ src/
                                   inicial (aparelho lento); fechada, a barra fica inert (fora do Tab e do leitor). Desktop: o menu recolhe a barra numa faixa de ícones
                                   (nome em sr-only e dica em title), sem virar X. Cabe sem rolar a 1366x768.
                                   Rodapé fixo com o link do código e a versão (ligada à tag do GitHub)
-      navegacao.ts             -> NAVEGACAO: grupos Painéis e Kit com rota, rótulo e ícone Font Awesome
+      navegacao.ts             -> NAVEGACAO: grupos Painéis e Kit (Componentes e Testes) com rota, rótulo e ícone
       outros-projetos.ts       -> OUTROS_PROJETOS: Planuz, portfólio e blog, em "Conheça também" (abre em nova aba)
     layout/theme-toggle/       -> ThemeToggle: radiogroup claro, escuro e sistema
     dashboards/aviso-de-reserva/ -> AvisoDeReserva (mi-aviso-de-reserva): "Dado guardado" com a data, quando a
@@ -154,6 +162,15 @@ src/
       galeria-indice/          -> /ui: primeiros passos e componentes por categoria
       pagina-componente/       -> /ui/:slug: descrição, importação, exemplos vivos, API e acessibilidade
       bloco-codigo/            -> BlocoCodigo: código como texto (nunca HTML) com botão de copiar
+    testes/                    -> galeria de testes em /testes (lazy, testes.routes.ts), no formato da /ui
+      cenario-de-teste.model.ts -> PersonaId, CategoriaPersona, Persona, CenarioDeTeste
+      personas.ts              -> PERSONAS (id = tag do Playwright sem o @), CATEGORIAS_PERSONA, buscarPersona
+      catalogo.ts              -> CATALOGO: GERADO por scripts/catalogo-de-testes.mjs; não editar à mão
+      areas.ts                 -> AREAS: área do site de cada arquivo de e2e/ (arquivo novo entra aqui; o spec cobra)
+      codigo-do-teste.ts       -> codigoDoTeste: link da linha do teste no GitHub, na tag da versão no ar
+      galeria-de-testes/       -> /testes: total, comando inicial e personas por categoria
+      pagina-persona/          -> /testes/:persona: comando da persona e cenários por área; desconhecida vira estado vazio
+      como-rodar/              -> /testes/como-rodar: comandos de cada camada de teste
 ```
 
 ## Angular Style Guide (regra bloqueante)
@@ -216,6 +233,12 @@ Font Awesome Free (`@fortawesome/fontawesome-free`), empacotado no bundle (sem C
 - Cada card com dado preenche `fonte` com o órgão e a tabela de origem; o período de referência aparece junto do número.
 - Testes nunca batem na rede: unidade com `HttpTestingController` e respostas mínimas; E2E com o HAR gravado (tudo fora da origem é bloqueado).
 - Texto de tela não diz que o painel consulta a fonte direto: os dados passam pela API do Mirante.
+
+## Galeria de testes (regra bloqueante)
+
+- **Todo teste de ponta a ponta declara persona** por tag: `test('...', { tag: ['@celular'] }, ...)`. As personas válidas estão em `src/app/testes/personas.ts`; persona nova entra lá com categoria, ícone e descrição.
+- Criou, renomeou, moveu ou mudou a persona de um teste: rodar `npm run testes:catalogo` e commitar o `catalogo.ts` junto. O `test:ci` (e o pipeline) falha com o catálogo desatualizado ou com teste sem persona.
+- Arquivo novo em `e2e/` entra em `src/app/testes/areas.ts`.
 
 ## Prévia do link
 

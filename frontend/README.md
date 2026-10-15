@@ -14,7 +14,8 @@ npm start              # http://localhost:4200, com /api encaminhado para http:/
 ## Testes
 
 ```bash
-npm run test:ci        # scripts (node --test) e unidade (Vitest no Chromium do Playwright)
+npm run test:ci        # scripts (node --test), catálogo de testes em dia e unidade (Vitest no Chromium)
+npm run testes:catalogo # regrava o catálogo da galeria /testes depois de mexer num teste
 npm run build:deploy   # build de produção, com o cartão do link de cada rota
 npm run e2e            # ponta a ponta (Playwright), desktop e celular de 360 px
 ```
@@ -27,6 +28,10 @@ Contra a imagem de produção, com a CSP real:
 docker compose -f ../docker/docker-compose.yml up -d --build
 E2E_BASE_URL=http://localhost:8092 npx playwright test
 ```
+
+## Galeria de testes
+
+A rota `/testes` mostra os testes de ponta a ponta por persona (celular, teclado, leitor de tela, tema escuro, fonte fora do ar, link compartilhado e outras), com a página de cada persona e o link para a linha de cada teste. A lista é gerada dos próprios specs: cada teste declara a persona por tag do Playwright, e `npm run testes:catalogo` regrava `src/app/testes/catalogo.ts`. Para rodar só uma persona: `npx playwright test --grep @celular`.
 
 ## Prévia do link
 

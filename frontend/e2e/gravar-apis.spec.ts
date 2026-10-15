@@ -49,7 +49,7 @@ async function aguardarConsultas(page: Page, passo: () => Promise<unknown>): Pro
   page.off('requestfailed', fim);
 }
 
-test('grava as respostas de todos os painéis e períodos', async ({ page }) => {
+test('grava as respostas de todos os painéis e períodos', { tag: ['@mantenedor'] }, async ({ page }) => {
   test.setTimeout(180_000);
   await usarApisGravadas(page, true);
 

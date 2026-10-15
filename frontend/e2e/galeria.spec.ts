@@ -1,7 +1,7 @@
 import { expect, test } from './apis';
 
 test.describe('galeria /ui', () => {
-  test('cada componente do índice abre a própria página sem erro', async ({ page }) => {
+  test('cada componente do índice abre a própria página sem erro', { tag: ['@desenvolvedor'] }, async ({ page }) => {
     await page.goto('/ui');
     const links = page.locator('main a[href^="/ui/"]');
     await expect(links).toHaveCount(14);
@@ -15,12 +15,13 @@ test.describe('galeria /ui', () => {
     }
   });
 
-  test('slug desconhecido mostra estado vazio com volta ao índice', async ({ page }) => {
+  test('slug desconhecido mostra estado vazio com volta ao índice', { tag: ['@desenvolvedor'] }, async ({ page }) => {
     await page.goto('/ui/nao-existe');
     await expect(page.getByRole('link', { name: /componentes/i }).last()).toBeVisible();
   });
 
-  test('o botão de copiar copia o código do exemplo', async ({ page, context, isMobile }) => {
+  const tag = ['@desenvolvedor'];
+  test('o botão de copiar copia o código do exemplo', { tag }, async ({ page, context, isMobile }) => {
     test.skip(isMobile, 'área de transferência só no desktop');
     await context.grantPermissions(['clipboard-read', 'clipboard-write']);
     await page.goto('/ui/button');

@@ -6,7 +6,7 @@ import { expect, test } from './apis';
  */
 test.skip(!process.env['E2E_BASE_URL'], 'só contra o container (E2E_BASE_URL)');
 
-test('o nginx entrega CSP, headers de segurança e cache certo', async ({ request }) => {
+test('o nginx entrega CSP, headers de segurança e cache certo', { tag: ['@mantenedor'] }, async ({ request }) => {
   const pagina = await request.get('/ipea');
   expect(pagina.status()).toBe(200);
   const h = pagina.headers();
@@ -32,7 +32,7 @@ test('o nginx entrega CSP, headers de segurança e cache certo', async ({ reques
   expect(await (await request.get('/health')).text()).toBe('ok');
 });
 
-test('a página carrega inteira sob a CSP, sem violação', async ({ page }) => {
+test('a página carrega inteira sob a CSP, sem violação', { tag: ['@mantenedor'] }, async ({ page }) => {
   const violacoes: string[] = [];
   page.on('console', (msg) => msg.text().includes('Content Security Policy') && violacoes.push(msg.text()));
   await page.goto('/ibge');
@@ -49,11 +49,12 @@ const CARTOES = [
   { rota: '/bcb', titulo: 'Banco Central · Mirante', imagem: 'bcb' },
   { rota: '/ipea', titulo: 'Ipeadata · Mirante', imagem: 'ipea' },
   { rota: '/ui', titulo: 'Componentes · Mirante', imagem: 'ui' },
+  { rota: '/testes', titulo: 'Testes · Mirante', imagem: 'testes' },
   { rota: '/ui/line-chart', titulo: 'Mirante · painéis de dados abertos do Brasil', imagem: 'mirante' },
 ];
 
 for (const { rota, titulo, imagem } of CARTOES) {
-  test(`cartão do link de ${rota} no HTML servido`, async ({ request }) => {
+  test(`cartão do link de ${rota} no HTML servido`, { tag: ['@link-compartilhado'] }, async ({ request }) => {
     const pagina = await request.get(rota);
     expect(pagina.status()).toBe(200);
     expect(pagina.headers()['content-security-policy']).toContain("script-src 'self';");
@@ -72,7 +73,7 @@ for (const { rota, titulo, imagem } of CARTOES) {
   });
 }
 
-test('capa inexistente dá 404 sem cache', async ({ request }) => {
+test('capa inexistente dá 404 sem cache', { tag: ['@mantenedor'] }, async ({ request }) => {
   const resposta = await request.get('/og/nao-existe.png');
   expect(resposta.status()).toBe(404);
   expect(resposta.headers()['cache-control']).toBe('no-store');
