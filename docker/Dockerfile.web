@@ -10,7 +10,9 @@ COPY VERSION /repo/VERSION
 COPY frontend/angular.json frontend/tsconfig.json frontend/tsconfig.app.json frontend/.postcssrc.json ./
 COPY frontend/public/ public/
 COPY frontend/src/ src/
-RUN npx ng build --configuration production
+COPY frontend/scripts/rotas-publicas.mjs frontend/scripts/cartoes-por-rota.mjs scripts/
+# ng build e, depois dele, o index.html de cada rota pública com o próprio cartão do link.
+RUN npm run build:deploy
 
 FROM nginx:1.30-alpine@sha256:0985e772fb9f729e6fa0980da05fca5d9c468e870eed43071545afa9d2e27d94
 LABEL app=mirante

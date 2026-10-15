@@ -7,9 +7,10 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "build:deploy": "ng build --configuration production",
-    "test:ci": "ng test --watch=false --browsers=ChromeHeadless",
-    "e2e": "playwright test"
+    "build:deploy": "ng build --configuration production && node scripts/cartoes-por-rota.mjs",
+    "test:ci": "node --test scripts/cartoes-por-rota.test.mjs && ng test --watch=false --browsers=ChromeHeadless",
+    "e2e": "playwright test",
+    "capas": "node scripts/gerar-capas.mjs"
   },
   "prettier": {
     "printWidth": 100,
