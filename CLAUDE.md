@@ -1,4 +1,4 @@
-# Mirante: painéis de dados abertos do Brasil (Angular 20 + API .NET 10)
+# Mirante: painéis de dados abertos do Brasil (Angular 22 + API .NET 10)
 
 Responda em português brasileiro, salvo quando for pedido outro idioma. Obedeça os padrões gramaticais e de acentuação de cada língua.
 
@@ -13,7 +13,7 @@ Responda em português brasileiro, salvo quando for pedido outro idioma. Obedeç
 
 ## Sobre o projeto
 
-Mirante é um **kit de dashboard** em Angular 20 e Tailwind CSS v4 o mais puro possível, com três painéis sobre dados abertos do Brasil: **IBGE**, **Banco Central** (API SGS) e **Ipeadata**. Faz parte do portfólio de Felipe Marciano: sem login, com dados reais abertos a qualquer visitante.
+Mirante é um **kit de dashboard** em Angular 22 e Tailwind CSS v4 o mais puro possível, com três painéis sobre dados abertos do Brasil: **IBGE**, **Banco Central** (API SGS) e **Ipeadata**. Faz parte do portfólio de Felipe Marciano: sem login, com dados reais abertos a qualquer visitante.
 
 Desde a versão 1.1, os painéis consultam uma **API .NET 10 própria** na mesma origem do site, que fala com as fontes oficiais com lista permitida, cache em duas camadas (memória e Redis), reserva da última resposta boa em PostgreSQL e rate limiter. O navegador não fala com host externo.
 
@@ -35,7 +35,7 @@ Regra: **nenhum número inventado.** Toda tela mostra a fonte e a data de refer�
 
 | Área | O quê | Documentação |
 |---|---|---|
-| `frontend/` | Angular 20 (standalone, zoneless, signals), Tailwind v4, Karma + Jasmine, Playwright + axe | `frontend/CLAUDE.md`, `frontend/README.md` |
+| `frontend/` | Angular 22 (standalone, zoneless, signals), Tailwind v4, Vitest (modo navegador), Playwright + axe | `frontend/CLAUDE.md`, `frontend/README.md` |
 | `backend/` | .NET 10 minimal API, EF Core 10 + PostgreSQL, Redis (HybridCache), xUnit v3 + Testcontainers | `backend/CLAUDE.md`, `backend/README.md` |
 | `docker/` | imagens, compose, nginx do site, cópia da borda, certificado; o pipeline fica na raiz | `docker/CLAUDE.md`, `docker/README.md` |
 

@@ -16,9 +16,9 @@ describe('Documentação dos componentes', () => {
 
   it('documenta importação, ao menos um exemplo e acessibilidade em cada componente', () => {
     for (const doc of DOCS) {
-      expect(doc.importacao).withContext(doc.slug).toContain('import');
-      expect(doc.exemplos.length).withContext(doc.slug).toBeGreaterThan(0);
-      expect(doc.acessibilidade.length).withContext(doc.slug).toBeGreaterThan(0);
+      expect(doc.importacao, doc.slug).toContain('import');
+      expect(doc.exemplos.length, doc.slug).toBeGreaterThan(0);
+      expect(doc.acessibilidade.length, doc.slug).toBeGreaterThan(0);
     }
   });
 
@@ -44,8 +44,8 @@ describe('Documentação dos componentes', () => {
           .forEach((requisicao) => requisicao.flush(MALHA_DE_TESTE));
         await fixture.whenStable();
         const html = fixture.nativeElement as HTMLElement;
-        expect(html.querySelector('h2')?.textContent).withContext(doc.slug).toContain(doc.nome);
-        expect(html.querySelectorAll('pre').length).withContext(doc.slug).toBe(doc.exemplos.length + 1);
+        expect(html.querySelector('h2')?.textContent, doc.slug).toContain(doc.nome);
+        expect(html.querySelectorAll('pre').length, doc.slug).toBe(doc.exemplos.length + 1);
         fixture.destroy();
       }
     });

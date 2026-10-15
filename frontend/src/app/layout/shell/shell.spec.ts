@@ -1,14 +1,14 @@
-import { Component, provideZonelessChangeDetection } from '@angular/core';
+import { ChangeDetectionStrategy, Component, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { Shell } from './shell';
 
-@Component({ template: '' })
+@Component({ template: '', changeDetection: ChangeDetectionStrategy.OnPush })
 class PaginaVazia {}
 
 /** Simula a largura da tela: o menu se comporta diferente no celular e no desktop. */
 function simularTela(larga: boolean): void {
-  spyOn(window, 'matchMedia').and.returnValue({
+  vi.spyOn(window, 'matchMedia').mockReturnValue({
     matches: larga,
     addEventListener: () => undefined,
     removeEventListener: () => undefined,
@@ -50,7 +50,7 @@ describe('Shell', () => {
     // Primeira navegação do app (id 1), terminando com o menu já aberto.
     await router.navigateByUrl('/ibge');
     await fixture.whenStable();
-    expect(router.navigated).toBeTrue();
+    expect(router.navigated).toBe(true);
     expect(botaoMenu().getAttribute('aria-expanded')).toBe('true');
   });
 
@@ -90,7 +90,7 @@ describe('Shell', () => {
   });
 
   it('no desktop, o menu recolhe a barra para os ícones e expande de volta', async () => {
-    (window.matchMedia as jasmine.Spy).and.returnValue({
+    vi.mocked(window.matchMedia).mockReturnValue({
       matches: true,
       addEventListener: () => undefined,
       removeEventListener: () => undefined,
@@ -120,9 +120,9 @@ describe('Shell', () => {
     await router.navigateByUrl('/ibge');
     await fixture.whenStable();
     const barra = html.querySelector('aside')!;
-    expect(barra.hasAttribute('inert')).toBeTrue();
+    expect(barra.hasAttribute('inert')).toBe(true);
     botaoMenu().click();
     await fixture.whenStable();
-    expect(barra.hasAttribute('inert')).toBeFalse();
+    expect(barra.hasAttribute('inert')).toBe(false);
   });
 });

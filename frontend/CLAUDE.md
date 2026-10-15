@@ -1,4 +1,4 @@
-# Mirante: frontend (Angular 20 + Tailwind CSS v4)
+# Mirante: frontend (Angular 22 + Tailwind CSS v4)
 
 Regras gerais (idioma, documentação viva, commits, segurança comum) no `CLAUDE.md` da raiz. Este arquivo vale para tudo em `frontend/`. Caminhos abaixo são relativos a `frontend/`; os comandos rodam de dentro dela.
 
@@ -6,7 +6,7 @@ Regras gerais (idioma, documentação viva, commits, segurança comum) no `CLAUD
 
 ## Stack
 
-Angular 20 (standalone, zoneless, signals), TypeScript, Tailwind CSS v4 (CSS-first, `@theme`), Font Awesome Free empacotado localmente, fonte Inter auto-hospedada. Testes: Karma + Jasmine (ChromeHeadless) para unidade; Playwright + axe-core para E2E, com as respostas gravadas em HAR.
+Angular 22 (standalone, zoneless, signals), TypeScript 6, Node 24, Tailwind CSS v4 (CSS-first, `@theme`), Font Awesome Free empacotado localmente, fonte Inter auto-hospedada. Testes: Vitest em modo navegador (Chromium do Playwright, builder @angular/build:unit-test) para unidade; Playwright + axe-core para E2E, com as respostas gravadas em HAR.
 
 ## Contrato com a API
 
@@ -31,7 +31,7 @@ angular.json                   -> projeto "mirante", prefixo mi; estilos globais
                                   ng serve com proxy.conf.json
 proxy.conf.json                -> npm start encaminha /api para a API local (localhost:5110)
 package.json                   -> scripts start, build:deploy (ng build e os cartões por rota), test:ci (testes
-                                  dos scripts no node --test e Karma), e2e, capas
+                                  dos scripts no node --test e Vitest), e2e, capas
 playwright.config.ts           -> E2E: projetos desktop (1366 px) e celular (360 px), pt-BR, fuso de São Paulo,
                                   sobe ng serve na porta 4300
 e2e/                           -> testes de ponta a ponta (Playwright)
@@ -236,7 +236,7 @@ Font Awesome Free (`@fortawesome/fontawesome-free`), empacotado no bundle (sem C
 ```bash
 npm start              # servidor local; /api vai para a API local (proxy.conf.json)
 npm run build:deploy   # build de produção (portão de toda fase)
-npm run test:ci        # testes unitários em ChromeHeadless, sem watch (portão de toda fase)
+npm run test:ci        # scripts e unitários (Vitest no Chromium), sem watch (portão de toda fase)
 npm run e2e            # Playwright, desktop e celular (portão das telas tocadas; suíte inteira antes de release)
 E2E_BASE_URL=http://localhost:8092 npx playwright test       # E2E contra a imagem de produção (CSP real)
 GRAVAR=1 E2E_BASE_URL=http://localhost:8092 npx playwright test gravar-apis --project=desktop   # regrava o HAR (compose de pé)

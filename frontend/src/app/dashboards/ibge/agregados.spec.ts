@@ -30,7 +30,7 @@ describe('agregados do IBGE', () => {
     expect(lerValor('5.4')).toBe(5.4);
     expect(lerValor('-0.32')).toBe(-0.32);
     for (const simbolo of ['-', '...', '..', 'X', '', null, undefined]) {
-      expect(lerValor(simbolo)).withContext(String(simbolo)).toBeNull();
+      expect(lerValor(simbolo), String(simbolo)).toBeNull();
     }
   });
 

@@ -1,10 +1,10 @@
 # Mirante: frontend
 
-O site do Mirante em **Angular 20** e **Tailwind CSS v4**: três painéis (IBGE, Banco Central e Ipeadata) e a galeria `/ui`, que documenta cada componente do kit para reaproveitamento.
+O site do Mirante em **Angular 22** e **Tailwind CSS v4**: três painéis (IBGE, Banco Central e Ipeadata) e a galeria `/ui`, que documenta cada componente do kit para reaproveitamento.
 
 ## Rodando
 
-Requer Node 20.19 ou superior. Para ver dados, a API precisa estar de pé (ver `../backend/README.md`); sem ela, os painéis mostram o estado de erro com "Tentar de novo".
+Requer Node 24 (ou 22.22.3 ou superior), a faixa do Angular 22. Para ver dados, a API precisa estar de pé (ver `../backend/README.md`); sem ela, os painéis mostram o estado de erro com "Tentar de novo".
 
 ```bash
 npm install
@@ -14,12 +14,12 @@ npm start              # http://localhost:4200, com /api encaminhado para http:/
 ## Testes
 
 ```bash
-npm run test:ci        # scripts (node --test) e unidade (Karma + Jasmine, Chrome headless)
+npm run test:ci        # scripts (node --test) e unidade (Vitest no Chromium do Playwright)
 npm run build:deploy   # build de produção, com o cartão do link de cada rota
 npm run e2e            # ponta a ponta (Playwright), desktop e celular de 360 px
 ```
 
-Na primeira vez, instale o navegador do Playwright com `npx playwright install chromium`. A suíte de ponta a ponta não usa a rede: as respostas das fontes ficam gravadas em `e2e/dados/apis.har` e são servidas no lugar da API, com o relógio do navegador fixado no dia da gravação. Ela cobre navegação, os três painéis (inclusive o aviso de dado guardado), a galeria, acessibilidade com axe (WCAG 2.2 AA nos dois temas), alvo de toque de 40 px e ausência de rolagem lateral.
+Na primeira vez, instale o navegador do Playwright com `npx playwright install chromium`: ele roda tanto os unitários quanto a suíte de ponta a ponta. A suíte de ponta a ponta não usa a rede: as respostas das fontes ficam gravadas em `e2e/dados/apis.har` e são servidas no lugar da API, com o relógio do navegador fixado no dia da gravação. Ela cobre navegação, os três painéis (inclusive o aviso de dado guardado), a galeria, acessibilidade com axe (WCAG 2.2 AA nos dois temas), alvo de toque de 40 px e ausência de rolagem lateral.
 
 Contra a imagem de produção, com a CSP real:
 
