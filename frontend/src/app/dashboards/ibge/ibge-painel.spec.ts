@@ -99,7 +99,7 @@ describe('IbgePainel', () => {
   it('ignora ?uf= malformado ou desconhecido e mostra o Brasil', async () => {
     for (const uf of [['RJ', 'SP'], { x: 1 }, 'ZZ']) {
       const { html, fixture } = await montar(uf);
-      expect(html.querySelector('h2')!.textContent).withContext(JSON.stringify(uf)).toContain('Brasil em números');
+      expect(html.querySelector('h2')!.textContent, JSON.stringify(uf)).toContain('Brasil em números');
       fixture.destroy();
     }
   });
@@ -120,10 +120,10 @@ describe('IbgePainel', () => {
 
   it('grava a UF escolhida na URL', async () => {
     const { html } = await montar();
-    const navegar = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+    const navegar = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     const select = html.querySelector('select')!;
     select.value = 'SP';
     select.dispatchEvent(new Event('change'));
-    expect(navegar).toHaveBeenCalledWith([], jasmine.objectContaining({ queryParams: { uf: 'SP' } }));
+    expect(navegar).toHaveBeenCalledWith([], expect.objectContaining({ queryParams: { uf: 'SP' } }));
   });
 });

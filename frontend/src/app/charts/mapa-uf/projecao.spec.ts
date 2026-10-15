@@ -33,7 +33,7 @@ describe('projetarMalha', () => {
 
   it('põe o extremo oeste e o extremo norte na origem', () => {
     const mapa = projetarMalha(MALHA, 600);
-    expect(mapa.ufs[1].caminho.startsWith('M0.0,0.0')).toBeTrue();
+    expect(mapa.ufs[1].caminho.startsWith('M0.0,0.0')).toBe(true);
   });
 });
 

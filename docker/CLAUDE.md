@@ -26,7 +26,7 @@ Internet -> nginx de borda (container planuz-nginx, repo planuz, TLS e HSTS)
 ```
 CLAUDE.md                      -> este arquivo (regras e mapa da infraestrutura)
 README.md                      -> runbook: rodar local, publicar, conferir, voltar versão, certificado
-Dockerfile.web                 -> build do frontend/ no node:22-alpine com npm run build:deploy (lê o VERSION da
+Dockerfile.web                 -> build do frontend/ no node:24-alpine com npm run build:deploy (lê o VERSION da
                                   raiz e grava o cartão do link por rota), entrega no nginx:1.30-alpine, ambos por
                                   digest; healthcheck em /health
 Dockerfile.web.dockerignore    -> leva só o necessário do frontend (sem node_modules, dist, e2e, backend, .github,

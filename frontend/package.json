@@ -8,7 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "build:deploy": "ng build --configuration production && node scripts/cartoes-por-rota.mjs",
-    "test:ci": "node --test scripts/cartoes-por-rota.test.mjs && ng test --watch=false --browsers=ChromeHeadless",
+    "test:ci": "node --test scripts/cartoes-por-rota.test.mjs && ng test --watch=false",
     "e2e": "playwright test",
     "capas": "node scripts/gerar-capas.mjs"
   },
@@ -25,6 +25,9 @@
     ]
   },
   "private": true,
+  "engines": {
+    "node": "^22.22.3 || >=24.15.0"
+  },
   "dependencies": {
     "@angular/common": "^22.2.3",
     "@angular/compiler": "^22.2.3",
@@ -44,16 +47,10 @@
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.64.0",
     "@tailwindcss/postcss": "^4.3.3",
-    "@types/jasmine": "~7.0.0",
-    "istanbul-lib-instrument": "^6.0.3",
-    "jasmine-core": "~7.0.2",
-    "karma": "~6.4.0",
-    "karma-chrome-launcher": "~3.2.0",
-    "karma-coverage": "~2.2.0",
-    "karma-jasmine": "~5.1.0",
-    "karma-jasmine-html-reporter": "~2.3.0",
+    "@vitest/browser-playwright": "^5.0.5",
     "postcss": "^8.5.30",
     "tailwindcss": "^4.3.3",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.0"
   }
 }

@@ -22,7 +22,7 @@ updates:
       angular:
         patterns: ['@angular/*', '@angular-devkit/*', 'typescript']
       testes:
-        patterns: ['@playwright/*', '@axe-core/*', 'karma*', 'jasmine*', '@types/jasmine']
+        patterns: ['@playwright/*', '@axe-core/*', 'vitest', '@vitest/*']
       tailwind:
         patterns: ['tailwindcss', '@tailwindcss/*', 'postcss']
     commit-message:

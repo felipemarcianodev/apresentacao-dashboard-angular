@@ -2,7 +2,7 @@ import { ROTAS, esperarDados, expect, test } from './apis';
 
 /**
  * Nada pode passar da largura da tela: nem a página, nem um elemento dentro de card. No celular
- * (360 px), é o portão que o Chrome do Karma não alcança.
+ * (360 px), é o portão que os unitários não alcançam.
  */
 for (const rota of ROTAS) {
   test(`${rota} cabe na largura da tela`, async ({ page }) => {

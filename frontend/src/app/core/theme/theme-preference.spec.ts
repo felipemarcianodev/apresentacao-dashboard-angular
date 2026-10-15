@@ -25,7 +25,7 @@ describe('ThemePreference', () => {
     const preferencia = TestBed.inject(ThemePreference);
     preferencia.definir('dark');
     TestBed.tick();
-    expect(html.classList.contains('dark')).toBeTrue();
+    expect(html.classList.contains('dark')).toBe(true);
     expect(localStorage.getItem('mirante.tema')).toBe('dark');
   });
 
@@ -33,6 +33,6 @@ describe('ThemePreference', () => {
     const preferencia = TestBed.inject(ThemePreference);
     preferencia.definir('light');
     TestBed.tick();
-    expect(html.classList.contains('dark')).toBeFalse();
+    expect(html.classList.contains('dark')).toBe(false);
   });
 });

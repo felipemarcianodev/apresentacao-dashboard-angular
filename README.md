@@ -1,6 +1,6 @@
 # Mirante
 
-Kit de dashboard em **Angular 20** e **Tailwind CSS v4**, com painéis sobre dados abertos do Brasil: IBGE, Banco Central e Ipeadata, servidos por uma **API .NET 10** com cache em Redis e reserva em PostgreSQL.
+Kit de dashboard em **Angular 22** e **Tailwind CSS v4**, com painéis sobre dados abertos do Brasil: IBGE, Banco Central e Ipeadata, servidos por uma **API .NET 10** com cache em Redis e reserva em PostgreSQL.
 
 - Componentes standalone, zoneless e baseados em signals, seguindo o [Angular Style Guide](https://angular.dev/style-guide).
 - Tailwind usado de forma pura: sem biblioteca de componentes e sem biblioteca de gráficos. Os gráficos são SVG próprio.
@@ -20,7 +20,7 @@ O navegador só fala com a própria origem. Os painéis chamam `/api/...`, e a A
 
 | Pasta | O quê | Documentação |
 |---|---|---|
-| [`frontend/`](frontend/) | o site em Angular 20 e Tailwind v4, com a galeria do kit em `/ui` | [frontend/README.md](frontend/README.md) |
+| [`frontend/`](frontend/) | o site em Angular 22 e Tailwind v4, com a galeria do kit em `/ui` | [frontend/README.md](frontend/README.md) |
 | [`backend/`](backend/) | a API em .NET 10, com PostgreSQL e Redis | [backend/README.md](backend/README.md) |
 | [`docker/`](docker/) | imagens, compose, nginx e o runbook de publicação | [docker/README.md](docker/README.md) |
 
@@ -28,7 +28,7 @@ A documentação de cada pasta acompanha o código no mesmo PR.
 
 ## Rodando localmente
 
-Requer Node 20.19 ou superior, .NET SDK 10 e Docker.
+Requer Node 24 (ou 22.22.3 ou superior), .NET SDK 10 e Docker.
 
 ```bash
 docker compose -f docker/docker-compose.yml up -d postgres redis

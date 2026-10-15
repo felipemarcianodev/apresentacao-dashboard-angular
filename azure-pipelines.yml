@@ -47,9 +47,9 @@ variables:
 
 steps:
   - task: UseNode@1
-    displayName: "Instalar Node.js 22"
+    displayName: "Instalar Node.js 24"
     inputs:
-      version: 22.x
+      version: 24.x
 
   - script: |
       set -e
@@ -60,6 +60,8 @@ steps:
 
   - script: |
       set -e
+      # Os unitários (Vitest) rodam no Chromium do Playwright, em modo navegador.
+      npx playwright install --with-deps chromium
       npm run test:ci
       npm run build:deploy
     displayName: "Front: testes unitários e build de produção"

@@ -65,7 +65,7 @@ describe('operações da tabela', () => {
 
   it('gera CSV para o Excel em português', () => {
     const csv = gerarCsv(COLUNAS, [LINHAS[1], { nome: 'Cidade "Nova"; teste', uf: 'XX', populacao: 1.5 }]);
-    expect(csv.startsWith('﻿')).toBeTrue();
+    expect(csv.startsWith('﻿')).toBe(true);
     expect(csv.slice(1).split('\r\n')).toEqual([
       'Município;UF;População',
       'Niterói;RJ;481758',
