@@ -84,3 +84,14 @@ updates:
     commit-message:
       prefix: build
       include: scope
+
+  # Actions do workflow do PR, fixadas por SHA: o Dependabot propõe o SHA da versão nova.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      timezone: America/Sao_Paulo
+    commit-message:
+      prefix: ci
+      include: scope

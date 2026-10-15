@@ -25,7 +25,7 @@ O navegador só fala com a própria origem. Os painéis chamam `/api/...`, e a A
 | [`backend/`](backend/) | a API em .NET 10, com PostgreSQL e Redis | [backend/README.md](backend/README.md) |
 | [`docker/`](docker/) | imagens, compose, nginx e o runbook de publicação | [docker/README.md](docker/README.md) |
 
-A documentação de cada pasta acompanha o código no mesmo PR.
+A documentação de cada pasta acompanha o código no mesmo PR. Um workflow do GitHub confere isso em todo PR (`scripts/verificar-documentacao.mjs`), junto com os unitários, o catálogo da galeria `/testes` e o build.
 
 ## Rodando localmente
 

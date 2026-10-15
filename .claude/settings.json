@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/catalogo-de-testes.mjs\"",
+            "timeout": 60,
+            "statusMessage": "Atualizando o catálogo da galeria de testes"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/verificar-documentacao.mjs\" --hook",
+            "timeout": 30,
+            "statusMessage": "Conferindo a documentação viva"
+          }
+        ]
+      }
+    ]
+  }
+}
