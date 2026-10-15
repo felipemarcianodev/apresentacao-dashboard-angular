@@ -31,7 +31,7 @@ angular.json                   -> projeto "mirante", prefixo mi; estilos globais
                                   ng serve com proxy.conf.json
 proxy.conf.json                -> npm start encaminha /api para a API local (localhost:5110)
 package.json                   -> scripts start, build:deploy (ng build e os cartões por rota), test:ci (testes
-                                  dos scripts no node --test, catálogo de testes em dia e Vitest), e2e, capas,
+                                  dos scripts e das ligações no node --test, catálogo de testes em dia e Vitest), e2e, capas,
                                   testes:catalogo
 playwright.config.ts           -> E2E: projetos desktop (1366 px) e celular (360 px), pt-BR, fuso de São Paulo,
                                   sobe ng serve na porta 4300
@@ -66,6 +66,8 @@ scripts/                       -> scripts Node fora do bundle
                                   src/app/testes/catalogo.ts; --verificar (no test:ci) falha com catálogo desatualizado,
                                   teste sem persona ou persona desconhecida
   catalogo-de-testes.test.mjs  -> node --test: achatar a listagem, grupos, problemas, escape, personas lidas
+  ligacoes.test.mjs            -> node --test: toda rota de app.routes.ts com cartão do link e em ROTAS do e2e; CSP da
+                                  imagem igual à cópia da borda (mais o upgrade-insecure-requests)
   gerar-capas.mjs              -> npm run capas: regera public/og/*.png pelo Playwright (manual; sem número nenhum)
 public/
   favicon.svg                  -> ícone da marca (mountain-sun do Font Awesome em branco sobre o accent)

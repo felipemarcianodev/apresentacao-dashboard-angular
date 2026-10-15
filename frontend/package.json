@@ -8,7 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "build:deploy": "ng build --configuration production && node scripts/cartoes-por-rota.mjs",
-    "test:ci": "node --test scripts/cartoes-por-rota.test.mjs scripts/catalogo-de-testes.test.mjs && node scripts/catalogo-de-testes.mjs --verificar && ng test --watch=false",
+    "test:ci": "node --test scripts/cartoes-por-rota.test.mjs scripts/catalogo-de-testes.test.mjs scripts/ligacoes.test.mjs && node scripts/catalogo-de-testes.mjs --verificar && ng test --watch=false",
     "e2e": "playwright test",
     "capas": "node scripts/gerar-capas.mjs",
     "testes:catalogo": "node scripts/catalogo-de-testes.mjs"

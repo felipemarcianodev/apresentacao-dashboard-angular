@@ -62,7 +62,7 @@ setup-letsencrypt-mirante.sh   -> emissão inicial do certificado na VPS (volume
 - **Imagens por digest** em Dockerfile, compose e script; o Dependabot propõe digests novos, sem saltos de versão maior (nginx, Node, Postgres, Redis e .NET à mão).
 - **Nada exposto além de 127.0.0.1:** o público entra só pela borda do Planuz. Postgres e Redis sem porta no host.
 - **Segredos:** só no variable group `mirante-producao` do Azure (secretos mapeados por `env:` no passo) e no `.env` do servidor. Nunca no repositório, que é público, nem no log.
-- **CSP em dois lugares, iguais:** `nginx/seguranca.conf` e o server block da borda (repo planuz). A cópia em `borda/` acompanha.
+- **CSP em dois lugares, iguais:** `nginx/seguranca.conf` e o server block da borda (repo planuz). A cópia em `borda/` acompanha; a borda só acrescenta `upgrade-insecure-requests` (ela termina o TLS). O `frontend/scripts/ligacoes.test.mjs` compara a imagem com a cópia no `test:ci`.
 - **Compilar só no agente do Azure:** compilar na VPS esgota a memória e derruba os outros apps. A VPS é compartilhada: limites de memória em todo serviço e prune só com `label=app=mirante`.
 - **Deploy por SHA:** o pipeline valida o SHA (40 hexadecimais) e faz `git reset --hard` nele na VPS; a imagem e o compose são do mesmo commit.
 - **Variável obrigatória nova no compose de produção** (`${X:?}`) só entra junto com a mudança do deploy que a fornece: o compose valida as variáveis de todos os serviços, mesmo subindo um só, e quebraria o deploy atual.

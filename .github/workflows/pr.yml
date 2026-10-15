@@ -1,0 +1,52 @@
+# Conferência do PR antes do merge. O pipeline do Azure (azure-pipelines.yml) só roda na release;
+# isto pega no próprio PR o que sairia de sincronia: documentação viva, catálogo da galeria /testes,
+# rotas sem cartão do link ou fora das suítes, CSP divergente da borda, unitários e build.
+# O E2E e o backend continuam no pipeline da release (precisam de container e Testcontainers).
+name: PR
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  conferencia:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      # Actions fixadas por SHA (o Dependabot propõe as novas), como as imagens por digest.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Documentação viva
+        run: |
+          node --test scripts/
+          node scripts/verificar-documentacao.mjs --base origin/${{ github.base_ref }}
+
+      - name: Dependências do front
+        working-directory: frontend
+        run: |
+          npm ci --ignore-scripts
+          npx playwright install --with-deps chromium
+
+      - name: Scripts, catálogo da /testes, ligações e unitários
+        working-directory: frontend
+        run: npm run test:ci
+
+      - name: Build de produção
+        working-directory: frontend
+        run: npm run build:deploy

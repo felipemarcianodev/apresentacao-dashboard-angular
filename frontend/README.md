@@ -14,7 +14,7 @@ npm start              # http://localhost:4200, com /api encaminhado para http:/
 ## Testes
 
 ```bash
-npm run test:ci        # scripts (node --test), catálogo de testes em dia e unidade (Vitest no Chromium)
+npm run test:ci        # scripts e ligações (node --test), catálogo de testes em dia e unidade (Vitest no Chromium)
 npm run testes:catalogo # regrava o catálogo da galeria /testes depois de mexer num teste
 npm run build:deploy   # build de produção, com o cartão do link de cada rota
 npm run e2e            # ponta a ponta (Playwright), desktop e celular de 360 px

@@ -58,9 +58,15 @@ VERSION                        -> versão semântica do Mirante; o build do fron
 .gitignore                     -> artefatos do front (frontend/...), planos locais de docs/ (plano-*.md), .env do
                                   compose; o .NET tem o próprio backend/.gitignore
 .vscode/                       -> tarefas npm apontando para frontend/
-.github/dependabot.yml         -> npm (frontend/), nuget (backend/), docker e compose (docker/), sem saltos de
-                                  versão maior (Angular, TypeScript, Node, .NET, nginx, Postgres e Redis à mão)
-.github/pull_request_template.md -> checklist do PR: testes da área, documentação viva, segurança
+.github/dependabot.yml         -> npm (frontend/), nuget (backend/), docker e compose (docker/), actions do workflow
+                                  do PR (por SHA), sem saltos de versão maior (Angular, TypeScript, Node, .NET,
+                                  nginx, Postgres e Redis à mão)
+.github/pull_request_template.md -> checklist do PR: testes da área, documentação viva, catálogo da /testes, segurança
+.github/workflows/pr.yml       -> em todo PR contra a main: documentação viva, test:ci do front (scripts, catálogo da
+                                  /testes, ligações, unitários) e build; actions fixadas por SHA
+scripts/verificar-documentacao.mjs -> mudança estrutural numa área sem o CLAUDE.md e o README.md dela no diff falha
+                                  (--hook: modo do hook Stop, devolve o bloqueio para o Claude completar)
+scripts/verificar-documentacao.test.mjs -> node --test scripts/ (da raiz): regras do verificador
 azure-pipelines.yml            -> release/*: front (audit, unitários, build), backend (build e testes com
                                   Testcontainers), imagens web e api, E2E contra o site, envio por scp e subida
                                   da stack com --wait (detalhes em docker/CLAUDE.md)
@@ -70,7 +76,24 @@ docker/                        -> infraestrutura (ver docker/CLAUDE.md)
 docs/                          -> planos faseados locais (plano-*.md, fora do git)
 .claude/skills/executar-plano-faseado/ -> executa um plano fase a fase com os portões de cada área
 .claude/agents/seguranca-angular.md    -> auditor de segurança do front (angular.dev/best-practices/security)
+.claude/agents/revisor-de-documentacao.md -> aponta o que o CLAUDE.md e o README de cada área deixaram de dizer
+.claude/settings.json                  -> hooks do projeto (ver "Ligações automáticas")
+.claude/hooks/catalogo-de-testes.mjs   -> PostToolUse: teste de ponta a ponta editado regrava o catálogo da /testes
 ```
+
+## Ligações automáticas
+
+O que muda num lugar e precisa mudar em outro, e quem cobra. Três camadas: hook do Claude Code (na hora), verificação no `test:ci` e no workflow do PR (para qualquer pessoa), subagente para o que exige julgamento.
+
+| Quando muda | Precisa mudar junto | Quem cobra |
+|---|---|---|
+| Teste de ponta a ponta (`frontend/e2e/*.spec.ts`) ou personas | catálogo da `/testes` (`frontend/src/app/testes/catalogo.ts`) | hook PostToolUse regrava; `test:ci` falha com catálogo velho ou teste sem persona |
+| Arquivo novo, removido ou renomeado; rota, script, build, endpoint, lista permitida, infra ou pipeline | `CLAUDE.md` e `README.md` da área; `README.md` da raiz se atravessa áreas | hook Stop e workflow do PR (`scripts/verificar-documentacao.mjs`); texto pelo `revisor-de-documentacao` |
+| Rota nova no front | cartão do link (`frontend/scripts/rotas-publicas.mjs`) e `ROTAS` de `frontend/e2e/apis.ts` | `frontend/scripts/ligacoes.test.mjs` no `test:ci` |
+| CSP da imagem (`docker/nginx/seguranca.conf`) | cópia da borda (`docker/borda/`) e o repo planuz | `ligacoes.test.mjs` (a borda só acrescenta `upgrade-insecure-requests`) |
+| Arquivo novo em `frontend/e2e/` | área dele em `frontend/src/app/testes/areas.ts` | spec da galeria de testes |
+
+O verificador cobra que o documento foi tocado, não o que ele diz; quando a mudança de fato não altera nada documentado, dizer isso no PR.
 
 ## Segurança (vale para todas as áreas)
 

@@ -26,7 +26,7 @@ Comandos do front rodam de dentro de `frontend/`; os do backend, de dentro de `b
 3. E2E (a partir da fase de qualidade): `npx playwright test` das telas tocadas; suíte inteira no fim do plano. Se não rodou, dizer no resumo e por quê.
 4. Backend: `dotnet build Mirante.slnx` com 0 avisos, `dotnet test` dos projetos de unidade e **suíte de integração inteira** (Testcontainers, Docker de pé). Rodar só o teste que falhou não conta.
 5. Segurança: se a fase tocou HTML dinâmico, URL vinda de API, interceptor ou dependência, rodar o agente `seguranca-angular` sobre o diff antes do commit; se tocou o backend (validação, cache, proteção), uma revisão de segurança do backend.
-6. Documentação: o diff da fase traz o `CLAUDE.md` e o `README.md` de cada área tocada atualizados. Sem isso a fase não fecha.
+6. Documentação: o diff da fase traz o `CLAUDE.md` e o `README.md` de cada área tocada atualizados. Sem isso a fase não fecha. Antes do commit: `node scripts/verificar-documentacao.mjs` (da raiz) verde e o subagente `revisor-de-documentacao` sem apontamento pendente. Mexeu em teste de ponta a ponta: o catálogo da `/testes` (`frontend/src/app/testes/catalogo.ts`) entra no mesmo commit (o hook regrava; `npm run testes:catalogo` à mão).
 7. Ambiente: `docker info` antes da integração do backend e do E2E contra o container (o Docker Desktop pode estar parado). Mexeu em `.claude/`, validar o cabeçalho YAML.
 
 ## Antes de começar

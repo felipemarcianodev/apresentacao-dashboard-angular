@@ -61,4 +61,6 @@ A reserva no Postgres fica no volume `postgres-dados` e não se perde ao trocar 
 
 ## Nginx de borda e certificado
 
+Um teste do front (`frontend/scripts/ligacoes.test.mjs`) falha se a CSP da imagem e a cópia da borda divergirem.
+
 O domínio chega pelo nginx do Planuz (container `planuz-nginx`), que cuida do TLS e repete a CSP. O server block fica no repositório do Planuz (`docker/nginx/conf.d/site-mirante.conf`), com uma cópia de referência em `borda/`. O certificado Let's Encrypt é emitido uma vez com `setup-letsencrypt-mirante.sh` e renovado pelo `planuz-certbot`.
