@@ -71,3 +71,9 @@ for (const { rota, titulo, imagem } of CARTOES) {
     expect(png.headers()['cache-control']).toBe('public, max-age=86400');
   });
 }
+
+test('capa inexistente dá 404 sem cache', async ({ request }) => {
+  const resposta = await request.get('/og/nao-existe.png');
+  expect(resposta.status()).toBe(404);
+  expect(resposta.headers()['cache-control']).toBe('no-store');
+});

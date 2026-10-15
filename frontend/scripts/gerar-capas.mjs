@@ -14,6 +14,8 @@ const DESTINO = join(RAIZ, 'public', 'og');
 const modulo = (caminho) => pathToFileURL(join(RAIZ, 'node_modules', caminho)).href;
 const marca = readFileSync(join(RAIZ, 'public', 'favicon.svg'), 'utf8').replace(/<!--[\s\S]*?-->/g, '');
 
+const escapar = (texto) => texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
 function html({ titulo, descricao, capa }) {
   const destaque = capa.arquivo === 'mirante' ? 'Mirante' : capa.chamada;
   const linha = capa.arquivo === 'mirante' ? capa.chamada : descricao;
@@ -40,10 +42,10 @@ function html({ titulo, descricao, capa }) {
 <i class="icone fa-solid ${capa.icone}" aria-hidden="true"></i>
 <main>
   <div class="topo">${marca}<span>Mirante</span></div>
-  <h1>${destaque}</h1>
-  <p>${linha}</p>
+  <h1>${escapar(destaque)}</h1>
+  <p>${escapar(linha)}</p>
   <footer>${rodape}</footer>
-</main><title>${titulo}</title></body></html>`;
+</main><title>${escapar(titulo)}</title></body></html>`;
 }
 
 mkdirSync(DESTINO, { recursive: true });

@@ -34,8 +34,8 @@ Dockerfile.web.dockerignore    -> leva só o necessário do frontend (sem node_m
 Dockerfile.api                 -> build do backend/ no SDK 10 alpine, execução no aspnet 10 alpine sem root,
                                   digests fixos; healthcheck em /health
 Dockerfile.api.dockerignore    -> leva só o backend, sem bin, obj e testes
-nginx/nginx.conf               -> site com try_files ($uri, $uri/index.html do cartão da rota, /index.html), /og/ com
-                                  cache de um dia, gzip (inclusive atrás da borda, HTTP/1.0), cache imutável
+nginx/nginx.conf               -> site com try_files ($uri, $uri/index.html do cartão da rota, /index.html), /og/ e /geo/
+                                  com um dia de cache só no 200 (404 sai no-store), gzip (inclusive atrás da borda, HTTP/1.0), cache imutável
                                   para arquivos com hash e no-cache para o resto; /api/ encaminhado para mirante-api
                                   (resolvido a cada requisição; só GET, sem corpo, sem caminho codificado; sem a
                                   API, só o /api dá 502; o /health/ready da API não sai)
