@@ -26,14 +26,16 @@ Internet -> nginx de borda (container planuz-nginx, repo planuz, TLS e HSTS)
 ```
 CLAUDE.md                      -> este arquivo (regras e mapa da infraestrutura)
 README.md                      -> runbook: rodar local, publicar, conferir, voltar versão, certificado
-Dockerfile.web                 -> build do frontend/ no node:22-alpine (lê o VERSION da raiz), entrega no
-                                  nginx:1.30-alpine, ambos por digest; healthcheck em /health
+Dockerfile.web                 -> build do frontend/ no node:22-alpine com npm run build:deploy (lê o VERSION da
+                                  raiz e grava o cartão do link por rota), entrega no nginx:1.30-alpine, ambos por
+                                  digest; healthcheck em /health
 Dockerfile.web.dockerignore    -> leva só o necessário do frontend (sem node_modules, dist, e2e, backend, .github,
                                   .vscode, markdown e .env)
 Dockerfile.api                 -> build do backend/ no SDK 10 alpine, execução no aspnet 10 alpine sem root,
                                   digests fixos; healthcheck em /health
 Dockerfile.api.dockerignore    -> leva só o backend, sem bin, obj e testes
-nginx/nginx.conf               -> site com try_files, gzip (inclusive atrás da borda, HTTP/1.0), cache imutável
+nginx/nginx.conf               -> site com try_files ($uri, $uri/index.html do cartão da rota, /index.html), /og/ com
+                                  cache de um dia, gzip (inclusive atrás da borda, HTTP/1.0), cache imutável
                                   para arquivos com hash e no-cache para o resto; /api/ encaminhado para mirante-api
                                   (resolvido a cada requisição; só GET, sem corpo, sem caminho codificado; sem a
                                   API, só o /api dá 502; o /health/ready da API não sai)

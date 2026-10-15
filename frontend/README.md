@@ -14,8 +14,8 @@ npm start              # http://localhost:4200, com /api encaminhado para http:/
 ## Testes
 
 ```bash
-npm run test:ci        # unidade (Karma + Jasmine, Chrome headless)
-npm run build:deploy   # build de produção
+npm run test:ci        # scripts (node --test) e unidade (Karma + Jasmine, Chrome headless)
+npm run build:deploy   # build de produção, com o cartão do link de cada rota
 npm run e2e            # ponta a ponta (Playwright), desktop e celular de 360 px
 ```
 
@@ -27,6 +27,10 @@ Contra a imagem de produção, com a CSP real:
 docker compose -f ../docker/docker-compose.yml up -d --build
 E2E_BASE_URL=http://localhost:8092 npx playwright test
 ```
+
+## Prévia do link
+
+Ao colar um link do Mirante no WhatsApp, LinkedIn ou Slack, aparece o cartão com título, descrição e imagem da página. Os robôs desses apps não rodam JavaScript, então o `build:deploy` grava uma cópia do `index.html` por rota pública (`ibge/index.html` e as outras) com os metadados dela, definidos em `scripts/rotas-publicas.mjs`. As imagens ficam em `public/og/` e são geradas por `npm run capas`.
 
 ## Como os dados chegam
 

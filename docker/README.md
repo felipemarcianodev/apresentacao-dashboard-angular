@@ -40,6 +40,7 @@ cd frontend && E2E_BASE_URL=http://localhost:8092 npx playwright test
 
 ```bash
 curl -I https://mirante.felipemarcianodev.com/            # CSP, HSTS, no-cache
+curl -s https://mirante.felipemarcianodev.com/ibge | grep og:title   # cartão do link da rota
 curl -sI "https://mirante.felipemarcianodev.com/api/ipea/odata4/ValoresSerie(SERCODIGO='PNADS_GINI')?\$select=VALDATA,VALVALOR" | grep -i x-mirante
 # na VPS, em /opt/mirante/docker:
 docker compose -f docker-compose.yml -f docker-compose.prod.yml ps

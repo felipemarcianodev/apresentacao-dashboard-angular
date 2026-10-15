@@ -41,3 +41,33 @@ test('a página carrega inteira sob a CSP, sem violação', async ({ page }) => 
   expect(fonte).toContain('Inter');
   expect(violacoes).toEqual([]);
 });
+
+// Prévia do link: os robôs dos apps leem o HTML sem rodar JavaScript.
+const CARTOES = [
+  { rota: '/', titulo: 'Mirante · painéis de dados abertos do Brasil', imagem: 'mirante' },
+  { rota: '/ibge', titulo: 'IBGE · Mirante', imagem: 'ibge' },
+  { rota: '/bcb', titulo: 'Banco Central · Mirante', imagem: 'bcb' },
+  { rota: '/ipea', titulo: 'Ipeadata · Mirante', imagem: 'ipea' },
+  { rota: '/ui', titulo: 'Componentes · Mirante', imagem: 'ui' },
+  { rota: '/ui/line-chart', titulo: 'Mirante · painéis de dados abertos do Brasil', imagem: 'mirante' },
+];
+
+for (const { rota, titulo, imagem } of CARTOES) {
+  test(`cartão do link de ${rota} no HTML servido`, async ({ request }) => {
+    const pagina = await request.get(rota);
+    expect(pagina.status()).toBe(200);
+    expect(pagina.headers()['content-security-policy']).toContain("script-src 'self';");
+    const html = await pagina.text();
+    const meta = (nome: string) => new RegExp(`<meta (?:property|name)="${nome}" content="([^"]*)">`).exec(html)?.[1];
+    expect(html).toContain(`<title>${titulo}</title>`);
+    expect(meta('og:title')).toBe(titulo);
+    expect(meta('og:image')).toBe(`https://mirante.felipemarcianodev.com/og/${imagem}.png`);
+    expect(meta('twitter:card')).toBe('summary_large_image');
+    expect(html).toMatch(/src="main-[A-Z0-9]{8}\.js"/);
+
+    const png = await request.get(`/og/${imagem}.png`);
+    expect(png.status()).toBe(200);
+    expect(png.headers()['content-type']).toBe('image/png');
+    expect(png.headers()['cache-control']).toBe('public, max-age=86400');
+  });
+}

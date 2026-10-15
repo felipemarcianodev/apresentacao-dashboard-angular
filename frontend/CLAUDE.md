@@ -30,7 +30,8 @@ angular.json                   -> projeto "mirante", prefixo mi; estilos globais
                                   o solid) e src/styles.css; produção sem CSS crítico inline (exigência da CSP);
                                   ng serve com proxy.conf.json
 proxy.conf.json                -> npm start encaminha /api para a API local (localhost:5110)
-package.json                   -> scripts start, build:deploy, test:ci, e2e
+package.json                   -> scripts start, build:deploy (ng build e os cartões por rota), test:ci (testes
+                                  dos scripts no node --test e Karma), e2e, capas
 playwright.config.ts           -> E2E: projetos desktop (1366 px) e celular (360 px), pt-BR, fuso de São Paulo,
                                   sobe ng serve na porta 4300
 e2e/                           -> testes de ponta a ponta (Playwright)
@@ -49,17 +50,28 @@ e2e/                           -> testes de ponta a ponta (Playwright)
   galeria.spec.ts              -> todas as páginas de componente, slug inválido, botão de copiar
   acessibilidade.spec.ts       -> axe WCAG 2.2 AA nos dois temas e alvo de toque de 40 px
   responsivo.spec.ts           -> nenhuma rota rola para o lado nem vaza conteúdo da tela
-  producao.spec.ts             -> só com E2E_BASE_URL: CSP, headers e cache do nginx da imagem
+  producao.spec.ts             -> só com E2E_BASE_URL: CSP, headers e cache do nginx da imagem; cartão do link de
+                                  cada rota no HTML servido e imagem em /og
+scripts/                       -> scripts Node fora do bundle
+  rotas-publicas.mjs           -> ROTAS_PUBLICAS: título, descrição e capa do cartão do link de cada rota (/, /ibge,
+                                  /bcb, /ipea, /ui); ORIGEM de produção (o Open Graph exige URL absoluta)
+  cartoes-por-rota.mjs         -> depois do ng build: grava ibge/index.html e as outras cópias com o cartão da rota
+                                  (os robôs da prévia não rodam JavaScript; o nginx serve $uri/index.html)
+  cartoes-por-rota.test.mjs    -> node --test: troca sem duplicar, escape, index.html do código igual ao geral,
+                                  capas de 1200x630
+  gerar-capas.mjs              -> npm run capas: regera public/og/*.png pelo Playwright (manual; sem número nenhum)
 public/
   favicon.svg                  -> ícone da marca (mountain-sun do Font Awesome em branco sobre o accent)
   favicon.ico                  -> o mesmo ícone em 16, 32 e 48 px, para navegador sem suporte a SVG
   apple-touch-icon.png         -> 180 px, atalho na tela inicial do celular
   robots.txt
+  og/                          -> capas do cartão do link, 1200x630 PNG, uma por rota pública (npm run capas)
   geo/br-uf.json               -> malha das 27 UFs (API de malhas do IBGE, coordenadas com 2 casas), usada pelo MapaUf
   theme-init.js                -> aplica .dark antes do Angular subir (evita piscar); arquivo estático por causa da CSP
 src/
   arquivos-de-texto.d.ts       -> tipo dos arquivos importados como texto (VERSION)
-  index.html                   -> documento base (lang pt-BR), carrega theme-init.js
+  index.html                   -> documento base (lang pt-BR), cartão geral do link (Open Graph, Twitter, canonical;
+                                  igual ao que cartoes-por-rota.mjs gera, o teste confere) e theme-init.js
   main.ts                      -> bootstrap da aplicação
   styles.css                   -> @import tailwindcss + @theme: escala primary do blog, tokens de superfície
                                   (bg, surface, sunken, fg, muted, line, grid), accent e semânticas (up, down,
@@ -204,6 +216,11 @@ Font Awesome Free (`@fortawesome/fontawesome-free`), empacotado no bundle (sem C
 - Cada card com dado preenche `fonte` com o órgão e a tabela de origem; o período de referência aparece junto do número.
 - Testes nunca batem na rede: unidade com `HttpTestingController` e respostas mínimas; E2E com o HAR gravado (tudo fora da origem é bloqueado).
 - Texto de tela não diz que o painel consulta a fonte direto: os dados passam pela API do Mirante.
+
+## Prévia do link
+
+- Rota pública nova: entrar em `scripts/rotas-publicas.mjs` (título igual ao de `app.routes.ts`), rodar `npm run capas` e versionar a imagem. O teste dos scripts falha se faltar a capa.
+- Mudou o cartão geral: atualizar o `src/index.html` para ficar igual ao que o script gera (o teste compara).
 
 ## Segurança do front
 
