@@ -33,6 +33,12 @@ test('o index.html do código já traz o cartão geral, igual ao que o script ge
   assert.equal(cartaoDaRota(BASE, geral), BASE);
 });
 
+test('preserva CRLF do arquivo', () => {
+  const crlf = BASE.replace(/\r?\n/g, '\r\n');
+  const geral = ROTAS_PUBLICAS.find((r) => r.caminho === '');
+  assert.equal(cartaoDaRota(crlf, geral), crlf);
+});
+
 test('escapa aspas e sinais no texto', () => {
   const html = cartaoDaRota(BASE, { ...ibge, titulo: 'A "B" <c>', descricao: 'x & y' });
   assert.match(html, /<title>A &quot;B&quot; &lt;c&gt;<\/title>/);

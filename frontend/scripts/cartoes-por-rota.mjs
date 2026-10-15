@@ -19,7 +19,7 @@ const TAGS_DO_CARTAO = [
   /\s*<link rel="canonical"[^>]*>/g,
 ];
 
-export function metadados(rota) {
+export function metadados(rota, eol = '\n') {
   const url = `${ORIGEM}/${rota.caminho}`;
   const imagem = `${ORIGEM}/og/${rota.capa.arquivo}.png`;
   const t = escapar(rota.titulo);
@@ -43,14 +43,16 @@ export function metadados(rota) {
     `<meta name="twitter:title" content="${t}">`,
     `<meta name="twitter:description" content="${d}">`,
     `<meta name="twitter:image" content="${imagem}">`,
-  ].join('\n  ');
+  ].join(`${eol}  `);
 }
 
 export function cartaoDaRota(htmlBase, rota) {
+  // Mesma quebra de linha do arquivo (o checkout no Windows pode trazer CRLF).
+  const eol = htmlBase.includes('\r\n') ? '\r\n' : '\n';
   let html = TAGS_DO_CARTAO.reduce((h, re) => h.replace(re, ''), htmlBase);
   const charset = /<meta charset="utf-8">/i;
   if (!charset.test(html)) throw new Error('index.html sem <meta charset="utf-8">: não há onde inserir o cartão');
-  html = html.replace(charset, (m) => `${m}\n  ${metadados(rota)}`);
+  html = html.replace(charset, (m) => `${m}${eol}  ${metadados(rota, eol)}`);
   return html;
 }
 
