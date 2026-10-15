@@ -102,7 +102,17 @@ export const test = base.extend<{ errosDoConsole: string[] }>({
 export { expect };
 
 /** Rotas principais, usadas pelas suítes de acessibilidade e responsividade. */
-export const ROTAS = ['/ibge', '/bcb', '/ipea', '/ui', '/ui/line-chart', '/ui/data-table'] as const;
+export const ROTAS = [
+  '/ibge',
+  '/bcb',
+  '/ipea',
+  '/ui',
+  '/ui/line-chart',
+  '/ui/data-table',
+  '/testes',
+  '/testes/celular',
+  '/testes/como-rodar',
+] as const;
 
 /** Espera os dados chegarem: nenhum skeleton no painel. */
 export async function esperarDados(page: Page): Promise<void> {

@@ -1,0 +1,48 @@
+<div class="grid grid-cols-1 gap-10">
+  <section class="grid grid-cols-1 max-w-3xl gap-3">
+    <p class="text-xs font-semibold tracking-wider text-accent uppercase">Qualidade</p>
+    <h2 class="text-2xl font-bold tracking-tight text-balance sm:text-3xl">Testes por persona</h2>
+    <p class="text-muted">
+      São {{ total }} cenários de ponta a ponta em {{ arquivos }} arquivos. Cada um roda num Chromium de verdade,
+      no desktop (1366 px) e no celular (360 px), contra as respostas gravadas das fontes, e declara para quem existe.
+      Esta página é gerada dos próprios testes. Abra uma persona para ver os cenários dela por área do site.
+    </p>
+  </section>
+
+  <section class="grid grid-cols-1 gap-3" aria-labelledby="titulo-primeiro-comando">
+    <h2 id="titulo-primeiro-comando" class="text-lg font-semibold">Rodando</h2>
+    <mi-bloco-codigo [codigo]="primeiroComando" linguagem="bash" />
+    <p>
+      <a routerLink="como-rodar" class="inline-flex items-center gap-2 font-semibold text-accent hover:underline">
+        Como rodar os testes
+        <i class="fa-solid fa-arrow-right text-xs" aria-hidden="true"></i>
+      </a>
+    </p>
+  </section>
+
+  @for (grupo of grupos; track grupo.categoria) {
+    <section class="grid grid-cols-1 gap-4" [attr.aria-labelledby]="'categoria-' + $index">
+      <h2 [id]="'categoria-' + $index" class="text-lg font-semibold">{{ grupo.categoria }}</h2>
+      <ul class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        @for (persona of grupo.personas; track persona.id) {
+          <li>
+            <a
+              [routerLink]="persona.id"
+              class="group flex h-full flex-col gap-1.5 rounded-xl border border-line bg-surface p-4 transition-colors hover:border-accent"
+            >
+              <span class="flex items-center justify-between gap-2">
+                <span class="flex items-center gap-2.5 font-semibold group-hover:text-accent">
+                  <i class="fa-solid w-5 text-center text-accent" [class]="persona.icone" aria-hidden="true"></i>
+                  {{ persona.nome }}
+                </span>
+                <i class="fa-solid fa-arrow-right text-xs text-muted group-hover:text-accent" aria-hidden="true"></i>
+              </span>
+              <span class="font-mono text-xs text-muted">&#64;{{ persona.id }} · {{ persona.quantidade }} cenários</span>
+              <span class="text-sm text-muted">{{ persona.descricao }}</span>
+            </a>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+</div>

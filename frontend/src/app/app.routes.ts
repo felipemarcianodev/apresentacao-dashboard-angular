@@ -26,5 +26,11 @@ export const routes: Routes = [
     data: { titulo: 'Componentes' },
     loadChildren: () => import('./galeria/galeria.routes').then((m) => m.GALERIA_ROUTES),
   },
+  {
+    path: 'testes',
+    title: 'Testes · Mirante',
+    data: { titulo: 'Testes' },
+    loadChildren: () => import('./testes/testes.routes').then((m) => m.TESTES_ROUTES),
+  },
   { path: '**', redirectTo: 'ibge' },
 ];

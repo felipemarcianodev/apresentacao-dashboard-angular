@@ -37,4 +37,10 @@ export const ROTAS_PUBLICAS = [
       'Galeria do kit de dashboard: gráficos em SVG, tabela, cartões e estados, com exemplos vivos e código para copiar.',
     capa: { arquivo: 'ui', icone: 'fa-shapes', chamada: 'Componentes' },
   },
+  {
+    caminho: 'testes',
+    titulo: 'Testes · Mirante',
+    descricao: 'Os testes de ponta a ponta do Mirante por persona: celular, teclado, leitor de tela, tema escuro e mais.',
+    capa: { arquivo: 'testes', icone: 'fa-vial-circle-check', chamada: 'Testes' },
+  },
 ];

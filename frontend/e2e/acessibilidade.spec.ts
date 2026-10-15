@@ -5,9 +5,10 @@ import { ROTAS, esperarDados, expect, test } from './apis';
 for (const tema of ['light', 'dark'] as const) {
   test.describe(`acessibilidade no tema ${tema === 'light' ? 'claro' : 'escuro'}`, () => {
     test.use({ colorScheme: tema });
+    const tag = tema === 'dark' ? ['@leitor-de-tela', '@tema-escuro'] : ['@leitor-de-tela'];
 
     for (const rota of ROTAS) {
-      test(`${rota} sem violações do axe`, async ({ page }) => {
+      test(`${rota} sem violações do axe`, { tag }, async ({ page }) => {
         await page.goto(rota);
         await esperarDados(page);
         const resultado = await new AxeBuilder({ page })
@@ -24,7 +25,7 @@ for (const tema of ['light', 'dark'] as const) {
 
 /** Regra do projeto: alvo de toque de no mínimo 40 px (o mapa tem a lista de UFs como alternativa). */
 for (const rota of ROTAS) {
-  test(`${rota} com alvos de toque de 40 px`, async ({ page }) => {
+  test(`${rota} com alvos de toque de 40 px`, { tag: ['@celular'] }, async ({ page }) => {
     await page.goto(rota);
     await esperarDados(page);
     const pequenos = await page

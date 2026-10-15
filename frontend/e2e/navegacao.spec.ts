@@ -2,14 +2,14 @@ import AxeBuilder from '@axe-core/playwright';
 import { esperarDados, expect, test } from './apis';
 
 test.describe('navegação e tema', () => {
-  test('a raiz abre o painel do IBGE', async ({ page }) => {
+  test('a raiz abre o painel do IBGE', { tag: ['@visitante'] }, async ({ page }) => {
     await page.goto('/');
     await expect(page).toHaveURL(/\/ibge$/);
     await expect(page).toHaveTitle('IBGE · Mirante');
     await expect(page.getByRole('banner').getByRole('heading', { level: 1 })).toHaveText('IBGE');
   });
 
-  test('o menu leva a cada painel e marca a página atual', async ({ page, isMobile }) => {
+  test('o menu leva a cada painel e marca a página atual', { tag: ['@visitante'] }, async ({ page, isMobile }) => {
     await page.goto('/ibge');
     const destinos = [
       { link: 'Banco Central', url: /\/bcb$/, titulo: 'Banco Central' },
@@ -29,7 +29,8 @@ test.describe('navegação e tema', () => {
     }
   });
 
-  test('o tema escuro vale para a página toda e sobrevive ao recarregar', async ({ page }) => {
+  const escuro = { tag: ['@tema-escuro'] };
+  test('o tema escuro vale para a página toda e sobrevive ao recarregar', escuro, async ({ page }) => {
     await page.goto('/ibge');
     const html = page.locator('html');
     await page.getByRole('radio', { name: 'Tema escuro' }).click();
@@ -41,7 +42,7 @@ test.describe('navegação e tema', () => {
     await expect(html).not.toHaveClass(/\bdark\b/);
   });
 
-  test('o tema do sistema segue a preferência do aparelho', async ({ page }) => {
+  test('o tema do sistema segue a preferência do aparelho', { tag: ['@tema-escuro'] }, async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark' });
     await page.goto('/ibge');
     await expect(page.locator('html')).toHaveClass(/\bdark\b/);
@@ -49,7 +50,7 @@ test.describe('navegação e tema', () => {
     await expect(page.locator('html')).not.toHaveClass(/\bdark\b/);
   });
 
-  test('o atalho de teclado pula para o conteúdo', async ({ page }) => {
+  test('o atalho de teclado pula para o conteúdo', { tag: ['@teclado'] }, async ({ page }) => {
     await page.goto('/ibge');
     await esperarDados(page);
     await page.keyboard.press('Tab');
@@ -60,7 +61,7 @@ test.describe('navegação e tema', () => {
     await expect(page).toHaveURL(/#conteudo$/);
   });
 
-  test('rota desconhecida volta para o IBGE', async ({ page }) => {
+  test('rota desconhecida volta para o IBGE', { tag: ['@visitante', '@link-compartilhado'] }, async ({ page }) => {
     await page.goto('/nao-existe');
     await expect(page).toHaveURL(/\/ibge$/);
   });
@@ -69,7 +70,7 @@ test.describe('navegação e tema', () => {
 test.describe('menu no celular', () => {
   test.skip(({ isMobile }) => !isMobile, 'só no celular');
 
-  test('abre como gaveta e fecha pelo fundo', async ({ page }) => {
+  test('abre como gaveta e fecha pelo fundo', { tag: ['@celular'] }, async ({ page }) => {
     await page.goto('/ibge');
     const abrir = page.getByRole('button', { name: 'Menu de navegação' });
     const menu = page.getByRole('complementary', { name: 'Navegação principal' });
@@ -82,7 +83,8 @@ test.describe('menu no celular', () => {
     await expect(menu).not.toBeInViewport();
   });
 
-  test('com a gaveta fechada, o Tab não entra nos links escondidos', async ({ page }) => {
+  const celularETeclado = { tag: ['@celular', '@teclado'] };
+  test('com a gaveta fechada, o Tab não entra nos links escondidos', celularETeclado, async ({ page }) => {
     await page.goto('/ibge');
     await esperarDados(page);
     const menuBotao = page.getByRole('button', { name: 'Menu de navegação' });
@@ -101,7 +103,7 @@ test.describe('menu no celular', () => {
 test.describe('menu no desktop', () => {
   test.skip(({ isMobile }) => !!isMobile, 'só no desktop');
 
-  test('a barra lateral cabe na altura de um notebook sem rolar', async ({ page }) => {
+  test('a barra lateral cabe na altura de um notebook sem rolar', { tag: ['@visitante'] }, async ({ page }) => {
     await page.setViewportSize({ width: 1366, height: 768 });
     await page.goto('/ibge');
     const rola = await page
@@ -111,7 +113,8 @@ test.describe('menu no desktop', () => {
     expect(rola).toBe(false);
   });
 
-  test('o menu recolhe a barra em ícones, com nome e dica em cada link, e expande de volta', async ({ page }) => {
+  const titulo = 'o menu recolhe a barra em ícones, com nome e dica em cada link, e expande de volta';
+  test(titulo, { tag: ['@visitante', '@leitor-de-tela'] }, async ({ page }) => {
     await page.goto('/ibge');
     await esperarDados(page);
     const menuBotao = page.getByRole('button', { name: 'Menu de navegação' });

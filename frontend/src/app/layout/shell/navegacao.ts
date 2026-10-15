@@ -20,6 +20,9 @@ export const NAVEGACAO: readonly GrupoNavegacao[] = [
   },
   {
     titulo: 'Kit',
-    itens: [{ rota: '/ui', rotulo: 'Componentes', icone: 'fa-shapes' }],
+    itens: [
+      { rota: '/ui', rotulo: 'Componentes', icone: 'fa-shapes' },
+      { rota: '/testes', rotulo: 'Testes', icone: 'fa-vial-circle-check' },
+    ],
   },
 ];
