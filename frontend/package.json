@@ -42,8 +42,8 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
-    "@angular/build": "^22.2.2",
-    "@angular/cli": "^22.2.2",
+    "@angular/build": "^22.2.3",
+    "@angular/cli": "^22.2.3",
     "@angular/compiler-cli": "^22.2.3",
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.64.0",
