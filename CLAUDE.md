@@ -80,8 +80,8 @@ docs/                          -> planos faseados locais (plano-*.md, fora do gi
 .claude/agents/revisor-de-documentacao.md -> aponta o que o CLAUDE.md e o README de cada área deixaram de dizer
 .claude/settings.json                  -> hooks do projeto (ver "Ligações automáticas")
 .claude/hooks/catalogo-de-testes.mjs   -> PostToolUse: teste de ponta a ponta editado regrava o catálogo da /testes
-.claude/hooks/revisao-ptbr.mjs         -> PostToolUse, PreToolUse e Stop: palavra sem acento no texto editado, na
-                                  mensagem de commit e revisão completa no fim do turno
+.claude/hooks/revisao-ptbr.mjs         -> PostToolUse, PreToolUse e Stop: aponta palavra sem acento no texto editado e
+                                  na mensagem de commit; pede a revisão completa no fim do turno
 ```
 
 ## Ligações automáticas
