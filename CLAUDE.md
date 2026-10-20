@@ -75,10 +75,13 @@ backend/                       -> a API .NET (ver backend/CLAUDE.md)
 docker/                        -> infraestrutura (ver docker/CLAUDE.md)
 docs/                          -> planos faseados locais (plano-*.md, fora do git)
 .claude/skills/executar-plano-faseado/ -> executa um plano fase a fase com os portões de cada área
+.claude/skills/revisar-texto-ptbr/     -> revisão de ortografia, gramática, pontuação e acentuação do texto escrito
 .claude/agents/seguranca-angular.md    -> auditor de segurança do front (angular.dev/best-practices/security)
 .claude/agents/revisor-de-documentacao.md -> aponta o que o CLAUDE.md e o README de cada área deixaram de dizer
 .claude/settings.json                  -> hooks do projeto (ver "Ligações automáticas")
 .claude/hooks/catalogo-de-testes.mjs   -> PostToolUse: teste de ponta a ponta editado regrava o catálogo da /testes
+.claude/hooks/revisao-ptbr.mjs         -> PostToolUse, PreToolUse e Stop: aponta palavra sem acento no texto editado e
+                                  na mensagem de commit; pede a revisão completa no fim do turno
 ```
 
 ## Ligações automáticas
@@ -91,6 +94,7 @@ O que muda num lugar e precisa mudar em outro, e quem cobra. Três camadas: hook
 | Arquivo novo, removido ou renomeado; rota, script, build, endpoint, lista permitida, infra ou pipeline | `CLAUDE.md` e `README.md` da área; `README.md` da raiz se atravessa áreas | hook Stop e workflow do PR (`scripts/verificar-documentacao.mjs`); texto pelo `revisor-de-documentacao` |
 | Rota nova no front | cartão do link (`frontend/scripts/rotas-publicas.mjs`) e `ROTAS` de `frontend/e2e/apis.ts` | `frontend/scripts/ligacoes.test.mjs` no `test:ci` |
 | CSP da imagem (`docker/nginx/seguranca.conf`) | cópia da borda (`docker/borda/`) e o repo planuz | `ligacoes.test.mjs` (a borda só acrescenta `upgrade-insecure-requests`) |
+| Texto em pt-BR escrito ou revisado pela IA (documentação, texto de tela, mensagem de commit) | ortografia, gramática, pontuação e acentuação revisadas no próprio arquivo | hook `revisao-ptbr.mjs` (na edição, no commit e no Stop); leitura pela skill `revisar-texto-ptbr` |
 | Arquivo novo em `frontend/e2e/` | área dele em `frontend/src/app/testes/areas.ts` | spec da galeria de testes |
 
 O verificador cobra que o documento foi tocado, não o que ele diz; quando a mudança de fato não altera nada documentado, dizer isso no PR.
@@ -128,3 +132,13 @@ cd frontend && npm start                            # site local (testes e E2E e
 cd backend && dotnet test --solution Mirante.slnx   # API: unidade e integração (mais em backend/CLAUDE.md)
 docker compose -f docker/docker-compose.yml up -d --build   # stack local (mais em docker/CLAUDE.md)
 ```
+
+## Governança de texto em pt-BR (bloqueante)
+
+Todo texto que a IA escreve neste repositório, seja criação do zero, seja revisão de um texto existente, passa por uma revisão de **ortografia, gramática, pontuação e acentuação** do português do Brasil antes de a tarefa ser dada por concluída, e a IA corrige no próprio arquivo o que precisar. Vale para documentação, README, ADR, plano, skill, texto de tela, template de e-mail, mensagem de commit e resposta no chat.
+
+- **Método:** skill `revisar-texto-ptbr` (`.claude/skills/revisar-texto-ptbr/SKILL.md`): delimita o trecho escrito, passa pela lista de conferência (acentuação pelo acordo de 1990, crase, concordância, regência, pontuação e hífen), corrige sem mudar sentido nem tom e fecha com uma linha dizendo o que corrigiu.
+- **Automático:** `.claude/hooks/revisao-ptbr.mjs`, ligado em `.claude/settings.json`. Depois de cada Edit/Write em `.md`, `.mdx`, `.txt`, `.adoc` e `.rst`, aponta na hora palavra sem acento, cedilha ou til; antes de `git commit`, recusa mensagem com palavra sem acento; no fim do turno, se algum texto tocado na sessão (prosa ou texto visível de template `.html`, `.ftl`, `.hbs`) mudou desde a última revisão, bloqueia o encerramento uma vez e pede a revisão completa.
+- **Fora da revisão:** código, identificadores, caminhos, URLs, placeholders, citação literal e texto em outro idioma.
+- **Falso positivo do hook:** acrescentar a palavra em `.claude/hooks/revisao-ptbr.permitidas.txt` (uma por linha, em minúsculas).
+- **Fonte:** replicada do repositório `meu-portfolio`, onde a governança nasceu. Não altere o hook nem a skill só aqui: mude lá e replique nos repositórios irmãos.
