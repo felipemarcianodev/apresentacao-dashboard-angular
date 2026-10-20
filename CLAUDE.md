@@ -75,10 +75,13 @@ backend/                       -> a API .NET (ver backend/CLAUDE.md)
 docker/                        -> infraestrutura (ver docker/CLAUDE.md)
 docs/                          -> planos faseados locais (plano-*.md, fora do git)
 .claude/skills/executar-plano-faseado/ -> executa um plano fase a fase com os portões de cada área
+.claude/skills/revisar-texto-ptbr/     -> revisão de ortografia, gramática, pontuação e acentuação do texto escrito
 .claude/agents/seguranca-angular.md    -> auditor de segurança do front (angular.dev/best-practices/security)
 .claude/agents/revisor-de-documentacao.md -> aponta o que o CLAUDE.md e o README de cada área deixaram de dizer
 .claude/settings.json                  -> hooks do projeto (ver "Ligações automáticas")
 .claude/hooks/catalogo-de-testes.mjs   -> PostToolUse: teste de ponta a ponta editado regrava o catálogo da /testes
+.claude/hooks/revisao-ptbr.mjs         -> PostToolUse, PreToolUse e Stop: palavra sem acento no texto editado, na
+                                  mensagem de commit e revisão completa no fim do turno
 ```
 
 ## Ligações automáticas
@@ -138,4 +141,4 @@ Todo texto que a IA escreve neste repositório, seja criação do zero, seja rev
 - **Automático:** `.claude/hooks/revisao-ptbr.mjs`, ligado em `.claude/settings.json`. Depois de cada Edit/Write em `.md`, `.mdx`, `.txt`, `.adoc` e `.rst`, aponta na hora palavra sem acento, cedilha ou til; antes de `git commit`, recusa mensagem com palavra sem acento; no fim do turno, se algum texto tocado na sessão (prosa ou texto visível de template `.html`, `.ftl`, `.hbs`) mudou desde a última revisão, bloqueia o encerramento uma vez e pede a revisão completa.
 - **Fora da revisão:** código, identificadores, caminhos, URLs, placeholders, citação literal e texto em outro idioma.
 - **Falso positivo do hook:** acrescentar a palavra em `.claude/hooks/revisao-ptbr.permitidas.txt` (uma por linha, em minúsculas).
-- **Fonte:** replicada do `meu-portfolio` (`C:Projetosmeu-portfolio`), onde a governança nasceu. Não altere o hook nem a skill só aqui: mude lá e replique nos repositórios irmãos.
+- **Fonte:** replicada do repositório `meu-portfolio`, onde a governança nasceu. Não altere o hook nem a skill só aqui: mude lá e replique nos repositórios irmãos.
