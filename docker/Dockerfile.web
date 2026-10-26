@@ -14,7 +14,7 @@ COPY frontend/scripts/rotas-publicas.mjs frontend/scripts/cartoes-por-rota.mjs s
 # ng build e, depois dele, o index.html de cada rota pública com o próprio cartão do link.
 RUN npm run build:deploy
 
-FROM nginx:1.30-alpine@sha256:970364228b1e4f932abc22d321932816782cca8a20b85a77552a7cfe9acfb3b5
+FROM nginx:1.30-alpine@sha256:47928bf67eb62a1863cb08d9ecb52d3e704304ba614eaee17884204677702951
 LABEL app=mirante
 COPY docker/nginx/nginx.conf /etc/nginx/conf.d/default.conf
 COPY docker/nginx/seguranca.conf /etc/nginx/snippets/seguranca.conf
