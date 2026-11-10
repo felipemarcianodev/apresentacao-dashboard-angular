@@ -62,7 +62,8 @@ VERSION                        -> versão semântica do Mirante; o build do fron
                                   do PR (por SHA), sem saltos de versão maior (Angular, TypeScript, Node, .NET,
                                   nginx, Postgres e Redis à mão)
 .github/pull_request_template.md -> checklist do PR: testes da área, documentação viva, catálogo da /testes, segurança
-.github/workflows/pr.yml       -> em todo PR contra a main: documentação viva, test:ci do front (scripts, catálogo da
+.github/workflows/pr.yml       -> em todo PR contra a main: documentação viva (exceto nos PRs do Dependabot, que só
+                                  trocam versão), test:ci do front (scripts, catálogo da
                                   /testes, ligações, unitários) e build; actions fixadas por SHA
 scripts/verificar-documentacao.mjs -> mudança estrutural numa área sem o CLAUDE.md e o README.md dela no diff falha
                                   (--hook: modo do hook Stop, devolve o bloqueio para o Claude completar)
