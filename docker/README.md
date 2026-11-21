@@ -6,7 +6,7 @@ Como o Mirante roda em containers, como é publicado e como operar em produção
 
 | Serviço | O quê | Porta local |
 |---|---|---|
-| `web` | nginx com o site e o encaminhamento de `/api` para a API | 8092 |
+| `web` | nginx 1.30.7 (tag e digest fixos no `Dockerfile.web`) com o site e o encaminhamento de `/api` para a API | 8092 |
 | `api` | API .NET 10 | 8093 |
 | `postgres` | reserva da última resposta boa de cada série | sem porta |
 | `redis` | cache (sem persistência) | sem porta |
