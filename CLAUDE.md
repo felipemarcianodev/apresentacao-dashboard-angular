@@ -79,6 +79,7 @@ docs/                          -> planos faseados locais (plano-*.md, fora do gi
 .claude/skills/revisar-texto-ptbr/     -> revisão de ortografia, gramática, pontuação e acentuação do texto escrito
 .claude/agents/seguranca-angular.md    -> auditor de segurança do front (angular.dev/best-practices/security)
 .claude/agents/revisor-de-documentacao.md -> aponta o que o CLAUDE.md e o README de cada área deixaram de dizer
+.claude/governanca/contexto.md         -> estado e contexto do projeto (no lugar da memória da IA, proibida)
 .claude/settings.json                  -> hooks do projeto (ver "Ligações automáticas")
 .claude/hooks/catalogo-de-testes.mjs   -> PostToolUse: teste de ponta a ponta editado regrava o catálogo da /testes
 .claude/hooks/revisao-ptbr.mjs         -> PostToolUse, PreToolUse e Stop: aponta palavra sem acento no texto editado e
@@ -125,6 +126,21 @@ O verificador cobra que o documento foi tocado, não o que ele diz; quando a mud
 - **PRs empilhados:** o merge é squash, então o PR seguinte entra em conflito com a `main` (o mesmo arquivo "criado dos dois lados"). Resolver trazendo a `main` com merge (sem force push) e conferir que o diff restante é só o da própria fase. Evitar empilhar mais de dois.
 - **Cabeçalho YAML de skill e agente** (`.claude/`): valor com `:` vai entre aspas. Um dois-pontos solto invalida o arquivo e o agente some sem aviso. Ao mexer nesses arquivos, validar o YAML.
 - **Teste de carga em produção:** nunca da rede do dono. O IP de saída é o mesmo do navegador dele, e o rate limiter (120 por minuto) o bloqueia junto.
+
+## Memória da IA: proibida (bloqueante)
+
+A memória automática do Claude Code (`~/.claude/projects/<projeto>/memory/`) está depreciada e proibida desde 21/11/2026: ela mora no computador, não no repositório, e some quando a máquina é formatada. Nada se grava lá, nem quando a ferramenta sugerir "salvar na memória" ou o dono disser "lembre disso".
+
+- **Regra de trabalho** (correção, preferência do dono) vai para "Regras do dono", logo abaixo, ou para o `CLAUDE.md` da área.
+- **Estado e contexto** (origem do projeto, branches, planos locais, conferência em produção) vão para `.claude/governanca/contexto.md`. Ler a seção certa antes de afirmar qualquer estado.
+
+### Regras do dono
+
+- **PR aprovado à distância.** O dono acompanha por sessão remota e responde curto ("aprovado", "pode seguir"): mandar o link do PR e prints das mudanças visuais, sem depender de passo interativo no computador. Depois do "aprovado", seguir o próximo passo combinado (release, conferência em produção) sem perguntar de novo. Origem: 13/10/2026.
+- **`gh` sem login salvo.** `gh auth login --with-token` falha (o token não tem `read:org`); exportar `GH_TOKEN` a partir de `git credential fill` em cada comando, sem nunca imprimir o token. Origem: 12/10/2026.
+- **Node 24 só nos comandos do front.** O Node global da máquina continua 20.19 por causa dos outros projetos: prefixar o `PATH` com `C:\Users\Administrador\AppData\Local\nvm\v24.22.0` só no comando, sem `nvm use`. Origem: 15/10/2026.
+- **Docker conferido antes.** O Docker Desktop costuma estar parado depois que o computador reinicia: `docker info` antes do Testcontainers e do E2E contra o container (pode abrir com `Start-Process`).
+- **Resumo dos testes fora do rtk.** A saída filtrada pelo rtk esconde o resumo do Vitest: usar `rtk proxy` ou gravar o log em arquivo e ler a linha final.
 
 ## Comandos de cada área
 
